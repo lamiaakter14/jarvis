@@ -1,0 +1,19 @@
+# Basic dependencies
+fastapi
+uvicorn[standard]
+openai
+langchain
+python-decouple
+pydantic
+requests
+typer
+tqdm
+numpy
+scikit-learn
+pandas
+
+# Testing and Code Quality
+pytest
+flake8
+black
+mypy
