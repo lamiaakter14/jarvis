@@ -21,34 +21,34 @@ class CognitiveLoop:
         PLAN -> LEARN -> CRITIQUE -> REFLECT -> EVOLVE
         """
         print("Starting Cognitive Loop...")
-
-        # STEP 1: PLAN - Generate the day's learning plan
+        
+        # Step 1: PLAN
         print("[PLAN] Generating Daily Learning Plan...")
         daily_plan = self.planner.generate_plan()
         print(f"Planned Tasks for {daily_plan['date']}:", daily_plan["tasks"])
 
-        # STEP 2: LEARN - Execute the Learning Plan
+        # Step 2: LEARN
         print("[LEARN] Executing Daily Learning Plan...")
         for task in daily_plan["tasks"]:
-            task_description = task["task"]
-            print(f"Learning Task: {task_description}")
-            explanation = self.teacher.explain_concept(task_description)
+            concept = task["task"]
+            print(f"Learning Task: {concept}")
+            explanation = self.teacher.explain_concept(concept)
             print(f"Generated Explanation: {explanation}")
-        
-        # STEP 3: CRITIQUE - Analyze Outcomes and Identify Knowledge Gaps
+
+        # Step 3: CRITIQUE
         print("[CRITIQUE] Analyzing Outcomes and Identifying Knowledge Gaps...")
-        knowledge_gaps = self.critic.detect_gaps()
-        print("Detected Knowledge Gaps:", knowledge_gaps)
+        gaps = self.critic.detect_gaps()
+        print("Detected Gaps:", gaps)
 
-        # STEP 4: REFLECT - Generate Summary and Strategy Recommendations
+        # Step 4: REFLECT
         print("[REFLECT] Summarizing Learning and Generating Recommendations...")
-        reflections = self.reviewer.reflect()
-        print("Daily Reflection Summary:", reflections)
+        reflection = self.reviewer.reflect()
+        print("Daily Reflection Summary:", reflection)
 
-        # STEP 5: EVOLVE - Adapt Learning Strategy
+        # Step 5: EVOLVE
         print("[EVOLVE] Updating Strategy and Evolving Learning Plan...")
-        recommendations = reflections["evolution_recommendations"]
-        for recommendation in recommendations:
-            print(f"Recommendation for Evolution: {recommendation}")
+        recommendations = reflection["evolution_recommendations"]
+        for rec in recommendations:
+            print(f"Recommendation: {rec}")
 
         print("Cognitive Loop Complete!")
