@@ -1,1 +1,27 @@
 
+[tool.poetry]
+name = "jarvis"
+version = "0.1.0"
+description = "JARVIS: A Learning Operating System for Human Intelligence Amplification"
+authors = ["Your Name <youremail@example.com>"]
+license = "MIT"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "openai",
+    "langchain",
+    "python-decouple",
+    "pydantic",
+    "requests",
+    "typer",
+    "tqdm",
+    "numpy",
+    "scikit-learn",
+    "pandas"
+]
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.mypy]
+files = ["jarvis", "tests"]
