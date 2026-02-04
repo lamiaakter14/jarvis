@@ -1,137 +1,193 @@
-.PHONY: help install dev test lint format clean docker-up docker-down k8s-deploy
+.PHONY: help install dev test lint format clean docker-up docker-down api web cli db-migrate health
 
-help:
-	@echo "JARVIS Development Commands"
-	@echo "=========================="
-	@echo ""
-	@echo "Setup & Installation:"
-	@echo "  make install         - Install all dependencies"
-	@echo "  make install-dev     - Install development dependencies"
-	@echo ""
-	@echo "Development:"
-	@echo "  make dev             - Start development environment"
-	@echo "  make dev-api         - Start API server only"
-	@echo "  make dev-web         - Start web dashboard only"
-	@echo ""
-	@echo "Testing:"
-	@echo "  make test            - Run all tests"
-	@echo "  make test-unit       - Run unit tests only"
-	@echo "  make test-integration- Run integration tests only"
-	@echo "  make test-e2e        - Run end-to-end tests"
-	@echo "  make test-coverage   - Run tests with coverage report"
-	@echo ""
-	@echo "Code Quality:"
-	@echo "  make lint            - Run linters"
-	@echo "  make format          - Format code"
-	@echo "  make type-check      - Run type checking"
-	@echo ""
-	@echo "Docker:"
-	@echo "  make docker-build    - Build Docker images"
-	@echo "  make docker-up       - Start Docker services"
-	@echo "  make docker-down     - Stop Docker services"
-	@echo "  make docker-logs     - View Docker logs"
-	@echo ""
-	@echo "Kubernetes:"
-	@echo "  make k8s-deploy      - Deploy to Kubernetes"
-	@echo "  make k8s-delete      - Delete from Kubernetes"
-	@echo "  make k8s-status      - Check deployment status"
-	@echo ""
-	@echo "Maintenance:"
-	@echo "  make clean           - Clean generated files"
-	@echo "  make db-migrate      - Run database migrations"
-	@echo "  make db-seed         - Seed database with test data"
+# Colors for output
+BLUE := \033[0;34m
+GREEN := \033[0;32m
+YELLOW := \033[0;33m
+RED := \033[0;31m
+NC := \033[0m
 
-# Installation
-install:
-	pip install -r requirements.txt
+help: ## Show this help message
+	@echo "$(BLUE)JARVIS - AI Cognitive Assistant$(NC)"
+	@echo ""
+	@echo "$(GREEN)Available commands:$(NC)"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-20s$(NC) %s\n", $$1, $$2}'
+
+install: ## Install all dependencies
+	@echo "$(BLUE)Installing dependencies...$(NC)"
+	pip install -e .
 	cd apps/web/dashboard && npm install
+	@echo "$(GREEN)✓ Dependencies installed$(NC)"
 
-install-dev:
-	pip install -r requirements.txt
-	pip install pytest pytest-cov pytest-asyncio black ruff mypy isort bandit
-	cd apps/web/dashboard && npm install
+install-dev: ## Install development dependencies
+	@echo "$(BLUE)Installing dev dependencies...$(NC)"
+	pip install -e ".[dev]"
 	pre-commit install
+	@echo "$(GREEN)✓ Dev dependencies installed$(NC)"
 
-# Development
-dev:
+setup: ## Complete local setup (first time)
+	@echo "$(BLUE)Setting up JARVIS for local development...$(NC)"
+	make install
+	make install-dev
+	cp .env.example .env
+	mkdir -p runtime/{working,metrics,innovations,logs,state}
+	mkdir -p runtime/working/execution_logs
+	@echo "$(YELLOW)⚠ Please edit .env with your API keys$(NC)"
+	@echo "$(GREEN)✓ Setup complete!$(NC)"
+
+dev: ## Start all services for development
+	@echo "$(BLUE)Starting development environment...$(NC)"
 	docker-compose up -d postgres redis
-	@echo "Starting services..."
-	@sleep 3
-	python -m apps.api.jarvis_api.main &
+	@echo "$(GREEN)✓ Infrastructure started$(NC)"
+	@echo "$(YELLOW)Run 'make api' and 'make web' in separate terminals$(NC)"
+
+api: ## Start API server
+	@echo "$(BLUE)Starting API server...$(NC)"
+	python -m uvicorn apps.api.jarvis_api.main:app --reload --host 0.0.0.0 --port 8000
+
+web: ## Start web dashboard
+	@echo "$(BLUE)Starting web dashboard...$(NC)"
 	cd apps/web/dashboard && npm run dev
 
-dev-api:
-	docker-compose up -d postgres redis
-	python -m apps.api.jarvis_api.main
+cli: ## Run CLI (use: make cli ARGS="strategist plan")
+	@echo "$(BLUE)Running JARVIS CLI...$(NC)"
+	python -m apps.cli.jarvis_cli.main $(ARGS)
 
-dev-web:
-	cd apps/web/dashboard && npm run dev
+test: ## Run all tests
+	@echo "$(BLUE)Running tests...$(NC)"
+	pytest tests/ -v --cov=packages/jarvis_core --cov-report=term-missing
+	@echo "$(GREEN)✓ Tests completed$(NC)"
 
-# Testing
-test:
-	pytest tests/ -v
-
-test-unit:
+test-unit: ## Run unit tests only
+	@echo "$(BLUE)Running unit tests...$(NC)"
 	pytest tests/unit/ -v
 
-test-integration:
+test-integration: ## Run integration tests
+	@echo "$(BLUE)Running integration tests...$(NC)"
 	pytest tests/integration/ -v
 
-test-e2e:
+test-e2e: ## Run end-to-end tests
+	@echo "$(BLUE)Running E2E tests...$(NC)"
 	pytest tests/e2e/ -v
 
-test-coverage:
-	pytest tests/ -v --cov=packages/jarvis_core --cov=apps/api --cov-report=html --cov-report=term
-
-# Code Quality
-lint:
+lint: ## Run linters
+	@echo "$(BLUE)Running linters...$(NC)"
 	ruff check .
 	black --check .
-	isort --check-only .
+	mypy packages/jarvis_core
+	@echo "$(GREEN)✓ Linting completed$(NC)"
 
-format:
+format: ## Format code
+	@echo "$(BLUE)Formatting code...$(NC)"
 	ruff check --fix .
 	black .
 	isort .
+	@echo "$(GREEN)✓ Code formatted$(NC)"
 
-type-check:
-	mypy packages/jarvis_core apps/api --ignore-missing-imports
+type-check: ## Run type checker
+	@echo "$(BLUE)Running type checker...$(NC)"
+	mypy packages/jarvis_core
 
-# Docker
-docker-build:
+db-migrate: ## Run database migrations
+	@echo "$(BLUE)Running database migrations...$(NC)"
+	cd apps/api/jarvis_api && alembic upgrade head
+	@echo "$(GREEN)✓ Migrations completed$(NC)"
+
+db-rollback: ## Rollback last migration
+	@echo "$(YELLOW)Rolling back last migration...$(NC)"
+	cd apps/api/jarvis_api && alembic downgrade -1
+
+db-reset: ## Reset database (WARNING: destroys data)
+	@echo "$(RED)⚠ WARNING: This will destroy all data!$(NC)"
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		docker-compose down -v; \
+		docker-compose up -d postgres; \
+		sleep 3; \
+		make db-migrate; \
+		echo "$(GREEN)✓ Database reset$(NC)"; \
+	fi
+
+seed: ## Seed database with test data
+	@echo "$(BLUE)Seeding database...$(NC)"
+	python scripts/database/seed.py
+	@echo "$(GREEN)✓ Database seeded$(NC)"
+
+clean: ## Clean build artifacts and cache
+	@echo "$(BLUE)Cleaning build artifacts...$(NC)"
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	find . -type f -name "*.pyo" -delete
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name ".coverage" -delete
+	rm -rf dist/ build/ htmlcov/
+	@echo "$(GREEN)✓ Cleaned$(NC)"
+
+clean-runtime: ## Clean runtime directory (logs, cache, etc.)
+	@echo "$(YELLOW)Cleaning runtime directory...$(NC)"
+	rm -rf runtime/working/* runtime/logs/* runtime/metrics/* runtime/innovations/*
+	@echo "$(GREEN)✓ Runtime cleaned$(NC)"
+
+docker-build: ## Build Docker images
+	@echo "$(BLUE)Building Docker images...$(NC)"
 	docker-compose build
+	@echo "$(GREEN)✓ Docker images built$(NC)"
 
-docker-up:
+docker-up: ## Start all Docker services
+	@echo "$(BLUE)Starting Docker services...$(NC)"
 	docker-compose up -d
+	@echo "$(GREEN)✓ Docker services started$(NC)"
 
-docker-down:
+docker-down: ## Stop all Docker services
+	@echo "$(BLUE)Stopping Docker services...$(NC)"
 	docker-compose down
+	@echo "$(GREEN)✓ Docker services stopped$(NC)"
 
-docker-logs:
+docker-logs: ## Show Docker logs
 	docker-compose logs -f
 
-# Kubernetes
-k8s-deploy:
+docker-ps: ## Show running containers
+	docker-compose ps
+
+health: ## Check health of all services
+	@echo "$(BLUE)Checking service health...$(NC)"
+	@echo "API: $$(curl -s http://localhost:8000/health 2>/dev/null | jq -r .status 2>/dev/null || echo 'DOWN')"
+	@echo "Web: $$(curl -s http://localhost:3000 > /dev/null 2>&1 && echo 'UP' || echo 'DOWN')"
+	@echo "PostgreSQL: $$(docker-compose exec -T postgres pg_isready -U jarvis 2>/dev/null | grep -q accepting && echo 'UP' || echo 'DOWN')"
+	@echo "Redis: $$(docker-compose exec -T redis redis-cli ping 2>/dev/null || echo 'DOWN')"
+
+logs: ## Show application logs
+	@echo "$(BLUE)Application logs:$(NC)"
+	tail -f runtime/logs/*.log 2>/dev/null || echo "No logs found"
+
+version: ## Show version information
+	@echo "$(BLUE)JARVIS Version Information$(NC)"
+	@echo "Python: $$(python --version 2>&1)"
+	@echo "Node: $$(node --version 2>&1)"
+	@echo "Docker: $$(docker --version 2>&1)"
+	@echo "Docker Compose: $$(docker-compose --version 2>&1)"
+
+k8s-deploy: ## Deploy to Kubernetes
+	@echo "$(BLUE)Deploying to Kubernetes...$(NC)"
 	kubectl apply -f infrastructure/kubernetes/base/
 
-k8s-delete:
+k8s-delete: ## Delete from Kubernetes
+	@echo "$(YELLOW)Deleting from Kubernetes...$(NC)"
 	kubectl delete -f infrastructure/kubernetes/base/
 
-k8s-status:
+k8s-status: ## Check Kubernetes deployment status
 	kubectl get pods,services,ingress
 
-# Maintenance
-clean:
-	find . -type d -name __pycache__ -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete
-	find . -type d -name "*.egg-info" -exec rm -rf {} +
-	find . -type d -name .pytest_cache -exec rm -rf {} +
-	find . -type d -name .mypy_cache -exec rm -rf {} +
-	find . -type d -name .ruff_cache -exec rm -rf {} +
-	rm -rf htmlcov/ .coverage
+deploy-staging: ## Deploy to staging
+	@echo "$(BLUE)Deploying to staging...$(NC)"
+	./scripts/deployment/deploy_staging.sh
 
-db-migrate:
-	cd apps/api/jarvis_api && alembic upgrade head
+deploy-production: ## Deploy to production (requires approval)
+	@echo "$(RED)⚠ Deploying to PRODUCTION$(NC)"
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		./scripts/deployment/deploy_production.sh; \
+	fi
 
-db-seed:
-	python scripts/database/seed.py
+.DEFAULT_GOAL := help
