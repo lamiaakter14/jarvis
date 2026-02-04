@@ -1,9 +1,10 @@
-from jarvis.core.cognitive_loop import CognitiveLoop
-from jarvis.core.memory_manager import MemoryManager
-from jarvis.agents.planner import Planner
-from jarvis.agents.teacher import Teacher
-from jarvis.agents.critic import Critic
-from jarvis.agents.reviewer import Reviewer
+from core.cognitive_loop import CognitiveLoop
+from core.memory_manager import MemoryManager
+from agents.strategist import Strategist
+from agents.mentor import Mentor
+from agents.executor import Executor
+from agents.innovator import Innovator
+from agents.amplifier import Amplifier
 
 
 def test_cognitive_loop():
@@ -11,13 +12,14 @@ def test_cognitive_loop():
     memory_manager = MemoryManager()
 
     # Initialize Agents
-    planner = Planner(memory_manager)
-    teacher = Teacher(memory_manager)
-    critic = Critic(memory_manager)
-    reviewer = Reviewer(memory_manager)
+    strategist = Strategist(memory_manager)
+    mentor = Mentor(memory_manager)
+    executor = Executor(memory_manager)
+    innovator = Innovator(memory_manager)
+    amplifier = Amplifier(memory_manager)
 
     # Initialize and run the cognitive loop
-    jarvis = CognitiveLoop(memory_manager, planner, teacher, critic, reviewer)
+    jarvis = CognitiveLoop(memory_manager, strategist, mentor, executor, innovator, amplifier)
     jarvis.run_loop()
 
 
