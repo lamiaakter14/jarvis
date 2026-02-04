@@ -3,14 +3,14 @@ import pytest
 from datetime import datetime, date
 from uuid import uuid4
 
-from src.domain.entities.task import Task
-from src.domain.entities.plan import Plan
-from src.domain.entities.context import Context
-from src.domain.entities.innovation import Innovation
-from src.domain.value_objects.priority import Priority
-from src.domain.value_objects.cognitive_load import CognitiveLoad
-from src.domain.value_objects.roi import ROI
-from src.domain.value_objects.agent_type import AgentType
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.entities.innovation import Innovation
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.domain.value_objects.agent_type import AgentType
 
 
 @pytest.fixture

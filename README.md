@@ -4,11 +4,40 @@
 
 Jarvis is an advanced AI-powered cognitive assistant that leverages a multi-agent architecture to help users with strategic planning, task execution, innovation, and performance optimization. The system implements **Clean Architecture** principles with a cognitive loop that coordinates multiple specialized agents to provide intelligent assistance.
 
+## 🏗️ Project Structure (Monorepo)
+
+JARVIS follows a modern monorepo architecture for better maintainability and scalability:
+
+```
+jarvis/
+├── apps/                          # Applications (entry points)
+│   ├── api/jarvis_api/           # FastAPI REST API
+│   ├── cli/jarvis_cli/           # Typer CLI application
+│   └── web/                       # React frontend
+│
+├── packages/jarvis_core/          # Core business logic
+│   ├── domain/                    # Domain Layer (entities, value objects)
+│   ├── application/               # Application Layer (use cases, DTOs)
+│   ├── infrastructure/            # Infrastructure Layer (agents, AI, persistence)
+│   ├── bridge/                    # Legacy bridge adapters
+│   └── shared/                    # Shared utilities
+│
+├── memory/                        # ✅ Curated knowledge (version controlled)
+├── runtime/                       # ❌ Generated state (gitignored)
+├── tests/                         # Test suite
+└── docs/                          # Documentation
+```
+
+### Memory vs Runtime
+
+- **memory/** - Curated knowledge committed to git (roadmaps, strategic docs, templates)
+- **runtime/** - Generated state unique to each instance (daily plans, logs, cache)
+
 ## 🎯 Clean Architecture
 
 The system follows Clean Architecture principles with four distinct layers:
 
-### Layer 1: Domain Layer (`src/domain/`)
+### Layer 1: Domain Layer (`packages/jarvis_core/domain/`)
 **Pure business logic with zero external dependencies**
 - Entities: Task, Plan, Context, Innovation, Memory, Agent
 - Value Objects: Priority, CognitiveLoad, ROI, AgentType
@@ -16,13 +45,13 @@ The system follows Clean Architecture principles with four distinct layers:
 - Repository Interfaces: ITaskRepository, IMemoryRepository, IAnalyticsRepository
 - Domain Events: TaskCompletedEvent, GapIdentifiedEvent, InnovationCreatedEvent
 
-### Layer 2: Application Layer (`src/application/`)
+### Layer 2: Application Layer (`packages/jarvis_core/application/`)
 **Use cases and application business rules**
 - Use Cases: ExecuteCognitiveLoop, GenerateDailyPlan, ExecuteTasks, IdentifyGaps, CreateInnovations, AnalyzePerformance
 - DTOs: TaskDTO, PlanDTO, AnalyticsDTO
 - Application Interfaces: IAIService, INotificationService
 
-### Layer 3: Infrastructure Layer (`src/infrastructure/`)
+### Layer 3: Infrastructure Layer (`packages/jarvis_core/infrastructure/`)
 **Implementation details and external dependencies**
 - Agents: StrategistAgent, MentorAgent, ExecutorAgent, InnovatorAgent, AmplifierAgent
 - Persistence: FileMemoryRepository, SQLiteTaskRepository, JSONStorage
@@ -30,13 +59,13 @@ The system follows Clean Architecture principles with four distinct layers:
 - Monitoring: StructuredLogger, Tracer, MetricsCollector
 - Configuration: Settings (Pydantic), Dependencies (DI Container)
 
-### Layer 4: Presentation Layer (`src/presentation/`)
-**User interfaces (API, CLI)**
+### Layer 4: Presentation Layer (`apps/`)
+**User interfaces (API, CLI, Web)**
 - REST API (FastAPI): `/api/cognitive-loop`, `/api/plan/today`, `/api/gaps`, etc.
 - CLI (Typer + Rich): Interactive command-line interface
-- WebSocket: Real-time updates (planned)
+- Web Dashboard (React): Modern web interface
 
-### Bridge Layer (`src/bridge/`)
+### Bridge Layer (`packages/jarvis_core/bridge/`)
 **Backward compatibility with legacy code**
 - Provides adapters for old scripts to work with new architecture
 - Enables gradual migration without breaking existing functionality
@@ -97,6 +126,7 @@ jarvis/
 ### Prerequisites
 
 - Python 3.8 or higher
+- Node.js 16+ (for web dashboard)
 - pip package manager
 
 ### Installation Steps
@@ -113,15 +143,25 @@ jarvis/
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. **Install dependencies:**
+3. **Install Python dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Set up environment variables:**
+4. **Install the package in development mode:**
+   ```bash
+   pip install -e .
+   ```
+
+5. **Set up environment variables:**
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   # Edit .env with your configuration (OpenAI API key, etc.)
+   ```
+
+6. **Create runtime directory (optional - auto-created):**
+   ```bash
+   mkdir -p runtime/{working/execution_logs,metrics,innovations,cache}
    ```
 
 ## Running the Project
@@ -132,13 +172,19 @@ The web dashboard provides a modern, visual interface to interact with JARVIS:
 
 **1. Start the Backend API:**
 ```bash
-python -m src.presentation.api.main
+# Option 1: Using Python module
+export PYTHONPATH=/path/to/jarvis/packages:/path/to/jarvis/apps/api:/path/to/jarvis/apps/cli
+python -m jarvis_api.main
+
+# Option 2: Using uvicorn directly  
+cd apps/api
+uvicorn jarvis_api.main:app --reload --host 0.0.0.0 --port 8000
 # Backend runs at http://localhost:8000
 ```
 
 **2. Start the Frontend (in a new terminal):**
 ```bash
-cd frontend
+cd apps/web
 npm install  # First time only
 npm run dev
 # Frontend runs at http://localhost:3000
@@ -158,33 +204,36 @@ Visit http://localhost:3000 to access the dashboard.
 - 🌙 Dark mode support
 - 📱 Fully responsive design
 
-See `frontend/README.md` for detailed frontend documentation.
+See `apps/web/README.md` for detailed frontend documentation.
 
 ### Using the CLI
 
 The CLI provides a user-friendly interface with rich formatting:
 
 ```bash
+# Set PYTHONPATH
+export PYTHONPATH=/path/to/jarvis/packages:/path/to/jarvis/apps/api:/path/to/jarvis/apps/cli
+
 # Display help
-python -m src.presentation.cli.main --help
+python -m jarvis_cli.main --help
 
 # Run complete cognitive loop
-python -m src.presentation.cli.main run
+python -m jarvis_cli.main run
 
 # Generate today's plan
-python -m src.presentation.cli.main plan
+python -m jarvis_cli.main plan
 
 # Identify knowledge gaps
-python -m src.presentation.cli.main gaps
+python -m jarvis_cli.main gaps
 
 # Generate innovations
-python -m src.presentation.cli.main innovate
+python -m jarvis_cli.main innovate
 
 # View performance metrics
-python -m src.presentation.cli.main performance
+python -m jarvis_cli.main performance
 
 # Show version info
-python -m src.presentation.cli.main version
+python -m jarvis_cli.main version
 ```
 
 ### Using the REST API
@@ -193,10 +242,10 @@ Start the FastAPI server:
 
 ```bash
 # Start the server
-python -m src.presentation.api.main
+python -m jarvis_api.main
 
 # Or use uvicorn directly
-uvicorn src.presentation.api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn jarvis_api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 API endpoints:
@@ -253,7 +302,7 @@ Track your progress using the JSON templates in `memory/working/`:
 Analyze your progress and identify patterns using the CLI:
 
 ```bash
-python -m src.presentation.cli.main performance
+python -m jarvis_cli.main performance
 ```
 
 This provides insights on:

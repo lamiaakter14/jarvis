@@ -10,12 +10,13 @@ services:
       - "8000:8000"
     volumes:
       - ./memory:/app/memory
+      - ./runtime:/app/runtime
       - ./.env:/app/.env:ro
     environment:
       - PYTHONUNBUFFERED=1
       - ENV_FILE=./.env
     restart: unless-stopped
-    command: python src/presentation/api/main.py
+    command: python -m uvicorn jarvis_api.main:app --host 0.0.0.0 --port 8000
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 30s
@@ -30,10 +31,21 @@ services:
     container_name: jarvis-cli
     volumes:
       - ./memory:/app/memory
+      - ./runtime:/app/runtime
       - ./.env:/app/.env:ro
     environment:
       - PYTHONUNBUFFERED=1
       - ENV_FILE=./.env
     profiles:
       - cli
-    command: python src/presentation/cli/main.py run
+    command: python -m jarvis_cli.main run
+    
+  jarvis-web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: jarvis-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - jarvis-api

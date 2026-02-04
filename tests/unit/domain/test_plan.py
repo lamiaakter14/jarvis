@@ -3,11 +3,11 @@ import pytest
 from datetime import date, datetime
 from uuid import uuid4
 
-from src.domain.entities.plan import Plan
-from src.domain.entities.task import Task
-from src.domain.value_objects.priority import Priority
-from src.domain.value_objects.cognitive_load import CognitiveLoad
-from src.domain.value_objects.roi import ROI
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.roi import ROI
 
 
 @pytest.mark.unit

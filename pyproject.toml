@@ -1,27 +1,55 @@
 
-[tool.poetry]
+[project]
 name = "jarvis"
-version = "0.1.0"
+version = "1.0.0"
 description = "JARVIS: A Learning Operating System for Human Intelligence Amplification"
-authors = ["Your Name <youremail@example.com>"]
-license = "MIT"
+authors = [{name = "Your Name", email = "youremail@example.com"}]
+license = {text = "MIT"}
+requires-python = ">=3.8"
 dependencies = [
-    "fastapi",
-    "uvicorn[standard]",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
     "openai",
     "langchain",
     "python-decouple",
-    "pydantic",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
     "requests",
-    "typer",
+    "typer[all]>=0.9.0",
+    "rich>=13.0.0",
     "tqdm",
     "numpy",
     "scikit-learn",
-    "pandas"
+    "pandas",
+    "pyyaml",
+    "flask",
+    "markdown",
+    "dependency-injector>=4.41.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "flake8",
+    "black",
+    "mypy",
+    "isort",
+]
+
+[project.scripts]
+jarvis-api = "jarvis_api.main:main"
+jarvis-cli = "jarvis_cli.main:app"
+
+[tool.setuptools.packages.find]
+where = ["packages", "apps"]
+include = ["jarvis_core*", "jarvis_api*", "jarvis_cli*"]
+
 [tool.black]
 line-length = 88
 target-version = ['py312']
 
 [tool.mypy]
-files = ["jarvis", "tests"]
+files = ["packages", "apps", "tests"]

@@ -21,21 +21,32 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy packages
+COPY packages/ /app/packages/
 
-# Create memory directory
-RUN mkdir -p memory/working memory/knowledge memory/strategic
+# Copy apps
+COPY apps/api/ /app/apps/api/
+COPY apps/cli/ /app/apps/cli/
+
+# Copy configuration
+COPY .env.example /app/.env.example
+COPY pyproject.toml /app/
+
+# Create runtime directory
+RUN mkdir -p /app/runtime/working/execution_logs /app/runtime/metrics /app/runtime/innovations /app/runtime/cache
+
+# Copy memory (curated knowledge)
+COPY memory/ /app/memory/
 
 # Expose port for API
 EXPOSE 8000
 
 # Set Python path
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/packages:/app/apps/api:/app/apps/cli
 
 # Default command (API server)
-CMD ["python", "src/presentation/api/main.py"]
+CMD ["python", "-m", "uvicorn", "jarvis_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Alternative commands:
-# - CLI: docker run jarvis python src/presentation/cli/main.py --help
-# - Legacy: docker run jarvis python scripts/test_cognitive_loop.py
+# - CLI: docker run jarvis python -m jarvis_cli.main --help
+
