@@ -1,3 +1,7 @@
 {
-  "feedback": []
+    "task": "Complete high-priority tasks",
+    "feedback": "Task reviewed successfully",
+    "suggestions": [
+        "Consider breaking down into smaller steps"
+    ]
 }

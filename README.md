@@ -2,7 +2,44 @@
 
 ## Overview
 
-Jarvis is an advanced AI-powered cognitive assistant that leverages a multi-agent architecture to help users with strategic planning, task execution, innovation, and performance optimization. The system implements a cognitive loop that coordinates multiple specialized agents to provide intelligent assistance.
+Jarvis is an advanced AI-powered cognitive assistant that leverages a multi-agent architecture to help users with strategic planning, task execution, innovation, and performance optimization. The system implements **Clean Architecture** principles with a cognitive loop that coordinates multiple specialized agents to provide intelligent assistance.
+
+## 🎯 Clean Architecture
+
+The system follows Clean Architecture principles with four distinct layers:
+
+### Layer 1: Domain Layer (`src/domain/`)
+**Pure business logic with zero external dependencies**
+- Entities: Task, Plan, Context, Innovation, Memory, Agent
+- Value Objects: Priority, CognitiveLoad, ROI, AgentType
+- Domain Services: StrategyEngine, InnovationEngine, MemoryCoordinator
+- Repository Interfaces: ITaskRepository, IMemoryRepository, IAnalyticsRepository
+- Domain Events: TaskCompletedEvent, GapIdentifiedEvent, InnovationCreatedEvent
+
+### Layer 2: Application Layer (`src/application/`)
+**Use cases and application business rules**
+- Use Cases: ExecuteCognitiveLoop, GenerateDailyPlan, ExecuteTasks, IdentifyGaps, CreateInnovations, AnalyzePerformance
+- DTOs: TaskDTO, PlanDTO, AnalyticsDTO
+- Application Interfaces: IAIService, INotificationService
+
+### Layer 3: Infrastructure Layer (`src/infrastructure/`)
+**Implementation details and external dependencies**
+- Agents: StrategistAgent, MentorAgent, ExecutorAgent, InnovatorAgent, AmplifierAgent
+- Persistence: FileMemoryRepository, SQLiteTaskRepository, JSONStorage
+- AI Services: OpenAIService, LangChainService
+- Monitoring: StructuredLogger, Tracer, MetricsCollector
+- Configuration: Settings (Pydantic), Dependencies (DI Container)
+
+### Layer 4: Presentation Layer (`src/presentation/`)
+**User interfaces (API, CLI)**
+- REST API (FastAPI): `/api/cognitive-loop`, `/api/plan/today`, `/api/gaps`, etc.
+- CLI (Typer + Rich): Interactive command-line interface
+- WebSocket: Real-time updates (planned)
+
+### Bridge Layer (`src/bridge/`)
+**Backward compatibility with legacy code**
+- Provides adapters for old scripts to work with new architecture
+- Enables gradual migration without breaking existing functionality
 
 ## Key Agents
 
@@ -78,11 +115,63 @@ jarvis/
 
 ## Running the Project
 
-### Run the Cognitive Loop
+### Using the CLI (Recommended)
+
+The new CLI provides a user-friendly interface with rich formatting:
+
+```bash
+# Display help
+python src/presentation/cli/main.py --help
+
+# Run complete cognitive loop
+python src/presentation/cli/main.py run
+
+# Generate today's plan
+python src/presentation/cli/main.py plan
+
+# Identify knowledge gaps
+python src/presentation/cli/main.py gaps
+
+# Generate innovations
+python src/presentation/cli/main.py innovate
+
+# View performance metrics
+python src/presentation/cli/main.py performance
+
+# Show version info
+python src/presentation/cli/main.py version
+```
+
+### Using the Legacy Script
+
+For backward compatibility, the original script still works:
 
 ```bash
 python scripts/test_cognitive_loop.py
 ```
+
+### Using the REST API
+
+Start the FastAPI server:
+
+```bash
+# Start the server
+python src/presentation/api/main.py
+
+# Or use uvicorn directly
+uvicorn src.presentation.api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+API endpoints:
+- `GET /` - Root endpoint
+- `GET /health` - Health check
+- `POST /api/cognitive-loop` - Run complete cognitive loop
+- `GET /api/plan/today` - Get today's plan
+- `GET /api/gaps` - Get knowledge gaps
+- `GET /api/innovations` - Get innovations
+- `GET /api/performance` - Get performance metrics
+
+API documentation (Swagger): http://localhost:8000/docs
 
 ### Using Docker (Optional)
 
