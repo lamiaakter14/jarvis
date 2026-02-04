@@ -66,6 +66,15 @@ jarvis/
 │   │   ├── api/         # REST API (FastAPI)
 │   │   └── cli/         # Command-line interface
 │   └── bridge/          # Backward compatibility layer
+├── frontend/            # React web dashboard
+│   ├── src/             # Frontend source code
+│   │   ├── api/         # API client
+│   │   ├── components/  # React components
+│   │   ├── pages/       # Page components
+│   │   ├── contexts/    # React contexts
+│   │   └── utils/       # Utilities
+│   ├── public/          # Static assets
+│   └── package.json     # Node.js dependencies
 ├── tests/               # Test suite
 │   ├── unit/            # Unit tests
 │   ├── integration/     # Integration tests
@@ -117,7 +126,41 @@ jarvis/
 
 ## Running the Project
 
-### Using the CLI (Recommended)
+### Using the Web Dashboard (Recommended) 🎨
+
+The web dashboard provides a modern, visual interface to interact with JARVIS:
+
+**1. Start the Backend API:**
+```bash
+python -m src.presentation.api.main
+# Backend runs at http://localhost:8000
+```
+
+**2. Start the Frontend (in a new terminal):**
+```bash
+cd frontend
+npm install  # First time only
+npm run dev
+# Frontend runs at http://localhost:3000
+```
+
+**3. Open your browser:**
+Visit http://localhost:3000 to access the dashboard.
+
+**Features:**
+- 📊 Dashboard with stats and system status
+- 🧠 Run cognitive loop with real-time agent status
+- 📅 View and generate daily plans
+- ✅ Manage tasks
+- 🎯 Track knowledge gaps
+- 💡 Browse innovations
+- 📈 Performance analytics with charts
+- 🌙 Dark mode support
+- 📱 Fully responsive design
+
+See `frontend/README.md` for detailed frontend documentation.
+
+### Using the CLI
 
 The CLI provides a user-friendly interface with rich formatting:
 
