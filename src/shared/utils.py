@@ -1,10 +1,10 @@
 """Shared utility functions for the JARVIS application."""
 
 import json
+import uuid
 from datetime import datetime, date
 from pathlib import Path
 from typing import Any, Dict, Optional
-import hashlib
 
 
 def generate_id(prefix: str = "") -> str:
@@ -16,10 +16,8 @@ def generate_id(prefix: str = "") -> str:
     Returns:
         Unique identifier string
     """
-    timestamp = datetime.now().isoformat()
-    hash_input = f"{prefix}{timestamp}".encode()
-    hash_value = hashlib.md5(hash_input).hexdigest()[:8]
-    return f"{prefix}{hash_value}" if prefix else hash_value
+    unique_id = uuid.uuid4().hex[:8]
+    return f"{prefix}{unique_id}" if prefix else unique_id
 
 
 def safe_json_load(file_path: Path) -> Dict[str, Any]:

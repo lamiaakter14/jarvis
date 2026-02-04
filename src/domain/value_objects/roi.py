@@ -137,7 +137,7 @@ class ROI:
         return self.value >= 0.7
     
     def is_medium_value(self) -> bool:
-        """Check if ROI is medium value (0.4 - 0.7)."""
+        """Check if ROI is medium value ([0.4, 0.7))."""
         return 0.4 <= self.value < 0.7
     
     def is_low_value(self) -> bool:

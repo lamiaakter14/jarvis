@@ -61,9 +61,9 @@ class Task:
             result: Optional result data from task execution
             
         Raises:
-            DomainException: If task is not in progress
+            DomainException: If task is already completed or failed
         """
-        if self.status != TaskStatus.IN_PROGRESS:
+        if self.status in [TaskStatus.COMPLETED, TaskStatus.FAILED]:
             raise DomainException(
                 f"Cannot complete task with status: {self.status.value}"
             )
