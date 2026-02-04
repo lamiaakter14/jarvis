@@ -34,7 +34,7 @@ class StrategistAgent(Agent):
             task_repo: Task repository for task persistence
         """
         super().__init__(
-            agent_type=AgentType.strategist(),
+            agent_type=AgentType.STRATEGIST,
             name="Strategist Agent",
             description="Plans and organizes daily tasks based on strategic goals",
         )

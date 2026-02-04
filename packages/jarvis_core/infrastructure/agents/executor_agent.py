@@ -32,7 +32,7 @@ class ExecutorAgent(Agent):
             memory_repo: Memory repository for logging
         """
         super().__init__(
-            agent_type=AgentType.executor(),
+            agent_type=AgentType.EXECUTOR,
             name="Executor Agent",
             description="Executes tasks and manages implementation",
         )

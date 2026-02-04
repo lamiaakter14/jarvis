@@ -24,11 +24,11 @@ class Task:
     task_id: str = field(default_factory=lambda: generate_id("task_"))
     title: str = ""
     description: str = ""
-    priority: Priority = field(default_factory=Priority.medium)
-    cognitive_load: CognitiveLoad = field(default_factory=CognitiveLoad.medium)
+    priority: Priority = field(default_factory=lambda: Priority.MEDIUM)
+    cognitive_load: CognitiveLoad = field(default_factory=lambda: CognitiveLoad.MEDIUM)
     roi: ROI = field(default_factory=lambda: ROI(0.5))
     status: TaskStatus = TaskStatus.PENDING
-    agent_type: AgentType = field(default_factory=AgentType.executor)
+    agent_type: AgentType = field(default_factory=lambda: AgentType.EXECUTOR)
     
     created_at: datetime = field(default_factory=current_timestamp)
     updated_at: datetime = field(default_factory=current_timestamp)
