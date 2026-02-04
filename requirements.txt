@@ -11,6 +11,8 @@ tqdm
 numpy
 scikit-learn
 pandas
+pyyaml
+flask
 
 # Testing and Code Quality
 pytest
