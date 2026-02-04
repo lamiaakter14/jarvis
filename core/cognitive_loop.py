@@ -1,5 +1,7 @@
 class CognitiveLoop:
-    def agents and memory manager.
+    def __init__(self, memory_manager, strategist, mentor, executor, innovator, amplifier):
+        """
+        Initialize the CognitiveLoop with agents and memory manager.
         Args:
             memory_manager: A MemoryManager instance for loading and saving memory files.
             strategist: The Strategist Agent for planning.
