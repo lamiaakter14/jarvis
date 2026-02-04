@@ -1,30 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "jarvis"
 version = "1.0.0"
-description = "JARVIS: A Learning Operating System for Human Intelligence Amplification"
-authors = [{name = "Your Name", email = "youremail@example.com"}]
-license = {text = "MIT"}
+description = "AI-Powered Cognitive Assistant with Clean Architecture"
+readme = "README.md"
 requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Lamia Akter", email = "lamiaakter14@github.com"}
+]
+keywords = ["ai", "cognitive-assistant", "agents", "clean-architecture"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
 dependencies = [
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
-    "openai",
-    "langchain",
-    "python-decouple",
+    "typer[all]>=0.9.0",
+    "rich>=13.7.0",
     "pydantic>=2.5.0",
     "pydantic-settings>=2.1.0",
-    "requests",
-    "typer[all]>=0.9.0",
-    "rich>=13.0.0",
-    "tqdm",
-    "numpy",
-    "scikit-learn",
-    "pandas",
-    "pyyaml",
-    "flask",
-    "markdown",
-    "dependency-injector>=4.41.0",
+    "openai>=1.3.0",
+    "langchain>=0.0.340",
+    "python-decouple>=3.8",
+    "requests>=2.31.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.3.0",
+    "pandas>=2.1.0",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -33,23 +46,58 @@ dev = [
     "pytest-asyncio>=0.21.1",
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.12.0",
-    "flake8",
-    "black",
-    "mypy",
-    "isort",
+    "black>=23.11.0",
+    "flake8>=6.1.0",
+    "mypy>=1.7.0",
+    "isort>=5.12.0",
 ]
 
 [project.scripts]
 jarvis-api = "jarvis_api.main:main"
 jarvis-cli = "jarvis_cli.main:app"
 
-[tool.setuptools.packages.find]
-where = ["packages", "apps"]
-include = ["jarvis_core*", "jarvis_api*", "jarvis_cli*"]
+[tool.setuptools]
+packages = ["jarvis_core"]
+package-dir = {"" = "packages"}
+
+[tool.setuptools.package-data]
+jarvis_core = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers --cov=jarvis_core --cov-report=term-missing"
 
 [tool.black]
-line-length = 88
-target-version = ['py312']
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | runtime
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+extend_skip = ["runtime"]
 
 [tool.mypy]
-files = ["packages", "apps", "tests"]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+exclude = ["runtime", "build", "dist"]
