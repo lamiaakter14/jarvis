@@ -3,10 +3,10 @@
 from datetime import date, datetime, timedelta
 from typing import List, Dict, Any
 
-from src.application.dto.analytics_dto import AnalyticsDTO
-from src.domain.repositories import ITaskRepository, IAnalyticsRepository, IMemoryRepository
-from src.shared.constants import TaskStatus
-from src.shared.exceptions import DomainException
+from jarvis_core.application.dto.analytics_dto import AnalyticsDTO
+from jarvis_core.domain.repositories import ITaskRepository, IAnalyticsRepository, IMemoryRepository
+from jarvis_core.shared.constants import TaskStatus
+from jarvis_core.shared.exceptions import DomainException
 
 
 class AnalyzePerformance:

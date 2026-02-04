@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import List, Dict, Any, Optional
 
-from src.shared.utils import generate_id, current_date
-from src.shared.exceptions import DomainException
+from jarvis_core.shared.utils import generate_id, current_date
+from jarvis_core.shared.exceptions import DomainException
 
 
 @dataclass

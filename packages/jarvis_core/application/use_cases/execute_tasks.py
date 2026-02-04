@@ -2,13 +2,13 @@
 
 from typing import List, Dict, Any
 
-from src.application.dto.task_dto import TaskDTO
-from src.application.interfaces.i_notification_service import INotificationService
-from src.domain.entities.task import Task
-from src.domain.events import TaskCompletedEvent
-from src.domain.repositories import ITaskRepository
-from src.shared.constants import TaskStatus
-from src.shared.exceptions import DomainException
+from jarvis_core.application.dto.task_dto import TaskDTO
+from jarvis_core.application.interfaces.i_notification_service import INotificationService
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.events import TaskCompletedEvent
+from jarvis_core.domain.repositories import ITaskRepository
+from jarvis_core.shared.constants import TaskStatus
+from jarvis_core.shared.exceptions import DomainException
 
 
 class ExecuteTasks:

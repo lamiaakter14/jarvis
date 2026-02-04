@@ -1,10 +1,10 @@
 """Unit tests for value objects."""
 import pytest
 
-from src.domain.value_objects.priority import Priority
-from src.domain.value_objects.cognitive_load import CognitiveLoad
-from src.domain.value_objects.roi import ROI
-from src.domain.value_objects.agent_type import AgentType
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.domain.value_objects.agent_type import AgentType
 
 
 @pytest.mark.unit

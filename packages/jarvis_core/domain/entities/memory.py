@@ -4,9 +4,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-from src.shared.constants import MemoryType
-from src.shared.utils import generate_id, current_timestamp
-from src.shared.exceptions import DomainException
+from jarvis_core.shared.constants import MemoryType
+from jarvis_core.shared.utils import generate_id, current_timestamp
+from jarvis_core.shared.exceptions import DomainException
 
 
 @dataclass

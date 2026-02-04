@@ -5,8 +5,8 @@ from typing import List, Dict, TYPE_CHECKING
 from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:
-    from src.domain.entities.plan import Plan
-    from src.application.dto.task_dto import TaskDTO
+    from jarvis_core.domain.entities.plan import Plan
+    from jarvis_core.application.dto.task_dto import TaskDTO
 
 
 class PlanDTO(BaseModel):
@@ -41,7 +41,7 @@ class PlanDTO(BaseModel):
         Returns:
             PlanDTO instance
         """
-        from src.application.dto.task_dto import TaskDTO
+        from jarvis_core.application.dto.task_dto import TaskDTO
         
         return cls(
             plan_id=plan.plan_id,
@@ -74,7 +74,7 @@ class PlanDTO(BaseModel):
         total = 0.0
         for task in self.tasks:
             # Parse cognitive load to get hours
-            from src.domain.value_objects.cognitive_load import CognitiveLoad
+            from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
             load = CognitiveLoad.from_string(task.cognitive_load)
             total += load.estimated_hours
         return total

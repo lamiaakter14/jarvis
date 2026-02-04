@@ -3,14 +3,14 @@
 from typing import Any, Dict, Optional
 import time
 
-from src.domain.entities.agent import Agent
-from src.domain.entities.task import Task
-from src.domain.value_objects.agent_type import AgentType
-from src.domain.repositories.i_task_repository import ITaskRepository
-from src.domain.repositories.i_memory_repository import IMemoryRepository
-from src.domain.entities.memory import Memory
-from src.shared.constants import TaskStatus, MemoryType
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.agent import Agent
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.value_objects.agent_type import AgentType
+from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.domain.entities.memory import Memory
+from jarvis_core.shared.constants import TaskStatus, MemoryType
+from jarvis_core.shared.exceptions import DomainException
 
 
 class ExecutorAgent(Agent):

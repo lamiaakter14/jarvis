@@ -2,11 +2,11 @@
 
 from typing import List, Dict, Any
 
-from src.application.interfaces.i_ai_service import IAIService
-from src.application.interfaces.i_notification_service import INotificationService
-from src.domain.events import GapIdentifiedEvent
-from src.domain.repositories import IMemoryRepository
-from src.shared.exceptions import DomainException
+from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.application.interfaces.i_notification_service import INotificationService
+from jarvis_core.domain.events import GapIdentifiedEvent
+from jarvis_core.domain.repositories import IMemoryRepository
+from jarvis_core.shared.exceptions import DomainException
 
 
 class IdentifyGaps:
@@ -75,7 +75,7 @@ class IdentifyGaps:
         Returns:
             List of execution log entries
         """
-        from src.shared.constants import MemoryType
+        from jarvis_core.shared.constants import MemoryType
         
         logs_memories = await self.memory_repository.list(MemoryType.EXECUTION_LOG)
         
@@ -105,11 +105,11 @@ class IdentifyGaps:
         
         for gap in gaps:
             # Add timestamp
-            from src.shared.utils import current_timestamp
+            from jarvis_core.shared.utils import current_timestamp
             gap["identified_at"] = current_timestamp().isoformat()
             
             # Add gap ID
-            from src.shared.utils import generate_id
+            from jarvis_core.shared.utils import generate_id
             gap["gap_id"] = generate_id("gap_")
             
             # Ensure required fields
@@ -135,8 +135,8 @@ class IdentifyGaps:
         Args:
             gaps: Gaps to store
         """
-        from src.shared.constants import MemoryType
-        from src.domain.entities.memory import Memory
+        from jarvis_core.shared.constants import MemoryType
+        from jarvis_core.domain.entities.memory import Memory
         
         # Get existing gaps
         existing_memory = await self.memory_repository.get("identified_gaps")

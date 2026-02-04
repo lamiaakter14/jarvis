@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List
 
-from src.domain.events.base_event import BaseEvent
-from src.shared.utils import generate_id, current_timestamp
+from jarvis_core.domain.events.base_event import BaseEvent
+from jarvis_core.shared.utils import generate_id, current_timestamp
 
 
 @dataclass(frozen=True)

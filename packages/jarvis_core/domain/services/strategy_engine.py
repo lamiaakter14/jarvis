@@ -2,10 +2,10 @@
 
 from typing import List
 
-from src.domain.entities.task import Task
-from src.domain.entities.context import Context
-from src.domain.value_objects.roi import ROI
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.shared.exceptions import DomainException
 
 
 class StrategyEngine:

@@ -1,7 +1,7 @@
 """Infrastructure configuration module."""
 
-from src.infrastructure.config.settings import Settings, settings
-from src.infrastructure.config.dependencies import (
+from jarvis_core.infrastructure.config.settings import Settings, settings
+from jarvis_core.infrastructure.config.dependencies import (
     get_memory_repository,
     get_task_repository,
     get_ai_service,

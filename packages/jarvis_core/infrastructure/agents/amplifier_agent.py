@@ -3,11 +3,11 @@
 from typing import Any, Dict, List
 import time
 
-from src.domain.entities.agent import Agent
-from src.domain.value_objects.agent_type import AgentType
-from src.domain.repositories.i_memory_repository import IMemoryRepository
-from src.infrastructure.monitoring.metrics_collector import MetricsCollector
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.agent import Agent
+from jarvis_core.domain.value_objects.agent_type import AgentType
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.infrastructure.monitoring.metrics_collector import MetricsCollector
+from jarvis_core.shared.exceptions import DomainException
 
 
 class AmplifierAgent(Agent):

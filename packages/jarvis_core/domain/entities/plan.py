@@ -4,10 +4,10 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import List, Optional
 
-from src.domain.entities.task import Task
-from src.shared.constants import TaskStatus
-from src.shared.utils import generate_id, current_date, current_timestamp
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.shared.constants import TaskStatus
+from jarvis_core.shared.utils import generate_id, current_date, current_timestamp
+from jarvis_core.shared.exceptions import DomainException
 
 
 @dataclass

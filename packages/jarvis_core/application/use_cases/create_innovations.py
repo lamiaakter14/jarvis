@@ -2,14 +2,14 @@
 
 from typing import List
 
-from src.application.interfaces.i_ai_service import IAIService
-from src.application.interfaces.i_notification_service import INotificationService
-from src.domain.entities.innovation import Innovation
-from src.domain.entities.context import Context
-from src.domain.events import InnovationCreatedEvent
-from src.domain.repositories import IMemoryRepository, ITaskRepository
-from src.domain.services.innovation_engine import InnovationEngine
-from src.shared.exceptions import DomainException
+from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.application.interfaces.i_notification_service import INotificationService
+from jarvis_core.domain.entities.innovation import Innovation
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.events import InnovationCreatedEvent
+from jarvis_core.domain.repositories import IMemoryRepository, ITaskRepository
+from jarvis_core.domain.services.innovation_engine import InnovationEngine
+from jarvis_core.shared.exceptions import DomainException
 
 
 class CreateInnovations:
@@ -107,7 +107,7 @@ class CreateInnovations:
         Returns:
             Context entity with loaded data
         """
-        from src.shared.utils import current_date
+        from jarvis_core.shared.utils import current_date
         context = Context(date=current_date())
         
         # Load strategic goals
@@ -194,8 +194,8 @@ class CreateInnovations:
         Args:
             innovations: Innovations to store
         """
-        from src.shared.constants import MemoryType
-        from src.domain.entities.memory import Memory
+        from jarvis_core.shared.constants import MemoryType
+        from jarvis_core.domain.entities.memory import Memory
         
         # Get existing innovations
         existing_memory = await self.memory_repository.get("recent_innovations")

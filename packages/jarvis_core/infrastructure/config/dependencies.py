@@ -3,21 +3,21 @@
 from typing import Optional
 from functools import lru_cache
 
-from src.infrastructure.config.settings import settings
-from src.infrastructure.persistence.file_memory_repository import FileMemoryRepository
-from src.infrastructure.persistence.sqlite_task_repository import SqliteTaskRepository
-from src.infrastructure.ai.openai_service import OpenAIService
-from src.infrastructure.agents.strategist_agent import StrategistAgent
-from src.infrastructure.agents.mentor_agent import MentorAgent
-from src.infrastructure.agents.executor_agent import ExecutorAgent
-from src.infrastructure.agents.innovator_agent import InnovatorAgent
-from src.infrastructure.agents.amplifier_agent import AmplifierAgent
-from src.infrastructure.monitoring.logger import Logger
-from src.infrastructure.monitoring.metrics_collector import MetricsCollector
-from src.infrastructure.monitoring.tracer import Tracer
-from src.domain.repositories.i_memory_repository import IMemoryRepository
-from src.domain.repositories.i_task_repository import ITaskRepository
-from src.application.interfaces.i_ai_service import IAIService
+from jarvis_core.infrastructure.config.settings import settings
+from jarvis_core.infrastructure.persistence.file_memory_repository import FileMemoryRepository
+from jarvis_core.infrastructure.persistence.sqlite_task_repository import SqliteTaskRepository
+from jarvis_core.infrastructure.ai.openai_service import OpenAIService
+from jarvis_core.infrastructure.agents.strategist_agent import StrategistAgent
+from jarvis_core.infrastructure.agents.mentor_agent import MentorAgent
+from jarvis_core.infrastructure.agents.executor_agent import ExecutorAgent
+from jarvis_core.infrastructure.agents.innovator_agent import InnovatorAgent
+from jarvis_core.infrastructure.agents.amplifier_agent import AmplifierAgent
+from jarvis_core.infrastructure.monitoring.logger import Logger
+from jarvis_core.infrastructure.monitoring.metrics_collector import MetricsCollector
+from jarvis_core.infrastructure.monitoring.tracer import Tracer
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
+from jarvis_core.application.interfaces.i_ai_service import IAIService
 
 
 # Repository Dependencies

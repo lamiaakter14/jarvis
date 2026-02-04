@@ -6,13 +6,8 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich import print as rprint
-import sys
-from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-from src.bridge.agent_bridge import (
+from jarvis_core.bridge.agent_bridge import (
     StrategistBridge,
     MentorBridge,
     ExecutorBridge,

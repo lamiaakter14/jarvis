@@ -3,14 +3,14 @@
 from typing import Any, Dict
 import time
 
-from src.domain.entities.agent import Agent
-from src.domain.entities.context import Context
-from src.domain.entities.plan import Plan
-from src.domain.value_objects.agent_type import AgentType
-from src.application.interfaces.i_ai_service import IAIService
-from src.domain.repositories.i_memory_repository import IMemoryRepository
-from src.domain.repositories.i_task_repository import ITaskRepository
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.agent import Agent
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.value_objects.agent_type import AgentType
+from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
+from jarvis_core.shared.exceptions import DomainException
 
 
 class StrategistAgent(Agent):

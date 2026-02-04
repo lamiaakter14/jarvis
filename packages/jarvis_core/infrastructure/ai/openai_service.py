@@ -3,15 +3,15 @@
 from typing import List, Dict, Any, Optional
 import json
 
-from src.application.interfaces.i_ai_service import IAIService
-from src.domain.entities.plan import Plan
-from src.domain.entities.context import Context
-from src.domain.entities.task import Task
-from src.domain.entities.innovation import Innovation
-from src.domain.value_objects.priority import Priority
-from src.domain.value_objects.cognitive_load import CognitiveLoad
-from src.domain.value_objects.roi import ROI
-from src.shared.exceptions import AIServiceError
+from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.entities.innovation import Innovation
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.shared.exceptions import AIServiceError
 
 
 class OpenAIService(IAIService):

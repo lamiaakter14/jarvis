@@ -1,8 +1,8 @@
 """Agent Type value object for domain entities."""
 
 from dataclasses import dataclass
-from src.shared.constants import AgentType as AgentTypeEnum
-from src.shared.exceptions import InvalidValueObjectError
+from jarvis_core.shared.constants import AgentType as AgentTypeEnum
+from jarvis_core.shared.exceptions import InvalidValueObjectError
 
 
 @dataclass(frozen=True)

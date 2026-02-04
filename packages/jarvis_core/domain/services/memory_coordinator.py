@@ -2,11 +2,11 @@
 
 from typing import Dict, List, Any
 
-from src.domain.entities.context import Context
-from src.domain.repositories.i_memory_repository import IMemoryRepository
-from src.domain.entities.memory import Memory
-from src.shared.constants import MemoryType
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.domain.entities.memory import Memory
+from jarvis_core.shared.constants import MemoryType
+from jarvis_core.shared.exceptions import DomainException
 
 
 class MemoryCoordinator:

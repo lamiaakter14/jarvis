@@ -5,8 +5,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from src.domain.value_objects.agent_type import AgentType
-from src.shared.utils import generate_id, current_timestamp
+from jarvis_core.domain.value_objects.agent_type import AgentType
+from jarvis_core.shared.utils import generate_id, current_timestamp
 
 
 @dataclass

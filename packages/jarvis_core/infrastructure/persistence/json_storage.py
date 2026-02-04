@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 
-from src.shared.exceptions import RepositoryError
+from jarvis_core.shared.exceptions import RepositoryError
 
 
 class JsonStorage:

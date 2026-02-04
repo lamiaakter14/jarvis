@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from src.shared.constants import TaskPriority
-from src.shared.exceptions import InvalidValueObjectError
+from jarvis_core.shared.constants import TaskPriority
+from jarvis_core.shared.exceptions import InvalidValueObjectError
 
 
 @dataclass(frozen=True)

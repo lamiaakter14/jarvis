@@ -3,8 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from src.domain.entities.memory import Memory
-from src.shared.constants import MemoryType
+from jarvis_core.domain.entities.memory import Memory
+from jarvis_core.shared.constants import MemoryType
 
 
 class IMemoryRepository(ABC):

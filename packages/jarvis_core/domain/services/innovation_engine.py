@@ -2,11 +2,11 @@
 
 from typing import List, Dict, Any
 
-from src.domain.entities.task import Task
-from src.domain.entities.context import Context
-from src.domain.entities.innovation import Innovation
-from src.shared.utils import generate_id
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.entities.innovation import Innovation
+from jarvis_core.shared.utils import generate_id
+from jarvis_core.shared.exceptions import DomainException
 
 
 class InnovationEngine:

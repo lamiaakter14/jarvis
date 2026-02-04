@@ -3,8 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from src.domain.entities.agent import Agent
-from src.domain.value_objects.agent_type import AgentType
+from jarvis_core.domain.entities.agent import Agent
+from jarvis_core.domain.value_objects.agent_type import AgentType
 
 
 class IAgentRepository(ABC):

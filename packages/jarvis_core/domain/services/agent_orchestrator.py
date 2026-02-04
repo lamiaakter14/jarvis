@@ -2,9 +2,9 @@
 
 from typing import Any, Dict, List
 
-from src.domain.entities.agent import Agent
-from src.domain.entities.context import Context
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.entities.agent import Agent
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.shared.exceptions import DomainException
 
 
 class AgentOrchestrator:

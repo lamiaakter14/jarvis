@@ -4,12 +4,12 @@ from datetime import datetime
 from typing import Optional, Any
 from pydantic import BaseModel, Field
 
-from src.domain.entities.task import Task
-from src.domain.value_objects.priority import Priority
-from src.domain.value_objects.cognitive_load import CognitiveLoad
-from src.domain.value_objects.roi import ROI
-from src.domain.value_objects.agent_type import AgentType
-from src.shared.constants import TaskStatus
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.domain.value_objects.agent_type import AgentType
+from jarvis_core.shared.constants import TaskStatus
 
 
 class TaskDTO(BaseModel):

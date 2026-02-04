@@ -3,15 +3,15 @@
 from datetime import date
 from typing import List
 
-from src.application.dto.plan_dto import PlanDTO
-from src.application.interfaces.i_ai_service import IAIService
-from src.domain.entities.context import Context
-from src.domain.entities.plan import Plan
-from src.domain.entities.memory import Memory
-from src.domain.repositories import ITaskRepository, IMemoryRepository
-from src.domain.services.strategy_engine import StrategyEngine
-from src.shared.constants import MemoryType
-from src.shared.exceptions import DomainException
+from jarvis_core.application.dto.plan_dto import PlanDTO
+from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.entities.memory import Memory
+from jarvis_core.domain.repositories import ITaskRepository, IMemoryRepository
+from jarvis_core.domain.services.strategy_engine import StrategyEngine
+from jarvis_core.shared.constants import MemoryType
+from jarvis_core.shared.exceptions import DomainException
 
 
 class GenerateDailyPlan:
@@ -91,7 +91,7 @@ class GenerateDailyPlan:
                 await self.task_repository.save(task)
             
             # Store plan in memory
-            from src.domain.entities.memory import Memory
+            from jarvis_core.domain.entities.memory import Memory
             plan_memory = Memory(
                 type=MemoryType.STRATEGIC,
                 key=f"plan_{target_date.isoformat()}",

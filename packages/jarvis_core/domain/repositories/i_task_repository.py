@@ -3,8 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
-from src.domain.entities.task import Task
-from src.shared.constants import TaskStatus
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.shared.constants import TaskStatus
 
 
 class ITaskRepository(ABC):

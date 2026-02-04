@@ -1,8 +1,8 @@
 """Cognitive Load value object for domain entities."""
 
 from dataclasses import dataclass
-from src.shared.constants import CognitiveLoadLevel
-from src.shared.exceptions import InvalidValueObjectError
+from jarvis_core.shared.constants import CognitiveLoadLevel
+from jarvis_core.shared.exceptions import InvalidValueObjectError
 
 
 @dataclass(frozen=True)

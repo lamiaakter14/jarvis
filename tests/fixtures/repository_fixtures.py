@@ -3,11 +3,11 @@ import pytest
 from unittest.mock import AsyncMock, Mock
 from typing import List, Optional, Dict, Any
 
-from src.domain.repositories.i_task_repository import ITaskRepository
-from src.domain.repositories.i_memory_repository import IMemoryRepository
-from src.domain.repositories.i_analytics_repository import IAnalyticsRepository
-from src.application.interfaces.i_ai_service import IAIService
-from src.application.interfaces.i_notification_service import INotificationService
+from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.domain.repositories.i_analytics_repository import IAnalyticsRepository
+from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.application.interfaces.i_notification_service import INotificationService
 
 
 @pytest.fixture

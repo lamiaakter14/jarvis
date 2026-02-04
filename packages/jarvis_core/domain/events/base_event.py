@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict
 
-from src.shared.utils import generate_id, current_timestamp
+from jarvis_core.shared.utils import generate_id, current_timestamp
 
 
 @dataclass(frozen=True)

@@ -1,8 +1,8 @@
 """Infrastructure monitoring module."""
 
-from src.infrastructure.monitoring.logger import Logger
-from src.infrastructure.monitoring.metrics_collector import MetricsCollector
-from src.infrastructure.monitoring.tracer import Tracer
+from jarvis_core.infrastructure.monitoring.logger import Logger
+from jarvis_core.infrastructure.monitoring.metrics_collector import MetricsCollector
+from jarvis_core.infrastructure.monitoring.tracer import Tracer
 
 __all__ = [
     "Logger",

@@ -3,10 +3,10 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 
-from src.domain.entities.plan import Plan
-from src.domain.entities.context import Context
-from src.domain.entities.task import Task
-from src.domain.entities.innovation import Innovation
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.entities.innovation import Innovation
 
 
 class IAIService(ABC):

@@ -2,7 +2,7 @@
 
 from typing import Any, Optional
 import re
-from src.shared.exceptions import ValidationError
+from jarvis_core.shared.exceptions import ValidationError
 
 
 def validate_not_empty(value: Any, field_name: str) -> None:

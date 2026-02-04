@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
-from src.domain.entities.task import Task
+from jarvis_core.domain.entities.task import Task
 
 
 class INotificationService(ABC):

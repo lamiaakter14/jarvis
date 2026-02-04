@@ -4,13 +4,13 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Optional
 
-from src.domain.value_objects.priority import Priority
-from src.domain.value_objects.cognitive_load import CognitiveLoad
-from src.domain.value_objects.roi import ROI
-from src.domain.value_objects.agent_type import AgentType
-from src.shared.constants import TaskStatus
-from src.shared.utils import generate_id, current_timestamp
-from src.shared.exceptions import DomainException
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.domain.value_objects.agent_type import AgentType
+from jarvis_core.shared.constants import TaskStatus
+from jarvis_core.shared.utils import generate_id, current_timestamp
+from jarvis_core.shared.exceptions import DomainException
 
 
 @dataclass

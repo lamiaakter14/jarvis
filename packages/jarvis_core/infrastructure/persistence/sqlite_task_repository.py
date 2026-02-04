@@ -6,14 +6,14 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
 
-from src.domain.repositories.i_task_repository import ITaskRepository
-from src.domain.entities.task import Task
-from src.domain.value_objects.priority import Priority
-from src.domain.value_objects.cognitive_load import CognitiveLoad
-from src.domain.value_objects.roi import ROI
-from src.domain.value_objects.agent_type import AgentType as AgentTypeVO
-from src.shared.constants import TaskStatus
-from src.shared.exceptions import RepositoryError, EntityNotFoundError
+from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
+from jarvis_core.domain.entities.task import Task
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.domain.value_objects.agent_type import AgentType as AgentTypeVO
+from jarvis_core.shared.constants import TaskStatus
+from jarvis_core.shared.exceptions import RepositoryError, EntityNotFoundError
 
 
 class SqliteTaskRepository(ITaskRepository):
@@ -127,7 +127,7 @@ class SqliteTaskRepository(ITaskRepository):
         Returns:
             Task entity
         """
-        from src.shared.constants import CognitiveLoadLevel
+        from jarvis_core.shared.constants import CognitiveLoadLevel
         
         # Parse cognitive load level
         cognitive_level_str = row["cognitive_load_level"]

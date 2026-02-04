@@ -9,7 +9,7 @@ The application layer orchestrates domain objects and implements use cases
 without depending on infrastructure details.
 """
 
-from src.application import dto, interfaces, use_cases
+from jarvis_core.application import dto, interfaces, use_cases
 
 __all__ = [
     "dto",

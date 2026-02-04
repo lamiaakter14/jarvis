@@ -4,13 +4,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
-import sys
-from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-from src.bridge.agent_bridge import (
+from jarvis_core.bridge.agent_bridge import (
     StrategistBridge,
     MentorBridge,
     ExecutorBridge,

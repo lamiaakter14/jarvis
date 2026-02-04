@@ -1,7 +1,7 @@
 """ROI (Return on Investment) value object for domain entities."""
 
 from dataclasses import dataclass
-from src.shared.exceptions import InvalidValueObjectError
+from jarvis_core.shared.exceptions import InvalidValueObjectError
 
 
 @dataclass(frozen=True)

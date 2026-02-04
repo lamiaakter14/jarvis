@@ -10,21 +10,21 @@ in the domain and application layers, including:
 - Monitoring and logging
 """
 
-from src.infrastructure.config import settings, Settings
-from src.infrastructure.persistence import (
+from jarvis_core.infrastructure.config import settings, Settings
+from jarvis_core.infrastructure.persistence import (
     JsonStorage,
     FileMemoryRepository,
     SqliteTaskRepository,
 )
-from src.infrastructure.ai import OpenAIService
-from src.infrastructure.agents import (
+from jarvis_core.infrastructure.ai import OpenAIService
+from jarvis_core.infrastructure.agents import (
     StrategistAgent,
     MentorAgent,
     ExecutorAgent,
     InnovatorAgent,
     AmplifierAgent,
 )
-from src.infrastructure.monitoring import (
+from jarvis_core.infrastructure.monitoring import (
     Logger,
     MetricsCollector,
     Tracer,
