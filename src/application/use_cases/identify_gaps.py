@@ -75,16 +75,22 @@ class IdentifyGaps:
         Returns:
             List of execution log entries
         """
-        logs = await self.memory_repository.retrieve(
-            memory_type="execution_log",
-            key="recent_executions"
-        )
+        from src.shared.constants import MemoryType
         
-        if not logs or not isinstance(logs, list):
+        logs_memories = await self.memory_repository.list(MemoryType.EXECUTION_LOG)
+        
+        if not logs_memories:
             return []
         
-        # Return most recent logs
-        return logs[:limit]
+        # Extract content from memories and flatten
+        all_logs = []
+        for memory in logs_memories[:limit]:
+            if isinstance(memory.content, dict):
+                log_entry = memory.content.get("log", {})
+                if log_entry:
+                    all_logs.append(log_entry)
+        
+        return all_logs
     
     async def _enrich_gaps(self, gaps: List[Dict]) -> List[Dict]:
         """Enrich gaps with additional context.
@@ -129,13 +135,18 @@ class IdentifyGaps:
         Args:
             gaps: Gaps to store
         """
-        # Get existing gaps
-        existing_gaps = await self.memory_repository.retrieve(
-            memory_type="knowledge",
-            key="identified_gaps"
-        )
+        from src.shared.constants import MemoryType
+        from src.domain.entities.memory import Memory
         
-        if not existing_gaps or not isinstance(existing_gaps, list):
+        # Get existing gaps
+        existing_memory = await self.memory_repository.get("identified_gaps")
+        
+        if existing_memory and isinstance(existing_memory.content, dict):
+            existing_gaps = existing_memory.content.get("gaps", [])
+        else:
+            existing_gaps = []
+        
+        if not isinstance(existing_gaps, list):
             existing_gaps = []
         
         # Merge with new gaps (avoid duplicates)
@@ -146,11 +157,12 @@ class IdentifyGaps:
                 existing_gaps.append(gap)
         
         # Store updated gaps
-        await self.memory_repository.store(
-            memory_type="knowledge",
+        gaps_memory = Memory(
+            type=MemoryType.KNOWLEDGE,
             key="identified_gaps",
-            value=existing_gaps
+            content={"gaps": existing_gaps}
         )
+        await self.memory_repository.save(gaps_memory)
     
     async def _notify_gaps(self, gaps: List[Dict]) -> None:
         """Send notifications for important gaps.

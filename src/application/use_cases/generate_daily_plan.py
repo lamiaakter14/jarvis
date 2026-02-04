@@ -7,8 +7,10 @@ from src.application.dto.plan_dto import PlanDTO
 from src.application.interfaces.i_ai_service import IAIService
 from src.domain.entities.context import Context
 from src.domain.entities.plan import Plan
+from src.domain.entities.memory import Memory
 from src.domain.repositories import ITaskRepository, IMemoryRepository
 from src.domain.services.strategy_engine import StrategyEngine
+from src.shared.constants import MemoryType
 from src.shared.exceptions import DomainException
 
 
@@ -89,11 +91,13 @@ class GenerateDailyPlan:
                 await self.task_repository.save(task)
             
             # Store plan in memory
-            await self.memory_repository.store(
-                memory_type="strategic",
+            from src.domain.entities.memory import Memory
+            plan_memory = Memory(
+                type=MemoryType.STRATEGIC,
                 key=f"plan_{target_date.isoformat()}",
-                value={"plan_id": plan.plan_id, "date": str(plan.date)}
+                content={"plan_id": plan.plan_id, "date": str(plan.date)}
             )
+            await self.memory_repository.save(plan_memory)
             
             return PlanDTO.from_entity(plan)
             
@@ -116,30 +120,27 @@ class GenerateDailyPlan:
         )
         
         # Load strategic goals from memory
-        goals_data = await self.memory_repository.retrieve(
-            memory_type="strategic",
-            key="strategic_goals"
-        )
-        if goals_data and isinstance(goals_data, list):
-            for goal in goals_data:
-                context.add_strategic_goal(goal)
+        goals_memory = await self.memory_repository.get("strategic_goals")
+        if goals_memory and isinstance(goals_memory.content, dict):
+            goals_data = goals_memory.content.get("goals", [])
+            if isinstance(goals_data, list):
+                for goal in goals_data:
+                    context.add_strategic_goal(goal)
         
         # Load current focus areas
-        focus_data = await self.memory_repository.retrieve(
-            memory_type="working",
-            key="current_focus"
-        )
-        if focus_data and isinstance(focus_data, list):
-            for focus in focus_data:
-                context.add_focus_area(focus)
+        focus_memory = await self.memory_repository.get("current_focus")
+        if focus_memory and isinstance(focus_memory.content, dict):
+            focus_data = focus_memory.content.get("focus_areas", [])
+            if isinstance(focus_data, list):
+                for focus in focus_data:
+                    context.add_focus_area(focus)
         
         # Load identified gaps
-        gaps_data = await self.memory_repository.retrieve(
-            memory_type="knowledge",
-            key="identified_gaps"
-        )
-        if gaps_data and isinstance(gaps_data, list):
-            context.gaps = gaps_data
+        gaps_memory = await self.memory_repository.get("identified_gaps")
+        if gaps_memory and isinstance(gaps_memory.content, dict):
+            gaps_data = gaps_memory.content.get("gaps", [])
+            if isinstance(gaps_data, list):
+                context.gaps = gaps_data
         
         return context
     

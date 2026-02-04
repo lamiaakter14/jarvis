@@ -31,6 +31,7 @@ class CreateInnovations:
         
         Args:
             memory_repository: Repository for memory/context data
+            task_repository: Repository for task data
             innovation_engine: Domain service for innovation analysis
             ai_service: AI service for innovation generation
             notification_service: Service for sending notifications
@@ -110,30 +111,27 @@ class CreateInnovations:
         context = Context(date=current_date())
         
         # Load strategic goals
-        goals = await self.memory_repository.retrieve(
-            memory_type="strategic",
-            key="strategic_goals"
-        )
-        if goals and isinstance(goals, list):
-            for goal in goals:
-                context.add_strategic_goal(goal)
+        goals_memory = await self.memory_repository.get("strategic_goals")
+        if goals_memory and isinstance(goals_memory.content, dict):
+            goals = goals_memory.content.get("goals", [])
+            if isinstance(goals, list):
+                for goal in goals:
+                    context.add_strategic_goal(goal)
         
         # Load gaps
-        gaps = await self.memory_repository.retrieve(
-            memory_type="knowledge",
-            key="identified_gaps"
-        )
-        if gaps and isinstance(gaps, list):
-            context.gaps = gaps
+        gaps_memory = await self.memory_repository.get("identified_gaps")
+        if gaps_memory and isinstance(gaps_memory.content, dict):
+            gaps = gaps_memory.content.get("gaps", [])
+            if isinstance(gaps, list):
+                context.gaps = gaps
         
         # Load focus areas
-        focus = await self.memory_repository.retrieve(
-            memory_type="working",
-            key="current_focus"
-        )
-        if focus and isinstance(focus, list):
-            for f in focus:
-                context.add_focus_area(f)
+        focus_memory = await self.memory_repository.get("current_focus")
+        if focus_memory and isinstance(focus_memory.content, dict):
+            focus = focus_memory.content.get("focus_areas", [])
+            if isinstance(focus, list):
+                for f in focus:
+                    context.add_focus_area(f)
         
         return context
     
@@ -143,12 +141,9 @@ class CreateInnovations:
         Returns:
             Dictionary with performance data
         """
-        metrics = await self.memory_repository.retrieve(
-            memory_type="strategic",
-            key="recent_metrics"
-        )
+        metrics_memory = await self.memory_repository.get("recent_metrics")
         
-        if not metrics or not isinstance(metrics, dict):
+        if not metrics_memory or not isinstance(metrics_memory.content, dict):
             return {
                 "success_rate": 1.0,
                 "average_execution_time": 0.0,
@@ -158,7 +153,7 @@ class CreateInnovations:
                 "available_hours": 8.0,
             }
         
-        return metrics
+        return metrics_memory.content.get("metrics", {})
     
     def _deduplicate_innovations(self, innovations: List[Innovation]) -> List[Innovation]:
         """Remove duplicate innovations based on title similarity.
@@ -199,13 +194,18 @@ class CreateInnovations:
         Args:
             innovations: Innovations to store
         """
-        # Get existing innovations
-        existing = await self.memory_repository.retrieve(
-            memory_type="knowledge",
-            key="recent_innovations"
-        )
+        from src.shared.constants import MemoryType
+        from src.domain.entities.memory import Memory
         
-        if not existing or not isinstance(existing, list):
+        # Get existing innovations
+        existing_memory = await self.memory_repository.get("recent_innovations")
+        
+        if existing_memory and isinstance(existing_memory.content, dict):
+            existing = existing_memory.content.get("innovations", [])
+        else:
+            existing = []
+        
+        if not isinstance(existing, list):
             existing = []
         
         # Convert innovations to dicts and merge
@@ -226,11 +226,12 @@ class CreateInnovations:
         all_innovations = innovation_dicts + existing
         all_innovations = all_innovations[:50]
         
-        await self.memory_repository.store(
-            memory_type="knowledge",
+        innovations_memory = Memory(
+            type=MemoryType.KNOWLEDGE,
             key="recent_innovations",
-            value=all_innovations
+            content={"innovations": all_innovations}
         )
+        await self.memory_repository.save(innovations_memory)
     
     async def _notify_innovations(self, innovations: List[Innovation]) -> None:
         """Send notifications for high-impact innovations.

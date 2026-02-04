@@ -374,12 +374,16 @@ class ExecuteCognitiveLoop:
         Args:
             summary: Loop execution summary
         """
+        from src.shared.constants import MemoryType
+        from src.domain.entities.memory import Memory
+        
         try:
-            await self.memory_repository.store(
-                memory_type="execution_log",
+            loop_memory = Memory(
+                type=MemoryType.EXECUTION_LOG,
                 key=f"loop_{summary['date']}",
-                value=summary
+                content={"log": summary}
             )
+            await self.memory_repository.save(loop_memory)
         except Exception as e:
             # Log but don't fail
             pass

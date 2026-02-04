@@ -139,10 +139,11 @@ class AnalyzePerformance:
             )
             
             # Store analytics
-            await self.analytics_repository.store_metrics(
-                period=period,
-                metrics=analytics.to_dict()
-            )
+            await self.analytics_repository.save_execution_metrics({
+                "period": period,
+                "timestamp": end_date.isoformat(),
+                "metrics": analytics.to_dict()
+            })
             
             return analytics
             
@@ -158,12 +159,13 @@ class AnalyzePerformance:
         Returns:
             List of top gaps
         """
-        gaps_data = await self.memory_repository.retrieve(
-            memory_type="knowledge",
-            key="identified_gaps"
-        )
+        gaps_memory = await self.memory_repository.get("identified_gaps")
         
-        if not gaps_data or not isinstance(gaps_data, list):
+        if not gaps_memory or not isinstance(gaps_memory.content, dict):
+            return []
+        
+        gaps_data = gaps_memory.content.get("gaps", [])
+        if not isinstance(gaps_data, list):
             return []
         
         # Sort by severity and return top N
@@ -185,12 +187,13 @@ class AnalyzePerformance:
         Returns:
             List of recent innovations
         """
-        innovations_data = await self.memory_repository.retrieve(
-            memory_type="knowledge",
-            key="recent_innovations"
-        )
+        innovations_memory = await self.memory_repository.get("recent_innovations")
         
-        if not innovations_data or not isinstance(innovations_data, list):
+        if not innovations_memory or not isinstance(innovations_memory.content, dict):
+            return []
+        
+        innovations_data = innovations_memory.content.get("innovations", [])
+        if not isinstance(innovations_data, list):
             return []
         
         # Return most recent
