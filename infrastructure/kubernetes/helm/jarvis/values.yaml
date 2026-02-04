@@ -1,0 +1,82 @@
+# Default values for JARVIS Helm chart
+
+replicaCount:
+  api: 3
+  web: 2
+
+image:
+  api:
+    repository: jarvis-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  web:
+    repository: jarvis-web
+    tag: latest
+    pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  api:
+    port: 8000
+  web:
+    port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: jarvis.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: api
+        - path: /
+          pathType: Prefix
+          service: web
+  tls:
+    - secretName: jarvis-tls
+      hosts:
+        - jarvis.example.com
+
+resources:
+  api:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  web:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+postgres:
+  enabled: true
+  image: postgres:15-alpine
+  storage: 10Gi
+  database: jarvis
+
+redis:
+  enabled: true
+  image: redis:7-alpine
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+secrets:
+  secretKey: ""
+  openaiApiKey: ""
+  databaseUrl: ""
+
+configMap:
+  redisUrl: "redis://redis:6379/0"
+  logLevel: "INFO"

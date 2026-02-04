@@ -1,0 +1,14 @@
+apiVersion: v2
+name: jarvis
+description: JARVIS AI Cognitive Assistant Helm Chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ai
+  - cognitive-assistant
+  - multi-agent
+home: https://github.com/lamiaakter14/jarvis
+maintainers:
+  - name: Lamia Akter
+    email: lamiaakter14@github.com
