@@ -55,29 +55,31 @@ The Jarvis system consists of five specialized agents:
 
 ```
 jarvis/
-├── agents/              # Agent implementations
-│   ├── strategist.py
-│   ├── mentor.py
-│   ├── executor.py
-│   ├── innovator.py
-│   └── amplifier.py
-├── core/                # Core system components
-│   ├── cognitive_loop.py
-│   └── memory_manager.py
+├── src/                 # Clean Architecture implementation
+│   ├── domain/          # Business logic and entities
+│   ├── application/     # Use cases and DTOs
+│   ├── infrastructure/  # External implementations
+│   │   ├── agents/      # Agent implementations
+│   │   ├── persistence/ # Data storage
+│   │   └── ai/          # AI service integrations
+│   ├── presentation/    # User interfaces
+│   │   ├── api/         # REST API (FastAPI)
+│   │   └── cli/         # Command-line interface
+│   └── bridge/          # Backward compatibility layer
+├── tests/               # Test suite
+│   ├── unit/            # Unit tests
+│   ├── integration/     # Integration tests
+│   └── e2e/             # End-to-end tests
 ├── memory/              # Memory and knowledge storage
 │   ├── working/         # Working memory for active tasks
-│   │   ├── daily_context.json
-│   │   ├── gaps.json
-│   │   └── reflections.json
 │   ├── knowledge/       # Long-term knowledge base
-│   │   └── learning_roadmap.md
 │   ├── innovator/       # Innovation tracking
 │   ├── amplifier/       # Performance metrics
 │   └── strategic/       # Strategic planning
-├── tools/               # Analysis and automation tools
-│   └── analyze_logs.py
-├── scripts/             # Utility scripts
-├── generate_quarterly_review.py  # Quarterly review automation
+├── docs/                # Documentation
+├── .github/             # GitHub workflows and configurations
+├── Dockerfile           # Docker containerization
+├── docker-compose.yml   # Docker orchestration
 └── requirements.txt     # Python dependencies
 ```
 
@@ -117,37 +119,29 @@ jarvis/
 
 ### Using the CLI (Recommended)
 
-The new CLI provides a user-friendly interface with rich formatting:
+The CLI provides a user-friendly interface with rich formatting:
 
 ```bash
 # Display help
-python src/presentation/cli/main.py --help
+python -m src.presentation.cli.main --help
 
 # Run complete cognitive loop
-python src/presentation/cli/main.py run
+python -m src.presentation.cli.main run
 
 # Generate today's plan
-python src/presentation/cli/main.py plan
+python -m src.presentation.cli.main plan
 
 # Identify knowledge gaps
-python src/presentation/cli/main.py gaps
+python -m src.presentation.cli.main gaps
 
 # Generate innovations
-python src/presentation/cli/main.py innovate
+python -m src.presentation.cli.main innovate
 
 # View performance metrics
-python src/presentation/cli/main.py performance
+python -m src.presentation.cli.main performance
 
 # Show version info
-python src/presentation/cli/main.py version
-```
-
-### Using the Legacy Script
-
-For backward compatibility, the original script still works:
-
-```bash
-python scripts/test_cognitive_loop.py
+python -m src.presentation.cli.main version
 ```
 
 ### Using the REST API
@@ -156,7 +150,7 @@ Start the FastAPI server:
 
 ```bash
 # Start the server
-python src/presentation/api/main.py
+python -m src.presentation.api.main
 
 # Or use uvicorn directly
 uvicorn src.presentation.api.main:app --reload --host 0.0.0.0 --port 8000
@@ -212,39 +206,18 @@ Track your progress using the JSON templates in `memory/working/`:
 
 ### Analysis Tools
 
-#### Log Analysis
-Analyze your progress and identify patterns:
+#### Performance Analysis
+Analyze your progress and identify patterns using the CLI:
 
 ```bash
-python tools/analyze_logs.py
+python -m src.presentation.cli.main performance
 ```
 
-This generates insights on:
-- Frequently encountered gaps
-- Most common lessons learned
-- Task execution trends
-- Productivity patterns
-- Challenge analysis
-
-#### Quarterly Reviews
-Generate automated quarterly reviews:
-
-```bash
-# Generate review for current quarter
-python generate_quarterly_review.py
-
-# Generate review for specific quarter
-python generate_quarterly_review.py --quarter Q1
-
-# Save to custom file
-python generate_quarterly_review.py --quarter Q2 --output my_review.json
-```
-
-Quarterly reviews include:
-- Tasks summary
-- Lessons learned
-- Unresolved gaps
-- Next quarter recommendations
+This provides insights on:
+- Productivity score
+- Task completion rates
+- Optimization suggestions
+- Performance trends
 
 ## Contributing
 

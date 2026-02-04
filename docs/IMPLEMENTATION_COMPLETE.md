@@ -114,13 +114,6 @@ INFO: Uvicorn running on http://0.0.0.0:8000
 # API docs at http://localhost:8000/docs
 ```
 
-**Option 3: Legacy Script** (Backward Compatible)
-```bash
-$ python scripts/test_cognitive_loop.py
-✓ Using new Clean Architecture through bridge layer
-✓ All 5 agents executed successfully
-```
-
 ### ✅ Docker Deployment
 ```bash
 $ docker-compose up jarvis-api
