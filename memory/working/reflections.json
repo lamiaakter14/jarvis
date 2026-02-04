@@ -1,0 +1,131 @@
+{
+  "daily_reflections": [
+    {
+      "id": "reflection-001",
+      "date": "2024-01-01",
+      "day_number": 1,
+      "quarter": "Q1",
+      "tasks_completed": [
+        {
+          "task_id": "task-001",
+          "title": "Example: Set up project repository",
+          "status": "completed",
+          "time_spent_hours": 2,
+          "difficulty": "easy",
+          "notes": "Initial project setup went smoothly"
+        }
+      ],
+      "tasks_in_progress": [
+        {
+          "task_id": "task-002",
+          "title": "Example: Configure development environment",
+          "status": "in_progress",
+          "progress_percentage": 50,
+          "blockers": []
+        }
+      ],
+      "lessons_learned": [
+        "Document all setup steps for reproducibility",
+        "Version control from day one is essential"
+      ],
+      "challenges_faced": [
+        {
+          "challenge": "Example: Dependency conflicts",
+          "resolution": "Used virtual environment to isolate dependencies",
+          "time_lost_hours": 0.5
+        }
+      ],
+      "wins": [
+        "Successfully initialized repository",
+        "Clear project structure established"
+      ],
+      "areas_for_improvement": [
+        "Better time estimation for tasks",
+        "More frequent commits"
+      ],
+      "energy_level": 8,
+      "focus_quality": 9,
+      "productivity_score": 8,
+      "notes": "Good start to the project. Feeling motivated and clear about goals.",
+      "next_day_priorities": [
+        "Complete development environment setup",
+        "Create initial project documentation"
+      ]
+    }
+  ],
+  "weekly_summaries": [
+    {
+      "week_number": 1,
+      "start_date": "2024-01-01",
+      "end_date": "2024-01-07",
+      "quarter": "Q1",
+      "total_tasks_completed": 7,
+      "total_hours_worked": 35,
+      "average_productivity_score": 8,
+      "key_achievements": [
+        "Project foundation established",
+        "Development environment configured"
+      ],
+      "key_challenges": [
+        "Learning new tools and frameworks"
+      ],
+      "weekly_lessons": [
+        "Planning ahead saves time",
+        "Documentation is crucial"
+      ],
+      "next_week_focus": [
+        "Core functionality implementation",
+        "Testing framework setup"
+      ]
+    }
+  ],
+  "monthly_summaries": [
+    {
+      "month": 1,
+      "quarter": "Q1",
+      "start_date": "2024-01-01",
+      "end_date": "2024-01-31",
+      "total_tasks_completed": 30,
+      "total_hours_worked": 160,
+      "average_productivity_score": 8.5,
+      "major_milestones": [
+        "Project setup completed",
+        "Core architecture designed"
+      ],
+      "skills_developed": [
+        "FastAPI development",
+        "Memory system design"
+      ],
+      "knowledge_gaps_identified": [
+        "Advanced async patterns",
+        "Performance optimization"
+      ],
+      "next_month_goals": [
+        "Implement core agents",
+        "Build testing infrastructure"
+      ]
+    }
+  ],
+  "quarterly_summaries": [
+    {
+      "quarter": "Q1",
+      "generated_at": "2026-02-04T11:49:46.960981",
+      "total_tasks_completed": 1,
+      "total_hours_worked": 2,
+      "total_lessons_learned": 2,
+      "unresolved_gaps": 1,
+      "next_quarter_focus": [
+        "Address critical knowledge gaps",
+        "Implement process improvements",
+        "Continue successful patterns",
+        "Develop new skills"
+      ]
+    }
+  ],
+  "metadata": {
+    "last_updated": "2024-01-01T00:00:00Z",
+    "total_reflections": 1,
+    "current_streak_days": 1,
+    "longest_streak_days": 1
+  }
+}
