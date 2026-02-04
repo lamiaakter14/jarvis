@@ -17,7 +17,6 @@ from src.bridge.agent_bridge import (
     InnovatorBridge,
     AmplifierBridge
 )
-from core.memory_manager import MemoryManager
 
 # Create FastAPI app
 app = FastAPI(
@@ -34,9 +33,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Initialize components (would normally use DI container)
-memory_manager = MemoryManager()
 
 
 @app.get("/")
@@ -68,11 +64,11 @@ async def run_cognitive_loop() -> Dict[str, Any]:
     """
     try:
         # Initialize agents
-        strategist = StrategistBridge(memory_manager)
-        mentor = MentorBridge(memory_manager)
-        executor = ExecutorBridge(memory_manager)
-        innovator = InnovatorBridge(memory_manager)
-        amplifier = AmplifierBridge(memory_manager)
+        strategist = StrategistBridge()
+        mentor = MentorBridge()
+        executor = ExecutorBridge()
+        innovator = InnovatorBridge()
+        amplifier = AmplifierBridge()
         
         # Execute each agent
         plan = strategist.generate_plan()
@@ -119,7 +115,7 @@ async def get_daily_plan() -> Dict[str, Any]:
         Daily plan with tasks
     """
     try:
-        strategist = StrategistBridge(memory_manager)
+        strategist = StrategistBridge()
         plan = strategist.generate_plan()
         return {
             "status": "success",
@@ -137,7 +133,7 @@ async def get_knowledge_gaps() -> Dict[str, Any]:
         List of knowledge gaps
     """
     try:
-        mentor = MentorBridge(memory_manager)
+        mentor = MentorBridge()
         gaps = mentor.analyze_execution_logs()
         return {
             "status": "success",
@@ -155,7 +151,7 @@ async def get_innovations() -> Dict[str, Any]:
         List of innovations
     """
     try:
-        innovator = InnovatorBridge(memory_manager)
+        innovator = InnovatorBridge()
         innovations = innovator.create_innovations()
         return {
             "status": "success",
@@ -173,7 +169,7 @@ async def get_performance_metrics() -> Dict[str, Any]:
         Performance metrics
     """
     try:
-        amplifier = AmplifierBridge(memory_manager)
+        amplifier = AmplifierBridge()
         performance = amplifier.amplify()
         return {
             "status": "success",

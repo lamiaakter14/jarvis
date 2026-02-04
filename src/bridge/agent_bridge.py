@@ -9,15 +9,13 @@ import asyncio
 from typing import Dict, Any
 from datetime import date, datetime
 
-from core.memory_manager import MemoryManager
-
 
 class BridgeAgentWrapper:
     """Base wrapper for agents to provide old-style interface."""
     
-    def __init__(self, memory_manager: MemoryManager):
-        """Initialize wrapper with memory manager."""
-        self.memory_manager = memory_manager
+    def __init__(self):
+        """Initialize wrapper."""
+        pass
 
 
 class StrategistBridge(BridgeAgentWrapper):
