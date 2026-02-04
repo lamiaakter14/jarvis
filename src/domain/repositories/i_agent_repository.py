@@ -26,7 +26,7 @@ class IAgentRepository(ABC):
             Agent instance if found, None otherwise
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass
     
@@ -38,7 +38,7 @@ class IAgentRepository(ABC):
             List of all Agent instances
             
         Raises:
-            RepositoryException: If list operation fails
+            RepositoryError: If list operation fails
         """
         pass
     
@@ -53,6 +53,6 @@ class IAgentRepository(ABC):
             Agent instance of the specified type if found, None otherwise
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass

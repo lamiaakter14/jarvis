@@ -26,7 +26,7 @@ class IMemoryRepository(ABC):
             Memory instance if found, None otherwise
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass
     
@@ -38,8 +38,8 @@ class IMemoryRepository(ABC):
             memory: Memory instance to save
             
         Raises:
-            RepositoryException: If save operation fails
-            ValidationException: If memory data is invalid
+            RepositoryError: If save operation fails
+            ValidationError: If memory data is invalid
         """
         pass
     
@@ -54,7 +54,7 @@ class IMemoryRepository(ABC):
             List of Memory instances matching the type
             
         Raises:
-            RepositoryException: If list operation fails
+            RepositoryError: If list operation fails
         """
         pass
     
@@ -66,7 +66,7 @@ class IMemoryRepository(ABC):
             key: Unique key identifying the memory to delete
             
         Raises:
-            RepositoryException: If delete operation fails
-            NotFoundException: If memory with key does not exist
+            RepositoryError: If delete operation fails
+            EntityNotFoundError: If memory with key does not exist
         """
         pass

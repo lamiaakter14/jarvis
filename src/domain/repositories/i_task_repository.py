@@ -26,7 +26,7 @@ class ITaskRepository(ABC):
             Task instance if found, None otherwise
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass
     
@@ -38,8 +38,8 @@ class ITaskRepository(ABC):
             task: Task instance to save
             
         Raises:
-            RepositoryException: If save operation fails
-            ValidationException: If task data is invalid
+            RepositoryError: If save operation fails
+            ValidationError: If task data is invalid
         """
         pass
     
@@ -55,7 +55,7 @@ class ITaskRepository(ABC):
             List of Task instances matching the filters
             
         Raises:
-            RepositoryException: If list operation fails
+            RepositoryError: If list operation fails
         """
         pass
     
@@ -67,8 +67,8 @@ class ITaskRepository(ABC):
             task_id: Unique identifier for the task to delete
             
         Raises:
-            RepositoryException: If delete operation fails
-            NotFoundException: If task with ID does not exist
+            RepositoryError: If delete operation fails
+            EntityNotFoundError: If task with ID does not exist
         """
         pass
     
@@ -83,6 +83,6 @@ class ITaskRepository(ABC):
             List of Task instances with the specified status
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass

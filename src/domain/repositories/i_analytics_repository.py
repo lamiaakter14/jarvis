@@ -23,8 +23,8 @@ class IAnalyticsRepository(ABC):
                      success, timestamp, etc.
             
         Raises:
-            RepositoryException: If save operation fails
-            ValidationException: If metrics data is invalid
+            RepositoryError: If save operation fails
+            ValidationError: If metrics data is invalid
         """
         pass
     
@@ -46,7 +46,7 @@ class IAnalyticsRepository(ABC):
             average_execution_time, agent_performance, etc.
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass
     
@@ -60,7 +60,7 @@ class IAnalyticsRepository(ABC):
             identified_date, etc.
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass
     
@@ -74,6 +74,6 @@ class IAnalyticsRepository(ABC):
             implementation_date, etc.
             
         Raises:
-            RepositoryException: If retrieval operation fails
+            RepositoryError: If retrieval operation fails
         """
         pass
