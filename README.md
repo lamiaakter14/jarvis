@@ -29,10 +29,18 @@ jarvis/
 │   └── memory_manager.py
 ├── memory/              # Memory and knowledge storage
 │   ├── working/         # Working memory for active tasks
+│   │   ├── daily_context.json
+│   │   ├── gaps.json
+│   │   └── reflections.json
 │   ├── knowledge/       # Long-term knowledge base
+│   │   └── learning_roadmap.md
 │   ├── innovator/       # Innovation tracking
-│   └── amplifier/       # Performance metrics
+│   ├── amplifier/       # Performance metrics
+│   └── strategic/       # Strategic planning
+├── tools/               # Analysis and automation tools
+│   └── analyze_logs.py
 ├── scripts/             # Utility scripts
+├── generate_quarterly_review.py  # Quarterly review automation
 └── requirements.txt     # Python dependencies
 ```
 
@@ -93,6 +101,61 @@ The Jarvis memory system maintains:
 - **Working Memory**: Active tasks and daily context
 - **Knowledge Base**: Long-term learning, roadmaps, and reflections
 - **Agent-Specific Memory**: Innovations and performance metrics
+
+## 📅 Roadmap and Progress Tracking
+
+JARVIS includes a comprehensive 2-year daily actionable roadmap and supporting tools for tracking progress:
+
+### Learning Roadmap
+
+The detailed roadmap is available at `memory/knowledge/learning_roadmap.md` and includes:
+- Day-by-day tasks for 2 years (730 days)
+- Quarterly milestones and objectives
+- Daily routine templates
+- Success metrics and tracking
+
+### Daily Task Tracking
+
+Track your progress using the JSON templates in `memory/working/`:
+- **`daily_context.json`**: Current tasks and priorities
+- **`gaps.json`**: Knowledge gaps (unresolved and resolved)
+- **`reflections.json`**: Daily reflections, lessons learned, and productivity metrics
+
+### Analysis Tools
+
+#### Log Analysis
+Analyze your progress and identify patterns:
+
+```bash
+python tools/analyze_logs.py
+```
+
+This generates insights on:
+- Frequently encountered gaps
+- Most common lessons learned
+- Task execution trends
+- Productivity patterns
+- Challenge analysis
+
+#### Quarterly Reviews
+Generate automated quarterly reviews:
+
+```bash
+# Generate review for current quarter
+python generate_quarterly_review.py
+
+# Generate review for specific quarter
+python generate_quarterly_review.py --quarter Q1
+
+# Save to custom file
+python generate_quarterly_review.py --quarter Q2 --output my_review.json
+```
+
+Quarterly reviews include:
+- Tasks summary
+- Lessons learned
+- Unresolved gaps
+- Next quarter recommendations
 
 ## Contributing
 
