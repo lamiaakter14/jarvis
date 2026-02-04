@@ -10,18 +10,21 @@ from typing import Any, Dict
 class MemoryManager:
     def __init__(self, memory_dir: str = "memory"):
         """
-        Initialize the Memory Manager to handle both working and knowledge memory.
+        Initialize the Memory Manager to handle working, knowledge, and strategic memory.
         Args:
             memory_dir (str): The root directory for memory storage.
         """
         self.memory_dir = Path(memory_dir)
         self.working_memory_path = self.memory_dir / "working"
         self.knowledge_memory_path = self.memory_dir / "knowledge"
+        self.strategic_memory_path = self.memory_dir / "strategic"
 
         # Ensure directories exist
         self.working_memory_path.mkdir(parents=True, exist_ok=True)
         self.knowledge_memory_path.mkdir(parents=True, exist_ok=True)
+        self.strategic_memory_path.mkdir(parents=True, exist_ok=True)
         (self.working_memory_path / "execution_logs").mkdir(parents=True, exist_ok=True)
+        (self.strategic_memory_path / "architecture_decision_records").mkdir(parents=True, exist_ok=True)
 
     # ---------------- Working Memory Operations ------------------
 
@@ -119,3 +122,51 @@ class MemoryManager:
 
         # Save updated file
         self.save_knowledge(file_name, {"unresolved_gaps": yaml_metadata, "body": body})
+
+    # ---------------- Strategic Memory Operations ------------------
+
+    def get_strategic_file(self, file_name: str) -> str:
+        """
+        Retrieve content from a strategic memory file (Markdown).
+
+        Args:
+            file_name (str): Filename within the strategic memory directory 
+                           (e.g., 'long_term_goal.md', 'milestones.md').
+
+        Returns:
+            str: Content of the strategic file.
+        """
+        file_path = self.strategic_memory_path / file_name
+        if file_path.exists():
+            with open(file_path, "r") as file:
+                return file.read()
+        return ""  # Return empty string if file does not exist
+
+    def get_adr(self, adr_number: str) -> str:
+        """
+        Retrieve an Architecture Decision Record.
+
+        Args:
+            adr_number (str): ADR number (e.g., '001', '002').
+
+        Returns:
+            str: Content of the ADR file.
+        """
+        # ADR files follow naming pattern: {number}-{title}.md
+        adr_dir = self.strategic_memory_path / "architecture_decision_records"
+        for adr_file in adr_dir.glob(f"{adr_number}-*.md"):
+            with open(adr_file, "r") as file:
+                return file.read()
+        return ""  # Return empty string if ADR not found
+
+    def list_adrs(self) -> list:
+        """
+        List all Architecture Decision Records.
+
+        Returns:
+            list: List of ADR filenames.
+        """
+        adr_dir = self.strategic_memory_path / "architecture_decision_records"
+        if adr_dir.exists():
+            return sorted([f.name for f in adr_dir.glob("*.md")])
+        return []
