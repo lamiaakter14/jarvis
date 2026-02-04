@@ -46,7 +46,8 @@ jobs:
       
       - name: Check dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -e .
+          pip freeze > requirements.txt
           safety check --json || true
 
   trivy:
