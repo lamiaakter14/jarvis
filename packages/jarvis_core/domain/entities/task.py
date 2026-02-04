@@ -113,7 +113,6 @@ class Task:
     
     def is_high_priority(self) -> bool:
         """Check if task has high or critical priority."""
-        from jarvis_core.domain.value_objects.priority import Priority
         return self.priority in (Priority.HIGH, Priority.CRITICAL)
     
     def is_high_roi(self) -> bool:
@@ -129,8 +128,6 @@ class Task:
         Returns:
             Task score (0.0 to 1.0)
         """
-        from jarvis_core.domain.value_objects.priority import Priority
-        
         # Map priority to weight
         priority_weights = {
             Priority.LOW: 0.25,

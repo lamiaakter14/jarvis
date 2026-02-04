@@ -192,13 +192,14 @@ class Plan:
     
     def sort_tasks_by_priority(self) -> None:
         """Sort tasks by priority (highest first)."""
+        from jarvis_core.domain.value_objects.priority import Priority
+        
         priority_order = {
             Priority.CRITICAL: 4,
             Priority.HIGH: 3,
             Priority.MEDIUM: 2,
             Priority.LOW: 1
         }
-        from jarvis_core.domain.value_objects.priority import Priority
         self.tasks.sort(key=lambda t: priority_order.get(t.priority, 0), reverse=True)
     
     def sort_tasks_by_score(self) -> None:
