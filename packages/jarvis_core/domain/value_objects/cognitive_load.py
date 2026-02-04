@@ -13,6 +13,16 @@ class CognitiveLoad(str, Enum):
     MEDIUM = "medium"
     HIGH = "high"
     
+    @property
+    def estimated_hours(self) -> float:
+        """Get default estimated hours for this cognitive load level."""
+        hours_map = {
+            CognitiveLoad.LOW: 1.0,
+            CognitiveLoad.MEDIUM: 2.0,
+            CognitiveLoad.HIGH: 3.0
+        }
+        return hours_map[self]
+    
     def __lt__(self, other):
         """Compare cognitive loads by order."""
         if not isinstance(other, CognitiveLoad):

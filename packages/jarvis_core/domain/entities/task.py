@@ -113,7 +113,8 @@ class Task:
     
     def is_high_priority(self) -> bool:
         """Check if task has high or critical priority."""
-        return self.priority >= Priority.high()
+        from jarvis_core.domain.value_objects.priority import Priority
+        return self.priority in (Priority.HIGH, Priority.CRITICAL)
     
     def is_high_roi(self) -> bool:
         """Check if task has high ROI."""
@@ -128,10 +129,21 @@ class Task:
         Returns:
             Task score (0.0 to 1.0)
         """
+        from jarvis_core.domain.value_objects.priority import Priority
+        
+        # Map priority to weight
+        priority_weights = {
+            Priority.LOW: 0.25,
+            Priority.MEDIUM: 0.50,
+            Priority.HIGH: 0.75,
+            Priority.CRITICAL: 1.0
+        }
+        priority_weight = priority_weights.get(self.priority, 0.5)
+        
         # Weight: Priority 40%, ROI 40%, Efficiency 20%
         efficiency = 1.0 - min(self.cognitive_load.estimated_hours / 8.0, 1.0)
         score = (
-            self.priority.weight * 0.4 +
+            priority_weight * 0.4 +
             self.roi.value * 0.4 +
             efficiency * 0.2
         )
@@ -146,7 +158,46 @@ class Task:
         Returns:
             True if task fits, False otherwise
         """
-        return self.cognitive_load.can_fit_in_schedule(available_hours)
+        return self.cognitive_load.estimated_hours <= available_hours
+    
+    def get_estimated_hours(self) -> float:
+        """Get estimated hours for this task.
+        
+        Returns:
+            Estimated hours based on cognitive load
+        """
+        return self.cognitive_load.estimated_hours
+    
+    def to_dict(self) -> dict:
+        """Convert task to dictionary.
+        
+        Returns:
+            Dictionary representation of the task
+        """
+        return {
+            "task_id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "priority": self.priority.value,
+            "cognitive_load": self.cognitive_load.value,
+            "roi": self.roi.value,
+            "status": self.status.value if hasattr(self.status, 'value') else self.status,
+            "agent_type": self.agent_type.value if self.agent_type else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "result": self.result,
+        }
+    
+    def __eq__(self, other) -> bool:
+        """Check equality based on task_id only."""
+        if not isinstance(other, Task):
+            return False
+        return self.task_id == other.task_id
+    
+    def __hash__(self) -> int:
+        """Hash based on task_id."""
+        return hash(self.task_id)
     
     def __str__(self) -> str:
         """String representation of the task."""

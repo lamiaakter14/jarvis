@@ -95,6 +95,17 @@ class Plan:
         """
         return [task for task in self.tasks if task.is_high_priority()]
     
+    def get_tasks_by_priority(self, priority) -> List[Task]:
+        """Get all tasks with specified priority.
+        
+        Args:
+            priority: Priority level to filter by
+            
+        Returns:
+            List of tasks with the specified priority
+        """
+        return [task for task in self.tasks if task.priority == priority]
+    
     def get_pending_tasks(self) -> List[Task]:
         """Get all pending tasks in the plan.
         
@@ -127,6 +138,14 @@ class Plan:
         """
         return sum(task.cognitive_load.estimated_hours for task in self.tasks)
     
+    def get_total_estimated_hours(self) -> float:
+        """Calculate total estimated hours for all tasks (alias for get_planned_hours).
+        
+        Returns:
+            Total estimated hours
+        """
+        return self.get_planned_hours()
+    
     def get_remaining_hours(self) -> float:
         """Calculate remaining available hours.
         
@@ -134,6 +153,14 @@ class Plan:
             Hours remaining after planned tasks
         """
         return self.total_hours - self.get_planned_hours()
+    
+    def is_overallocated(self) -> bool:
+        """Check if plan is overallocated (exceeds available hours).
+        
+        Returns:
+            True if total task hours > total available hours
+        """
+        return self.get_planned_hours() > self.total_hours
     
     def is_feasible(self) -> bool:
         """Check if plan is feasible within available hours.
@@ -165,7 +192,14 @@ class Plan:
     
     def sort_tasks_by_priority(self) -> None:
         """Sort tasks by priority (highest first)."""
-        self.tasks.sort(key=lambda t: t.priority.weight, reverse=True)
+        priority_order = {
+            Priority.CRITICAL: 4,
+            Priority.HIGH: 3,
+            Priority.MEDIUM: 2,
+            Priority.LOW: 1
+        }
+        from jarvis_core.domain.value_objects.priority import Priority
+        self.tasks.sort(key=lambda t: priority_order.get(t.priority, 0), reverse=True)
     
     def sort_tasks_by_score(self) -> None:
         """Sort tasks by calculated score (highest first)."""
@@ -182,6 +216,34 @@ class Plan:
     def archive(self) -> None:
         """Archive the plan."""
         self.status = "archived"
+    
+    def to_dict(self) -> dict:
+        """Convert plan to dictionary.
+        
+        Returns:
+            Dictionary representation of the plan
+        """
+        return {
+            "plan_id": self.plan_id,
+            "date": self.date.isoformat(),
+            "tasks": [
+                {
+                    "task_id": task.task_id,
+                    "title": task.title,
+                    "description": task.description,
+                    "priority": task.priority.value,
+                    "cognitive_load": task.cognitive_load.value,
+                    "roi": task.roi.value,
+                    "status": task.status.value if hasattr(task.status, 'value') else task.status,
+                    "agent_type": task.agent_type.value if task.agent_type else None,
+                }
+                for task in self.tasks
+            ],
+            "total_hours": self.total_hours,
+            "status": self.status,
+            "created_by": self.created_by,
+            "created_at": self.created_at.isoformat(),
+        }
     
     def __str__(self) -> str:
         """String representation of the plan."""
