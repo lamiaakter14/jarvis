@@ -183,3 +183,9 @@ htmlcov/
 *.db-journal
 memory/tasks.db
 memory/tasks.db-journal
+
+# Runtime directory (generated state)
+runtime/
+!runtime/.gitkeep
+!runtime/**/.gitkeep
+!runtime/README.md
