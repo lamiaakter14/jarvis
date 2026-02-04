@@ -1,0 +1,29 @@
+# Code Owners
+# These owners will be requested for review when someone opens a pull request.
+
+# Global owners
+* @lamiaakter14
+
+# Core packages
+/packages/jarvis_core/ @lamiaakter14
+
+# API
+/apps/api/ @lamiaakter14
+
+# CLI
+/apps/cli/ @lamiaakter14
+
+# Web frontend
+/apps/web/ @lamiaakter14
+
+# Infrastructure
+/infrastructure/ @lamiaakter14
+
+# GitHub workflows
+/.github/ @lamiaakter14
+
+# Documentation
+/docs/ @lamiaakter14
+
+# Tests
+/tests/ @lamiaakter14
