@@ -1,5 +1,86 @@
 # Jarvis - AI-Powered Cognitive Assistant
 
+> Enterprise-grade AI cognitive assistant with Clean Architecture
+
+## 🚀 Quick Start (Local Development)
+
+### One-Command Setup
+
+```bash
+# Clone and setup everything
+git clone https://github.com/lamiaakter14/jarvis.git
+cd jarvis
+./scripts/setup/quick_start.sh
+```
+
+### Manual Setup
+
+```bash
+# 1. Install dependencies
+make install
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# 3. Start infrastructure
+docker-compose up -d postgres redis
+
+# 4. Run migrations
+make db-migrate
+
+# 5. Start applications
+make api     # Terminal 1: API server
+make web     # Terminal 2: Web dashboard
+```
+
+### Access Points
+
+- **API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **Web Dashboard**: http://localhost:3000
+- **CLI**: `make cli ARGS="--help"`
+
+## 📋 Available Commands
+
+```bash
+make help              # Show all commands
+make install           # Install dependencies
+make dev               # Start development environment
+make api               # Start API server
+make web               # Start web dashboard
+make cli               # Run CLI (use ARGS="command")
+make test              # Run tests
+make lint              # Run linters
+make format            # Format code
+make docker-up         # Start Docker services
+make health            # Check service health
+```
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+make test
+
+# Run specific test types
+make test-unit
+make test-integration
+make test-e2e
+
+# Check code quality
+make lint
+make type-check
+```
+
+## 📚 Documentation
+
+- [Quick Start](docs/QUICK_START.md)
+- [Local Testing Guide](docs/LOCAL_TESTING.md)
+- [Architecture Overview](docs/architecture/clean-architecture-overview.md)
+- [API Documentation](http://localhost:8000/docs)
+- [Contributing Guide](CONTRIBUTING.md)
+
 ## Overview
 
 Jarvis is an advanced AI-powered cognitive assistant that leverages a multi-agent architecture to help users with strategic planning, task execution, innovation, and performance optimization. The system implements **Clean Architecture** principles with a cognitive loop that coordinates multiple specialized agents to provide intelligent assistance.
@@ -25,13 +106,16 @@ jarvis/
 ├── memory/                        # ✅ Curated knowledge (version controlled)
 ├── runtime/                       # ❌ Generated state (gitignored)
 ├── tests/                         # Test suite
-└── docs/                          # Documentation
+├── docs/                          # Documentation
+└── scripts/                       # Setup and deployment scripts
 ```
 
 ### Memory vs Runtime
 
 - **memory/** - Curated knowledge committed to git (roadmaps, strategic docs, templates)
 - **runtime/** - Generated state unique to each instance (daily plans, logs, cache)
+
+See [docs/architecture/project-structure.md](docs/architecture/) for detailed structure information.
 
 ## 🎯 Clean Architecture
 
@@ -79,85 +163,6 @@ The Jarvis system consists of five specialized agents:
 3. **EXECUTOR** - Executes tasks and manages the implementation process
 4. **INNOVATOR** - Generates creative solutions and innovative approaches to problems
 5. **AMPLIFIER** - Analyzes performance metrics and optimizes system effectiveness
-
-## 🚀 Quick Start
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/lamiaakter14/jarvis.git
-   cd jarvis
-   ```
-
-2. **Create virtual environment:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install -e .
-   ```
-
-4. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
-
-### Running Applications
-
-#### API
-```bash
-python -m jarvis_api.main
-# Or: uvicorn jarvis_api.main:app --reload
-# Access: http://localhost:8000
-# Docs: http://localhost:8000/docs
-```
-
-#### CLI
-```bash
-python -m jarvis_cli.main --help
-python -m jarvis_cli.main run-loop
-python -m jarvis_cli.main generate-plan
-```
-
-#### Web Dashboard
-```bash
-cd apps/web
-npm install
-npm run dev
-# Access: http://localhost:3000
-```
-
-#### Docker
-```bash
-docker-compose up --build
-```
-
-## 📚 Documentation
-
-- [Quick Start Guide](docs/QUICK_START.md)
-- [Architecture Overview](docs/architecture/clean-architecture-overview.md)
-- [API Documentation](http://localhost:8000/docs) (when running)
-- [Implementation Details](docs/IMPLEMENTATION_COMPLETE.md)
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=jarvis_core --cov-report=html
-
-# Run specific test types
-pytest tests/unit/
-pytest tests/integration/
-pytest tests/e2e/
-```
 
 ## 📦 Project Structure Details
 
