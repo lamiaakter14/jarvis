@@ -29,7 +29,7 @@ class AmplifierAgent(Agent):
             metrics_collector: Metrics collector for performance tracking
         """
         super().__init__(
-            agent_type=AgentType.amplifier(),
+            agent_type=AgentType.AMPLIFIER,
             name="Amplifier Agent",
             description="Analyzes performance and optimizes effectiveness",
         )

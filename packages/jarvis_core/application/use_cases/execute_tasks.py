@@ -61,8 +61,8 @@ class ExecuteTasks:
                 # Execute task
                 result_task = await self._execute_single_task(task)
                 
-                # Save updated task
-                await self.task_repository.save(result_task)
+                # Update task
+                await self.task_repository.update(result_task)
                 
                 # Convert to DTO
                 executed_tasks.append(TaskDTO.from_entity(result_task))
@@ -92,7 +92,7 @@ class ExecuteTasks:
         """
         # Mark task as in progress
         task.mark_in_progress()
-        await self.task_repository.save(task)
+        await self.task_repository.update(task)
         
         try:
             # In a real implementation, this would delegate to agent infrastructure

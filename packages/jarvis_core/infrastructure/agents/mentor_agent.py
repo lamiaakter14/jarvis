@@ -31,7 +31,7 @@ class MentorAgent(Agent):
             memory_repo: Memory repository for accessing execution logs
         """
         super().__init__(
-            agent_type=AgentType.mentor(),
+            agent_type=AgentType.MENTOR,
             name="Mentor Agent",
             description="Provides guidance and identifies knowledge gaps",
         )

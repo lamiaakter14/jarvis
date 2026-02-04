@@ -33,7 +33,7 @@ class InnovatorAgent(Agent):
             memory_repo: Memory repository for storing innovations
         """
         super().__init__(
-            agent_type=AgentType.innovator(),
+            agent_type=AgentType.INNOVATOR,
             name="Innovator Agent",
             description="Generates creative solutions and innovative approaches",
         )

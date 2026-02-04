@@ -1,7 +1,7 @@
 """Analytics Data Transfer Object for application layer."""
 
 from typing import List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class AnalyticsDTO(BaseModel):
@@ -10,6 +10,8 @@ class AnalyticsDTO(BaseModel):
     Provides a serializable representation of analytics data for reporting
     and visualization purposes.
     """
+    
+    model_config = ConfigDict(from_attributes=True)
     
     period: str = Field(..., description="Time period for analytics (e.g., 'daily', 'weekly', 'monthly')")
     total_tasks: int = Field(default=0, ge=0, description="Total number of tasks in period")
@@ -26,30 +28,6 @@ class AnalyticsDTO(BaseModel):
     average_task_duration: float = Field(default=0.0, ge=0.0, description="Average task duration in hours")
     total_hours_spent: float = Field(default=0.0, ge=0.0, description="Total hours spent on tasks")
     utilization_rate: float = Field(default=0.0, ge=0.0, le=1.0, description="Time utilization rate")
-    
-    class Config:
-        """Pydantic configuration."""
-        json_schema_extra = {
-            "example": {
-                "period": "weekly",
-                "total_tasks": 25,
-                "completed_tasks": 20,
-                "average_roi": 0.75,
-                "top_gaps": [
-                    {"type": "knowledge", "description": "Advanced Python", "severity": "high"}
-                ],
-                "recent_innovations": [
-                    {"title": "Automate testing", "impact_score": 0.8}
-                ],
-                "productivity_score": 0.82,
-                "success_rate": 0.8,
-                "failed_tasks": 2,
-                "pending_tasks": 3,
-                "average_task_duration": 2.5,
-                "total_hours_spent": 50.0,
-                "utilization_rate": 0.78
-            }
-        }
     
     def to_dict(self) -> Dict:
         """Convert DTO to dictionary.

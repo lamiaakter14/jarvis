@@ -19,7 +19,7 @@ class Agent(ABC):
     """
     
     agent_id: str = field(default_factory=lambda: generate_id("agent_"))
-    agent_type: AgentType = field(default_factory=AgentType.executor)
+    agent_type: AgentType = field(default_factory=lambda: AgentType.EXECUTOR)
     name: str = ""
     description: str = ""
     
@@ -33,9 +33,9 @@ class Agent(ABC):
     def __post_init__(self):
         """Validate agent after initialization."""
         if not self.name:
-            self.name = f"{self.agent_type.type.value.title()} Agent"
+            self.name = f"{self.agent_type.value.title()} Agent"
         if not self.description:
-            self.description = self.agent_type.description
+            self.description = f"Agent of type {self.agent_type.value}"
     
     @abstractmethod
     async def execute(self, context: Any) -> Any:

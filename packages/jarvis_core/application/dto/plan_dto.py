@@ -2,7 +2,7 @@
 
 from datetime import date as date_type, datetime
 from typing import List, Dict, TYPE_CHECKING
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 if TYPE_CHECKING:
     from jarvis_core.domain.entities.plan import Plan
@@ -16,6 +16,8 @@ class PlanDTO(BaseModel):
     application layer communication with data validation.
     """
     
+    model_config = ConfigDict(from_attributes=True)
+    
     plan_id: str = Field(..., description="Unique identifier for the plan")
     date: date_type = Field(..., description="Date for which the plan is created")
     tasks: List["TaskDTO"] = Field(default_factory=list, description="List of tasks in the plan")
@@ -23,13 +25,6 @@ class PlanDTO(BaseModel):
     status: str = Field(..., description="Plan status (draft, active, completed, archived)")
     created_by: str = Field(default="system", description="Creator of the plan")
     created_at: datetime = Field(..., description="Plan creation timestamp")
-    
-    class Config:
-        """Pydantic configuration."""
-        json_encoders = {
-            date_type: lambda v: v.isoformat(),
-            datetime: lambda v: v.isoformat()
-        }
     
     @classmethod
     def from_entity(cls, plan: "Plan") -> "PlanDTO":

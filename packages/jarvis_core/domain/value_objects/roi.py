@@ -108,6 +108,10 @@ class ROI:
         percentage = self.value * 100
         return f"{percentage:.1f}%"
     
+    def to_percentage(self) -> float:
+        """Convert ROI to percentage (0.75 -> 75.0)."""
+        return self.value * 100.0
+    
     def __lt__(self, other: "ROI") -> bool:
         """Compare ROIs by value."""
         if not isinstance(other, ROI):
