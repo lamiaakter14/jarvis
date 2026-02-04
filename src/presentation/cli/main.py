@@ -19,7 +19,6 @@ from src.bridge.agent_bridge import (
     InnovatorBridge,
     AmplifierBridge
 )
-from core.memory_manager import MemoryManager
 
 # Create CLI app
 app = typer.Typer(
@@ -37,15 +36,12 @@ def run():
     console.print("\n[bold blue]Running JARVIS Cognitive Loop...[/bold blue]\n")
     
     try:
-        # Initialize
-        memory_manager = MemoryManager()
-        
         # Initialize agents
-        strategist = StrategistBridge(memory_manager)
-        mentor = MentorBridge(memory_manager)
-        executor = ExecutorBridge(memory_manager)
-        innovator = InnovatorBridge(memory_manager)
-        amplifier = AmplifierBridge(memory_manager)
+        strategist = StrategistBridge()
+        mentor = MentorBridge()
+        executor = ExecutorBridge()
+        innovator = InnovatorBridge()
+        amplifier = AmplifierBridge()
         
         # Execute cognitive loop
         console.print("[cyan]→ Step 1: Planning with Strategist[/cyan]")
@@ -82,8 +78,7 @@ def plan():
     console.print("\n[bold blue]Generating Daily Plan...[/bold blue]\n")
     
     try:
-        memory_manager = MemoryManager()
-        strategist = StrategistBridge(memory_manager)
+        strategist = StrategistBridge()
         
         plan = strategist.generate_plan()
         
@@ -118,8 +113,7 @@ def gaps():
     console.print("\n[bold blue]Analyzing Knowledge Gaps...[/bold blue]\n")
     
     try:
-        memory_manager = MemoryManager()
-        mentor = MentorBridge(memory_manager)
+        mentor = MentorBridge()
         
         result = mentor.analyze_execution_logs()
         gaps = result.get('updated_gaps', [])
@@ -143,8 +137,7 @@ def innovate():
     console.print("\n[bold blue]Generating Innovations...[/bold blue]\n")
     
     try:
-        memory_manager = MemoryManager()
-        innovator = InnovatorBridge(memory_manager)
+        innovator = InnovatorBridge()
         
         result = innovator.create_innovations()
         innovations = result.get('innovations', [])
@@ -172,8 +165,7 @@ def performance():
     console.print("\n[bold blue]Performance Analysis...[/bold blue]\n")
     
     try:
-        memory_manager = MemoryManager()
-        amplifier = AmplifierBridge(memory_manager)
+        amplifier = AmplifierBridge()
         
         perf = amplifier.amplify()
         

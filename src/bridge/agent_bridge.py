@@ -6,17 +6,15 @@ while we gradually migrate to the new architecture.
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import date, datetime
-
-from core.memory_manager import MemoryManager
 
 
 class BridgeAgentWrapper:
     """Base wrapper for agents to provide old-style interface."""
     
-    def __init__(self, memory_manager: MemoryManager):
-        """Initialize wrapper with memory manager."""
+    def __init__(self, memory_manager: Optional[Any] = None):
+        """Initialize wrapper with optional memory manager for backward compatibility."""
         self.memory_manager = memory_manager
 
 
