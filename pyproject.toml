@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Lamia Akter", email = "lamiaakter14@github.com"}
+    {name = "Lamia Akter", email = "lamiaakter14@users.noreply.github.com"}
 ]
 keywords = ["ai", "cognitive-assistant", "agents", "clean-architecture"]
 classifiers = [
@@ -57,6 +57,7 @@ jarvis-api = "jarvis_api.main:main"
 jarvis-cli = "jarvis_cli.main:app"
 
 [tool.setuptools]
+# Only jarvis_core is packaged - apps are run via -m flag, not installed as packages
 packages = ["jarvis_core"]
 package-dir = {"" = "packages"}
 
@@ -71,7 +72,7 @@ python_functions = ["test_*"]
 addopts = "-v --strict-markers --cov=jarvis_core --cov-report=term-missing"
 
 [tool.black]
-line-length = 100
+line-length = 100  # Extended from default 88 for better readability in complex domain models
 target-version = ['py38', 'py39', 'py310', 'py311']
 include = '\.pyi?$'
 extend-exclude = '''
