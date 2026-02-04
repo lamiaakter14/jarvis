@@ -266,7 +266,7 @@ class InnovationEngine:
         actionable = [
             inn for inn in innovations
             if self.score_innovation(inn) >= min_score and 
-            inn.is_proposed() or inn.is_approved()
+            (inn.is_proposed() or inn.is_approved())
         ]
         
         return self.rank_innovations(actionable)
