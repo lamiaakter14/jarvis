@@ -80,56 +80,9 @@ The Jarvis system consists of five specialized agents:
 4. **INNOVATOR** - Generates creative solutions and innovative approaches to problems
 5. **AMPLIFIER** - Analyzes performance metrics and optimizes system effectiveness
 
-## Project Structure
+## 🚀 Quick Start
 
-```
-jarvis/
-├── src/                 # Clean Architecture implementation
-│   ├── domain/          # Business logic and entities
-│   ├── application/     # Use cases and DTOs
-│   ├── infrastructure/  # External implementations
-│   │   ├── agents/      # Agent implementations
-│   │   ├── persistence/ # Data storage
-│   │   └── ai/          # AI service integrations
-│   ├── presentation/    # User interfaces
-│   │   ├── api/         # REST API (FastAPI)
-│   │   └── cli/         # Command-line interface
-│   └── bridge/          # Backward compatibility layer
-├── frontend/            # React web dashboard
-│   ├── src/             # Frontend source code
-│   │   ├── api/         # API client
-│   │   ├── components/  # React components
-│   │   ├── pages/       # Page components
-│   │   ├── contexts/    # React contexts
-│   │   └── utils/       # Utilities
-│   ├── public/          # Static assets
-│   └── package.json     # Node.js dependencies
-├── tests/               # Test suite
-│   ├── unit/            # Unit tests
-│   ├── integration/     # Integration tests
-│   └── e2e/             # End-to-end tests
-├── memory/              # Memory and knowledge storage
-│   ├── working/         # Working memory for active tasks
-│   ├── knowledge/       # Long-term knowledge base
-│   ├── innovator/       # Innovation tracking
-│   ├── amplifier/       # Performance metrics
-│   └── strategic/       # Strategic planning
-├── docs/                # Documentation
-├── .github/             # GitHub workflows and configurations
-├── Dockerfile           # Docker containerization
-├── docker-compose.yml   # Docker orchestration
-└── requirements.txt     # Python dependencies
-```
-
-## Setup and Installation
-
-### Prerequisites
-
-- Python 3.8 or higher
-- Node.js 16+ (for web dashboard)
-- pip package manager
-
-### Installation Steps
+### Installation
 
 1. **Clone the repository:**
    ```bash
@@ -137,188 +90,127 @@ jarvis/
    cd jarvis
    ```
 
-2. **Create a virtual environment (recommended):**
+2. **Create virtual environment:**
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   source venv/bin/activate  # Windows: venv\Scripts\activate
    ```
 
-3. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Install the package in development mode:**
+3. **Install dependencies:**
    ```bash
    pip install -e .
    ```
 
-5. **Set up environment variables:**
+4. **Configure environment:**
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration (OpenAI API key, etc.)
+   # Edit .env with your API keys
    ```
 
-6. **Create runtime directory (optional - auto-created):**
-   ```bash
-   mkdir -p runtime/{working/execution_logs,metrics,innovations,cache}
-   ```
+### Running Applications
 
-## Running the Project
-
-### Using the Web Dashboard (Recommended) 🎨
-
-The web dashboard provides a modern, visual interface to interact with JARVIS:
-
-**1. Start the Backend API:**
+#### API
 ```bash
-# Option 1: Using Python module
-export PYTHONPATH=/path/to/jarvis/packages:/path/to/jarvis/apps/api:/path/to/jarvis/apps/cli
 python -m jarvis_api.main
-
-# Option 2: Using uvicorn directly  
-cd apps/api
-uvicorn jarvis_api.main:app --reload --host 0.0.0.0 --port 8000
-# Backend runs at http://localhost:8000
+# Or: uvicorn jarvis_api.main:app --reload
+# Access: http://localhost:8000
+# Docs: http://localhost:8000/docs
 ```
 
-**2. Start the Frontend (in a new terminal):**
+#### CLI
+```bash
+python -m jarvis_cli.main --help
+python -m jarvis_cli.main run-loop
+python -m jarvis_cli.main generate-plan
+```
+
+#### Web Dashboard
 ```bash
 cd apps/web
-npm install  # First time only
+npm install
 npm run dev
-# Frontend runs at http://localhost:3000
+# Access: http://localhost:3000
 ```
 
-**3. Open your browser:**
-Visit http://localhost:3000 to access the dashboard.
+#### Docker
+```bash
+docker-compose up --build
+```
 
-**Features:**
-- 📊 Dashboard with stats and system status
-- 🧠 Run cognitive loop with real-time agent status
-- 📅 View and generate daily plans
-- ✅ Manage tasks
-- 🎯 Track knowledge gaps
-- 💡 Browse innovations
-- 📈 Performance analytics with charts
-- 🌙 Dark mode support
-- 📱 Fully responsive design
+## 📚 Documentation
 
-See `apps/web/README.md` for detailed frontend documentation.
+- [Quick Start Guide](docs/QUICK_START.md)
+- [Architecture Overview](docs/architecture/clean-architecture-overview.md)
+- [API Documentation](http://localhost:8000/docs) (when running)
+- [Implementation Details](docs/IMPLEMENTATION_COMPLETE.md)
 
-### Using the CLI
-
-The CLI provides a user-friendly interface with rich formatting:
+## 🧪 Testing
 
 ```bash
-# Set PYTHONPATH
-export PYTHONPATH=/path/to/jarvis/packages:/path/to/jarvis/apps/api:/path/to/jarvis/apps/cli
+# Run all tests
+pytest
 
-# Display help
-python -m jarvis_cli.main --help
+# Run with coverage
+pytest --cov=jarvis_core --cov-report=html
 
-# Run complete cognitive loop
-python -m jarvis_cli.main run
-
-# Generate today's plan
-python -m jarvis_cli.main plan
-
-# Identify knowledge gaps
-python -m jarvis_cli.main gaps
-
-# Generate innovations
-python -m jarvis_cli.main innovate
-
-# View performance metrics
-python -m jarvis_cli.main performance
-
-# Show version info
-python -m jarvis_cli.main version
+# Run specific test types
+pytest tests/unit/
+pytest tests/integration/
+pytest tests/e2e/
 ```
 
-### Using the REST API
+## 📦 Project Structure Details
 
-Start the FastAPI server:
+### Apps vs Packages
 
-```bash
-# Start the server
-python -m jarvis_api.main
+- **apps/**: Application entry points that users interact with
+  - Can be deployed independently
+  - Import from `jarvis_core`
+  
+- **packages/**: Shared business logic
+  - Reusable across all apps
+  - Contains Clean Architecture layers
 
-# Or use uvicorn directly
-uvicorn jarvis_api.main:app --reload --host 0.0.0.0 --port 8000
-```
+### Memory vs Runtime
 
-API endpoints:
-- `GET /` - Root endpoint
-- `GET /health` - Health check
-- `POST /api/cognitive-loop` - Run complete cognitive loop
-- `GET /api/plan/today` - Get today's plan
-- `GET /api/gaps` - Get knowledge gaps
-- `GET /api/innovations` - Get innovations
-- `GET /api/performance` - Get performance metrics
+- **memory/**: Curated knowledge (committed to git)
+  - Templates, roadmaps, strategies
+  - Documentation and plans
+  - Version controlled
+  
+- **runtime/**: Generated state (gitignored)
+  - Daily context and plans
+  - Logs and metrics
+  - Cache and temporary files
+  - Unique per instance
 
-API documentation (Swagger): http://localhost:8000/docs
+## 🔧 Development
 
-### Using Docker (Optional)
+### Adding a New App
 
-```bash
-docker-compose up
-```
+1. Create directory: `apps/my_app/`
+2. Add entry point: `apps/my_app/main.py`
+3. Import from: `jarvis_core.*`
 
-## Configuration
+### Adding a Feature
 
-Configure the system by editing the `.env` file with your specific settings, including API keys and other credentials.
+1. Add domain entity: `packages/jarvis_core/domain/entities/`
+2. Add use case: `packages/jarvis_core/application/use_cases/`
+3. Add infrastructure: `packages/jarvis_core/infrastructure/`
+4. Expose via app: `apps/api/` or `apps/cli/`
 
-## Memory System
+## 🤝 Contributing
 
-The Jarvis memory system maintains:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `pytest`
+5. Submit a pull request
 
-- **Working Memory**: Active tasks and daily context
-- **Knowledge Base**: Long-term learning, roadmaps, and reflections
-- **Agent-Specific Memory**: Innovations and performance metrics
+## 📄 License
 
-## 📅 Roadmap and Progress Tracking
+MIT License
 
-JARVIS includes a comprehensive 2-year daily actionable roadmap and supporting tools for tracking progress:
-
-### Learning Roadmap
-
-The detailed roadmap is available at `memory/knowledge/learning_roadmap.md` and includes:
-- Day-by-day tasks for 2 years (730 days)
-- Quarterly milestones and objectives
-- Daily routine templates
-- Success metrics and tracking
-
-### Daily Task Tracking
-
-Track your progress using the JSON templates in `memory/working/`:
-- **`daily_context.json`**: Current tasks and priorities
-- **`gaps.json`**: Knowledge gaps (unresolved and resolved)
-- **`reflections.json`**: Daily reflections, lessons learned, and productivity metrics
-
-### Analysis Tools
-
-#### Performance Analysis
-Analyze your progress and identify patterns using the CLI:
-
-```bash
-python -m jarvis_cli.main performance
-```
-
-This provides insights on:
-- Productivity score
-- Task completion rates
-- Optimization suggestions
-- Performance trends
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-[Add license information here]
-
-## Contact
+## 📧 Contact
 
 For questions or support, please open an issue on GitHub.
