@@ -33,29 +33,29 @@ cp .env.example .env
 
 ```bash
 # Run complete cognitive loop
-python src/presentation/cli/main.py run
+python -m src.presentation.cli.main run
 
 # Generate today's plan
-python src/presentation/cli/main.py plan
+python -m src.presentation.cli.main plan
 
 # Identify knowledge gaps
-python src/presentation/cli/main.py gaps
+python -m src.presentation.cli.main gaps
 
 # Generate innovations
-python src/presentation/cli/main.py innovate
+python -m src.presentation.cli.main innovate
 
 # View performance metrics
-python src/presentation/cli/main.py performance
+python -m src.presentation.cli.main performance
 
 # Show help
-python src/presentation/cli/main.py --help
+python -m src.presentation.cli.main --help
 ```
 
 ### Option 2: REST API (Recommended for Integration)
 
 ```bash
 # Start the API server
-python src/presentation/api/main.py
+python -m src.presentation.api.main
 
 # API will be available at http://localhost:8000
 # Swagger docs at http://localhost:8000/docs
@@ -81,13 +81,7 @@ curl -X POST http://localhost:8000/api/cognitive-loop
 curl http://localhost:8000/api/plan/today
 ```
 
-### Option 3: Legacy Script (Backward Compatible)
-
-```bash
-python scripts/test_cognitive_loop.py
-```
-
-### Option 4: Docker
+### Option 3: Docker
 
 ```bash
 # Start API server
@@ -206,7 +200,12 @@ jarvis/
 │   ├── domain/          # Core business logic
 │   ├── application/     # Use cases
 │   ├── infrastructure/  # Implementation details
+│   │   ├── agents/      # Agent implementations
+│   │   ├── persistence/ # Data storage
+│   │   └── ai/          # AI service integrations
 │   ├── presentation/    # User interfaces
+│   │   ├── api/         # REST API
+│   │   └── cli/         # Command-line interface
 │   ├── bridge/          # Backward compatibility
 │   └── shared/          # Common utilities
 ├── tests/
@@ -214,22 +213,17 @@ jarvis/
 │   ├── integration/     # Component integration tests
 │   ├── e2e/             # End-to-end tests
 │   └── fixtures/        # Test fixtures
-├── core/                # Legacy code (will be deprecated)
-├── agents/              # Legacy agents (will be deprecated)
 ├── memory/              # Persistent storage
 │   ├── working/         # Active tasks, context
 │   ├── knowledge/       # Long-term knowledge
 │   └── strategic/       # Strategic planning
-├── scripts/             # Utility scripts
 └── docs/                # Documentation
 ```
 
 ## 📚 Additional Documentation
 
-- [Clean Architecture Overview](docs/architecture/clean-architecture-overview.md)
-- [Application Layer Guide](APPLICATION_LAYER_GUIDE.md)
-- [Implementation Summary](IMPLEMENTATION_SUMMARY.md)
-- [Workflow Guide](WORKFLOW.md)
+- [Clean Architecture Overview](architecture/clean-architecture-overview.md)
+- [Implementation Complete](IMPLEMENTATION_COMPLETE.md)
 
 ## 🐛 Troubleshooting
 
