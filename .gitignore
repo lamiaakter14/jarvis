@@ -168,3 +168,7 @@ dmypy.json
 .pyre/
 .pytype/
 cython_debug/
+
+# Generated reports and analysis files
+log_analysis_report.json
+quarterly_review_*.json
