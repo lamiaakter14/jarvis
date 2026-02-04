@@ -172,3 +172,14 @@ cython_debug/
 # Generated reports and analysis files
 log_analysis_report.json
 quarterly_review_*.json
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Database files
+*.db
+*.db-journal
+memory/tasks.db
+memory/tasks.db-journal
