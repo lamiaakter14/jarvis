@@ -5,6 +5,7 @@ openai
 langchain
 python-decouple
 pydantic
+pydantic-settings
 requests
 typer
 tqdm
