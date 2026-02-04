@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import Optional, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from jarvis_core.domain.entities.task import Task
 from jarvis_core.domain.value_objects.priority import Priority
@@ -19,6 +19,8 @@ class TaskDTO(BaseModel):
     application layer communication with data validation.
     """
     
+    model_config = ConfigDict(from_attributes=True)
+    
     task_id: str = Field(..., description="Unique identifier for the task")
     title: str = Field(..., description="Task title")
     description: str = Field(default="", description="Detailed task description")
@@ -26,18 +28,12 @@ class TaskDTO(BaseModel):
     cognitive_load: str = Field(..., description="Cognitive load level")
     roi: float = Field(..., ge=0.0, le=1.0, description="Return on investment score")
     status: str = Field(..., description="Current task status")
-    agent_type: str = Field(..., description="Type of agent assigned to task")
+    agent_type: Optional[str] = Field(None, description="Type of agent assigned to task")
     
-    created_at: datetime = Field(..., description="Task creation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
+    created_at: Optional[datetime] = Field(None, description="Task creation timestamp")
+    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
     completed_at: Optional[datetime] = Field(None, description="Completion timestamp")
     result: Optional[Any] = Field(None, description="Task execution result")
-    
-    class Config:
-        """Pydantic configuration."""
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
     
     @classmethod
     def from_entity(cls, task: Task) -> "TaskDTO":
@@ -53,15 +49,15 @@ class TaskDTO(BaseModel):
             task_id=task.task_id,
             title=task.title,
             description=task.description,
-            priority=str(task.priority),
-            cognitive_load=str(task.cognitive_load),
+            priority=task.priority.value,
+            cognitive_load=task.cognitive_load.value,
             roi=task.roi.value,
-            status=task.status.value,
-            agent_type=str(task.agent_type),
-            created_at=task.created_at,
-            updated_at=task.updated_at,
-            completed_at=task.completed_at,
-            result=task.result,
+            status=task.status.value if hasattr(task.status, 'value') else task.status,
+            agent_type=task.agent_type.value if task.agent_type else None,
+            created_at=task.created_at if hasattr(task, 'created_at') else None,
+            updated_at=task.updated_at if hasattr(task, 'updated_at') else None,
+            completed_at=task.completed_at if hasattr(task, 'completed_at') else None,
+            result=task.result if hasattr(task, 'result') else None,
         )
     
     def to_entity(self) -> Task:
@@ -71,19 +67,22 @@ class TaskDTO(BaseModel):
             Task entity instance
         """
         # Parse priority
-        priority = Priority.from_string(self.priority)
+        priority = Priority(self.priority)
         
         # Parse cognitive load
-        cognitive_load = CognitiveLoad.from_string(self.cognitive_load)
+        cognitive_load = CognitiveLoad(self.cognitive_load)
         
         # Create ROI
         roi = ROI(self.roi)
         
         # Parse agent type
-        agent_type = AgentType.from_string(self.agent_type)
+        agent_type = AgentType(self.agent_type) if self.agent_type else None
         
         # Parse status
-        status = TaskStatus(self.status)
+        try:
+            status = TaskStatus(self.status)
+        except (ValueError, AttributeError):
+            status = self.status
         
         return Task(
             task_id=self.task_id,
