@@ -180,8 +180,8 @@ class IdentifyGaps:
                     
                     # Emit domain event
                     event = GapIdentifiedEvent(
-                        gap_type=gap.get("type", "unknown"),
                         description=gap.get("description", ""),
+                        category=gap.get("type", "unknown"),
                         severity=severity,
                         evidence=gap.get("evidence", [])
                     )
