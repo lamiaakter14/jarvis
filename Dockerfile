@@ -14,8 +14,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy packages (core logic)
 COPY packages/ /app/packages/
 
-# Install jarvis_core package
-RUN pip install -e packages/jarvis_core
+# Copy pyproject.toml for package installation
+COPY pyproject.toml /app/
+
+# Install jarvis package
+RUN pip install -e .
 
 # Copy apps
 COPY apps/ /app/apps/
@@ -32,7 +35,6 @@ RUN mkdir -p /app/runtime/working \
 
 # Copy configuration
 COPY .env.example /app/.env.example
-COPY pyproject.toml /app/
 
 # Set Python path
 ENV PYTHONPATH=/app/packages:/app/apps:$PYTHONPATH
