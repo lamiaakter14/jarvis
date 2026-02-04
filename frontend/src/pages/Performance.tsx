@@ -71,7 +71,11 @@ export const Performance: React.FC = () => {
     ],
   };
 
-  const data = metrics || mockMetrics;
+  // Use mock data if metrics is not available or incomplete
+  const data = (metrics && 
+    metrics.task_completion_trend && 
+    metrics.task_distribution && 
+    metrics.optimization_suggestions) ? metrics : mockMetrics;
 
   return (
     <div className="space-y-6">
