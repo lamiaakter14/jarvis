@@ -304,6 +304,21 @@ class TestValidateMemoryContent:
         assert isinstance(result, ExecutionLogContent)
         assert result.task_id == "task_123"
     
+    def test_validate_adr(self):
+        """Test validating ADR content."""
+        content_dict = {
+            "title": "Test ADR",
+            "date": datetime.now(),
+            "context": "Test context",
+            "decision": "Test decision",
+            "consequences": "Test consequences"
+        }
+        
+        result = validate_memory_content("adr", content_dict)
+        
+        assert isinstance(result, ADRContent)
+        assert result.title == "Test ADR"
+    
     def test_validate_unknown_memory_type(self):
         """Test that unknown memory type raises error."""
         with pytest.raises(ValueError, match="Unknown memory type"):
