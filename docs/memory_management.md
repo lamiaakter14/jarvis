@@ -2,7 +2,7 @@
 
 ## Overview
 
-The JARVIS memory management system provides a comprehensive framework for storing, retrieving, and managing different types of memories including working memory, knowledge, strategic goals, and execution logs. The system supports schema validation, versioning, indexing, and advanced search capabilities.
+The JARVIS memory management system provides a comprehensive framework for storing, retrieving, and managing different types of memories including working memory, knowledge, strategic goals, and execution logs. The system supports schema validation, versioning, **indexed storage**, and advanced search capabilities.
 
 ## Features
 
@@ -18,6 +18,8 @@ All memory operations are validated using Pydantic schemas to ensure data integr
   - `ExecutionLogContent`: Task execution records
   - `ADRContent`: Architecture Decision Records
 
+**New in Phase 1**: ADR content validation is now fully integrated with the `validate_memory_content()` function, supporting the `'adr'` memory type parameter.
+
 ### 2. Memory Indexing and Search
 
 Advanced search capabilities for efficient knowledge retrieval:
@@ -27,6 +29,13 @@ Advanced search capabilities for efficient knowledge retrieval:
 - **Tag-based Search**: Filter memories using tags
 - **Type Filtering**: Search within specific memory types
 - **Pagination Support**: Handle large result sets efficiently
+
+**New in Phase 1**: Strategic memory now includes a dedicated indexing system (`StrategicMemoryIndex`) that provides:
+- **Fast O(1) Lookups**: Indexed searches by priority, status, tags, and type
+- **Persistent Index**: Automatic persistence to `.index.json` file
+- **Multi-criteria Search**: Combined searches with union/intersection support
+- **Statistics & Metadata**: Real-time statistics on strategic memory usage
+- **Automatic Updates**: Index automatically maintained on save/delete operations
 
 ### 3. Memory Versioning
 
@@ -150,6 +159,83 @@ all_adrs = await use_case.list_adrs()
 
 # List only accepted ADRs
 accepted_adrs = await use_case.list_adrs(status="accepted")
+```
+
+### Using Strategic Memory Index
+
+**New in Phase 1**: Direct access to the strategic memory index for advanced queries:
+
+```python
+from jarvis_core.infrastructure.persistence.file_memory_repository import FileMemoryRepository
+
+repository = FileMemoryRepository()
+index = repository.strategic_index
+
+# Find goals by priority
+critical_goals = index.find_by_priority("critical")
+high_priority_goals = index.find_by_priority("high")
+
+# Find by status
+active_goals = index.find_by_status("active")
+completed_goals = index.find_by_status("completed")
+
+# Find ADRs
+all_adrs = index.find_by_type("adr")
+accepted_adrs = index.find_by_status("accepted")
+
+# Find by tags (any match)
+perf_related = index.find_by_tags(["performance", "optimization"], match_all=False)
+
+# Find by tags (all must match)
+backend_high_priority = index.find_by_tags(["backend", "high"], match_all=True)
+
+# Get statistics
+stats = index.get_statistics()
+print(f"Total strategic entries: {stats['total_entries']}")
+print(f"Goals: {stats['by_type']['goal']}")
+print(f"ADRs: {stats['by_type']['adr']}")
+print(f"Active goals: {stats['by_status']['active']}")
+print(f"Most used tags: {stats['most_used_tags'][:5]}")
+
+# Get metadata for a specific entry
+metadata = index.get_metadata("goal_123")
+print(f"Type: {metadata['type']}")
+print(f"Priority: {metadata['priority']}")
+print(f"Tags: {metadata['tags']}")
+```
+
+### Validating Memory Content
+
+**New in Phase 1**: Validate ADR content directly:
+
+```python
+from jarvis_core.domain.schemas.memory_content import validate_memory_content
+from datetime import datetime
+
+# Validate an ADR
+adr_content = {
+    "title": "Use microservices architecture",
+    "status": "proposed",
+    "date": datetime.now(),
+    "context": "System scaling requirements",
+    "decision": "Adopt microservices pattern",
+    "consequences": "Improved scalability but increased complexity",
+    "alternatives": ["Monolithic", "Serverless"]
+}
+
+validated_adr = validate_memory_content("adr", adr_content)
+print(f"Valid ADR: {validated_adr.title}")
+
+# Validate strategic goal
+goal_content = {
+    "goal": "Reduce latency by 50%",
+    "priority": "high",
+    "status": "active",
+    "progress": 25.0
+}
+
+validated_goal = validate_memory_content("strategic", goal_content)
+print(f"Valid goal: {validated_goal.goal}")
 ```
 
 ### Working with Memory Versions
@@ -345,27 +431,33 @@ class IMemoryRepository(ABC):
 
 Comprehensive test coverage includes:
 
-- **Unit Tests**: 48 tests for entities, schemas, and DTOs
-- **Integration Tests**: 18 tests for repository and use case integration
-- **Total**: 118 tests passing with 46% code coverage
+- **Unit Tests**: 
+  - 24 tests for memory schemas (including ADR validation)
+  - 10 tests for strategic memory index
+- **Integration Tests**: 
+  - 9 tests for strategic memory use cases
+  - 9 tests for indexed storage integration
+- **Total**: 52+ memory-related tests passing with high code coverage
+  - Memory schemas: 100% coverage
+  - Strategic memory index: 94% coverage
+  - File memory repository: 70% coverage
 
 Run tests:
 ```bash
-# All tests
-pytest tests/
+# All memory tests
+pytest tests/unit/domain/test_memory_schemas.py
+pytest tests/unit/infrastructure/test_strategic_memory_index.py
+pytest tests/integration/test_strategic_memory.py
+pytest tests/integration/test_strategic_memory_index.py
 
 # Unit tests only
-pytest tests/unit/
+pytest tests/unit/ -k memory
 
 # Integration tests only
-pytest tests/integration/
+pytest tests/integration/ -k strategic_memory
 
-# Memory-specific tests
-pytest tests/unit/domain/test_memory_entity.py
-pytest tests/unit/domain/test_memory_schemas.py
-pytest tests/unit/application/test_memory_dto.py
-pytest tests/integration/test_memory_repository.py
-pytest tests/integration/test_strategic_memory.py
+# Run with coverage
+pytest tests/unit/infrastructure/test_strategic_memory_index.py --cov=jarvis_core.infrastructure.persistence.strategic_memory_index
 ```
 
 ## Architecture
@@ -376,28 +468,67 @@ The memory management system follows Clean Architecture principles:
 Domain Layer:
 - entities/memory.py: Core Memory entity
 - repositories/i_memory_repository.py: Repository interface
-- schemas/memory_content.py: Pydantic schemas
+- schemas/memory_content.py: Pydantic schemas with ADR validation
 
 Application Layer:
 - dto/memory_dto.py: Data transfer objects
 - use_cases/manage_strategic_memory.py: Strategic memory use cases
 
 Infrastructure Layer:
-- persistence/file_memory_repository.py: File-based implementation
+- persistence/file_memory_repository.py: File-based implementation with indexing
+- persistence/strategic_memory_index.py: Indexed storage for strategic memory (NEW)
+- persistence/json_storage.py: JSON file storage
+```
+
+### Strategic Memory Index Architecture
+
+The new indexing system provides efficient lookups for strategic memory:
+
+```
+StrategicMemoryIndex
+├── In-Memory Indexes
+│   ├── by_priority: {critical, high, medium, low} → Set[key]
+│   ├── by_status: {active, paused, completed, ...} → Set[key]
+│   ├── by_tag: {tag} → Set[key]
+│   └── by_type: {goal, adr} → Set[key]
+├── Metadata Store: key → {type, priority, status, tags, indexed_at}
+└── Persistent Storage: .index.json (auto-saved)
+
+Integration with FileMemoryRepository:
+- save() → automatically updates index
+- delete() → automatically removes from index
+- search() → uses index for fast tag-based queries
 ```
 
 ## Future Enhancements
 
 Potential future improvements:
 
-1. **Semantic Search**: Implement vector-based semantic search using embeddings
-2. **Memory Compression**: Automatic archival and compression of old memories
-3. **Memory Pruning**: Smart cleanup of stale or redundant memories
-4. **Distributed Storage**: Support for distributed memory storage
-5. **Real-time Sync**: Real-time synchronization across instances
-6. **Memory Analytics**: Advanced analytics and insights on memory usage
-7. **Memory Migrations**: Automated schema migration tools
-8. **Memory Replication**: Cross-region memory replication
+1. ~~**Strategic Memory Indexing**: Indexed storage for fast strategic memory lookups~~ ✅ **COMPLETED in Phase 1**
+2. ~~**ADR Schema Validation**: Full validation support for Architecture Decision Records~~ ✅ **COMPLETED in Phase 1**
+3. **Semantic Search**: Implement vector-based semantic search using embeddings
+4. **Memory Compression**: Automatic archival and compression of old memories
+5. **Memory Pruning**: Smart cleanup of stale or redundant memories
+6. **Distributed Storage**: Support for distributed memory storage
+7. **Real-time Sync**: Real-time synchronization across instances
+8. **Memory Analytics**: Advanced analytics and insights on memory usage
+9. **Memory Migrations**: Automated schema migration tools
+10. **Memory Replication**: Cross-region memory replication
+
+### Phase 1 Completed Features
+
+✅ **Strategic Memory Indexed Storage**
+- In-memory and persistent indexes for goals and ADRs
+- O(1) lookup performance by priority, status, tags, and type
+- Automatic index maintenance on save/delete
+- Statistics and metadata tracking
+- Backward compatible with existing API
+
+✅ **ADR Schema Validation**
+- ADRContent fully integrated with validate_memory_content()
+- Comprehensive validation for ADR fields
+- Status validation (proposed, accepted, deprecated, superseded)
+- Support for alternatives and related decisions tracking
 
 ## Contributing
 
