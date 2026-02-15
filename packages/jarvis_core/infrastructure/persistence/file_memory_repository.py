@@ -9,6 +9,7 @@ from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.shared.constants import MemoryType
 from jarvis_core.shared.exceptions import RepositoryError, EntityNotFoundError
 from jarvis_core.infrastructure.persistence.json_storage import JsonStorage
+from jarvis_core.infrastructure.persistence.strategic_memory_index import StrategicMemoryIndex
 
 
 class FileMemoryRepository(IMemoryRepository):
@@ -16,6 +17,7 @@ class FileMemoryRepository(IMemoryRepository):
     
     Stores memories as JSON files organized by memory type in the
     file system, maintaining compatibility with the existing memory structure.
+    Includes indexed storage for strategic memory for fast retrieval.
     """
     
     def __init__(self, base_path: str = "memory"):
@@ -25,6 +27,7 @@ class FileMemoryRepository(IMemoryRepository):
             base_path: Base directory for memory storage
         """
         self.storage = JsonStorage(base_path)
+        self.strategic_index = StrategicMemoryIndex(base_path)
         self._ensure_directories()
     
     def _ensure_directories(self) -> None:
@@ -152,6 +155,10 @@ class FileMemoryRepository(IMemoryRepository):
             # Save version history
             await self._save_version(memory)
             
+            # Update strategic memory index if applicable
+            if memory.type == MemoryType.STRATEGIC:
+                self._update_strategic_index(memory)
+            
         except Exception as e:
             raise RepositoryError(f"Failed to save memory '{memory.key}': {e}")
     
@@ -206,15 +213,21 @@ class FileMemoryRepository(IMemoryRepository):
         try:
             # Try to find and delete the memory in all memory type directories
             found = False
+            found_type = None
             for memory_type in MemoryType:
                 file_path = self._get_file_path(memory_type, key)
                 if self.storage.exists(file_path):
                     self.storage.delete(file_path)
                     found = True
+                    found_type = memory_type
                     break
             
             if not found:
                 raise EntityNotFoundError(f"Memory with key '{key}' not found")
+            
+            # Remove from strategic index if applicable
+            if found_type == MemoryType.STRATEGIC:
+                self.strategic_index.remove_entry(key)
         except EntityNotFoundError:
             raise
         except Exception as e:
@@ -248,6 +261,8 @@ class FileMemoryRepository(IMemoryRepository):
     ) -> List[Memory]:
         """Search for memories based on multiple criteria.
         
+        Uses indexed storage for strategic memory searches to improve performance.
+        
         Args:
             memory_type: Filter by memory type
             keywords: Keywords to search for in content
@@ -263,6 +278,20 @@ class FileMemoryRepository(IMemoryRepository):
             RepositoryError: If search operation fails
         """
         try:
+            # Use index for strategic memory when filtering by tags
+            if memory_type == MemoryType.STRATEGIC and tags and not keywords and not key_pattern:
+                # Fast path: use index for tag-based searches
+                matching_keys = self.strategic_index.find_by_tags(tags, match_all=False)
+                memories = []
+                for key in matching_keys:
+                    memory = await self.get(key)
+                    if memory:
+                        memories.append(memory)
+                
+                # Apply pagination
+                return memories[offset:offset + limit]
+            
+            # Standard search path
             # Get all memories to search from
             if memory_type:
                 all_memories = await self.list(memory_type)
@@ -403,3 +432,31 @@ class FileMemoryRepository(IMemoryRepository):
         except Exception as e:
             # Log error but don't fail the save operation
             logging.warning(f"Failed to save memory version: {e}")
+    
+    def _update_strategic_index(self, memory: Memory) -> None:
+        """Update the strategic memory index for a memory.
+        
+        Args:
+            memory: Memory to index
+        """
+        # Determine entry type
+        entry_type = None
+        if memory.has_tag("adr"):
+            entry_type = "adr"
+        elif memory.has_tag("goal") or "goal" in memory.content:
+            entry_type = "goal"
+        
+        # Get priority and status from content
+        priority = memory.content.get("priority")
+        status = memory.content.get("status")
+        tags = memory.get_tags()
+        
+        # Add to index
+        if entry_type:
+            self.strategic_index.add_entry(
+                key=memory.key,
+                entry_type=entry_type,
+                priority=priority,
+                status=status,
+                tags=tags
+            )

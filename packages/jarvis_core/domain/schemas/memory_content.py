@@ -158,7 +158,7 @@ def validate_memory_content(memory_type: str, content: Dict[str, Any]) -> BaseMo
     """Validate memory content against its type-specific schema.
     
     Args:
-        memory_type: Type of memory (working, knowledge, strategic, execution_log)
+        memory_type: Type of memory (working, knowledge, strategic, execution_log, adr)
         content: Content dictionary to validate
         
     Returns:
@@ -172,6 +172,7 @@ def validate_memory_content(memory_type: str, content: Dict[str, Any]) -> BaseMo
         'knowledge': KnowledgeMemoryContent,
         'strategic': StrategicMemoryContent,
         'execution_log': ExecutionLogContent,
+        'adr': ADRContent,
     }
     
     schema_class = schema_map.get(memory_type.lower())
