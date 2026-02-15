@@ -132,7 +132,8 @@ class AgentCoordinator:
                 })
                 
             except Exception as e:
-                task.fail(str(e))
+                task.status = TaskStatus.FAILED
+                task.result = {"error": str(e)}
                 await self.task_repository.save(task)
                 
                 results["failed"] += 1
