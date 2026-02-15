@@ -263,3 +263,32 @@ class CachedMemoryRepository(IMemoryRepository):
         """Clear all cache entries."""
         self._memory_cache.clear()
         self._list_cache.clear()
+    
+    async def get_by_version(self, key: str, version: int) -> Optional[Memory]:
+        """Retrieve a specific version of a memory.
+        
+        Note: Version queries are not cached as they are infrequent.
+        
+        Args:
+            key: Memory key
+            version: Version number to retrieve
+            
+        Returns:
+            Memory instance if found, None otherwise
+        """
+        # Version queries bypass cache
+        return await self._repository.get_by_version(key, version)
+    
+    async def list_versions(self, key: str) -> List[int]:
+        """List all available versions of a memory.
+        
+        Note: Version listing is not cached as it is infrequent.
+        
+        Args:
+            key: Memory key
+            
+        Returns:
+            List of version numbers
+        """
+        # Version listing bypasses cache
+        return await self._repository.list_versions(key)
