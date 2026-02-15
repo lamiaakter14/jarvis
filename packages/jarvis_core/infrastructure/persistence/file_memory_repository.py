@@ -1,7 +1,8 @@
 """File-based memory repository implementation."""
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pathlib import Path
+import json
 
 from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
 from jarvis_core.domain.entities.memory import Memory
@@ -147,6 +148,10 @@ class FileMemoryRepository(IMemoryRepository):
             file_path = self._get_file_path(memory.type, memory.key)
             data = self._memory_to_dict(memory)
             self.storage.save(file_path, data)
+            
+            # Save version history
+            await self._save_version(memory)
+            
         except Exception as e:
             raise RepositoryError(f"Failed to save memory '{memory.key}': {e}")
     
@@ -231,3 +236,168 @@ class FileMemoryRepository(IMemoryRepository):
         """
         all_memories = await self.list(memory_type)
         return [m for m in all_memories if key_pattern in m.key]
+    
+    async def search(
+        self,
+        memory_type: Optional[MemoryType] = None,
+        keywords: Optional[List[str]] = None,
+        key_pattern: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[Memory]:
+        """Search for memories based on multiple criteria.
+        
+        Args:
+            memory_type: Filter by memory type
+            keywords: Keywords to search for in content
+            key_pattern: Pattern to match in keys
+            tags: Tags to filter by
+            limit: Maximum number of results
+            offset: Offset for pagination
+            
+        Returns:
+            List of matching Memory instances
+            
+        Raises:
+            RepositoryError: If search operation fails
+        """
+        try:
+            # Get all memories to search from
+            if memory_type:
+                all_memories = await self.list(memory_type)
+            else:
+                # Get all memories from all types
+                all_memories = []
+                for mem_type in MemoryType:
+                    all_memories.extend(await self.list(mem_type))
+            
+            # Apply filters
+            filtered_memories = all_memories
+            
+            # Filter by key pattern
+            if key_pattern:
+                filtered_memories = [
+                    m for m in filtered_memories 
+                    if key_pattern.lower() in m.key.lower()
+                ]
+            
+            # Filter by keywords in content
+            if keywords:
+                def matches_keywords(memory: Memory) -> bool:
+                    content_str = json.dumps(memory.content).lower()
+                    return any(keyword.lower() in content_str for keyword in keywords)
+                
+                filtered_memories = [
+                    m for m in filtered_memories
+                    if matches_keywords(m)
+                ]
+            
+            # Filter by tags
+            if tags:
+                filtered_memories = [
+                    m for m in filtered_memories
+                    if any(tag in m.get_tags() for tag in tags)
+                ]
+            
+            # Apply pagination
+            paginated_memories = filtered_memories[offset:offset + limit]
+            
+            return paginated_memories
+            
+        except Exception as e:
+            raise RepositoryError(f"Failed to search memories: {e}")
+    
+    async def get_by_version(self, key: str, version: int) -> Optional[Memory]:
+        """Retrieve a specific version of a memory.
+        
+        For file-based storage, we store version history in a subdirectory.
+        
+        Args:
+            key: Memory key
+            version: Version number to retrieve
+            
+        Returns:
+            Memory instance if found, None otherwise
+            
+        Raises:
+            RepositoryError: If retrieval operation fails
+        """
+        try:
+            # Try to find the versioned memory file
+            for memory_type in MemoryType:
+                dir_name = self._get_directory_name(memory_type)
+                safe_key = key.replace("/", "_").replace("\\", "_")
+                version_file = f"{dir_name}/.versions/{safe_key}_v{version}.json"
+                
+                if self.storage.exists(version_file):
+                    data = self.storage.load(version_file)
+                    return self._dict_to_memory(data)
+            
+            return None
+            
+        except Exception as e:
+            raise RepositoryError(f"Failed to get memory version: {e}")
+    
+    async def list_versions(self, key: str) -> List[int]:
+        """List all available versions of a memory.
+        
+        Args:
+            key: Memory key
+            
+        Returns:
+            List of version numbers
+            
+        Raises:
+            RepositoryError: If list operation fails
+        """
+        try:
+            versions = []
+            safe_key = key.replace("/", "_").replace("\\", "_")
+            
+            for memory_type in MemoryType:
+                dir_name = self._get_directory_name(memory_type)
+                version_dir = self.storage.get_full_path(f"{dir_name}/.versions")
+                
+                if not version_dir.exists():
+                    continue
+                
+                # Find all version files for this key
+                for file_path in version_dir.glob(f"{safe_key}_v*.json"):
+                    # Extract version number from filename
+                    filename = file_path.stem  # e.g., "mykey_v1"
+                    version_str = filename.split('_v')[-1]
+                    try:
+                        version_num = int(version_str)
+                        versions.append(version_num)
+                    except ValueError:
+                        continue
+            
+            return sorted(versions)
+            
+        except Exception as e:
+            raise RepositoryError(f"Failed to list memory versions: {e}")
+    
+    async def _save_version(self, memory: Memory) -> None:
+        """Save a versioned copy of the memory.
+        
+        Args:
+            memory: Memory to save version of
+        """
+        try:
+            version = memory.get_version()
+            dir_name = self._get_directory_name(memory.type)
+            safe_key = memory.key.replace("/", "_").replace("\\", "_")
+            
+            # Ensure version directory exists
+            version_dir = f"{dir_name}/.versions"
+            self.storage.ensure_directory(version_dir)
+            
+            # Save versioned copy
+            version_file = f"{version_dir}/{safe_key}_v{version}.json"
+            data = self._memory_to_dict(memory)
+            self.storage.save(version_file, data)
+            
+        except Exception as e:
+            # Log error but don't fail the save operation
+            print(f"Warning: Failed to save memory version: {e}")
