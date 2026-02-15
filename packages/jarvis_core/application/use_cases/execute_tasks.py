@@ -1,13 +1,13 @@
 """Execute Tasks use case."""
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from jarvis_core.application.dto.task_dto import TaskDTO
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
 from jarvis_core.domain.entities.task import Task
 from jarvis_core.domain.events import TaskCompletedEvent
 from jarvis_core.domain.repositories import ITaskRepository
-from jarvis_core.shared.constants import TaskStatus
+from jarvis_core.shared.constants import TaskStatus, TaskPriority
 from jarvis_core.shared.exceptions import DomainException
 
 
@@ -135,3 +135,54 @@ class ExecuteTasks:
             "agent_type": str(task.agent_type),
             "message": f"Task '{task.title}' executed successfully"
         }
+    
+    async def get_tasks_by_status(self, status: TaskStatus) -> List[TaskDTO]:
+        """Retrieve tasks filtered by their current status.
+        
+        Args:
+            status: TaskStatus to filter by (PENDING, IN_PROGRESS, COMPLETED, etc.)
+            
+        Returns:
+            List of TaskDTO matching the specified status
+        """
+        # Get all tasks from repository
+        all_tasks = await self.task_repository.list()
+        
+        # Filter tasks by status
+        filtered_tasks = [task for task in all_tasks if task.status == status]
+        
+        # Convert to DTOs
+        return [TaskDTO.from_entity(task) for task in filtered_tasks]
+    
+    async def get_tasks_by_priority(
+        self, 
+        priority: TaskPriority,
+        status: Optional[TaskStatus] = None
+    ) -> List[TaskDTO]:
+        """Retrieve tasks filtered by priority and optionally by status.
+        
+        Args:
+            priority: TaskPriority to filter by (LOW, MEDIUM, HIGH, CRITICAL)
+            status: Optional TaskStatus to further filter results
+            
+        Returns:
+            List of TaskDTO matching the specified priority and status
+        """
+        # Get all tasks from repository
+        all_tasks = await self.task_repository.list()
+        
+        # Filter tasks by priority
+        filtered_tasks = [
+            task for task in all_tasks 
+            if task.priority.value == priority.value
+        ]
+        
+        # Further filter by status if provided
+        if status is not None:
+            filtered_tasks = [
+                task for task in filtered_tasks 
+                if task.status == status
+            ]
+        
+        # Convert to DTOs
+        return [TaskDTO.from_entity(task) for task in filtered_tasks]
