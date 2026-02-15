@@ -90,14 +90,14 @@ const mockTasks: Task[] = [
   }
 ];
 
-const getPriorityVariant = (priority: string): 'default' | 'success' | 'warning' | 'error' => {
+const getPriorityVariant = (priority: string): 'default' | 'success' | 'warning' | 'error' | 'info' => {
   switch (priority) {
     case 'critical':
       return 'error';
     case 'high':
       return 'warning';
     case 'medium':
-      return 'warning';
+      return 'info';
     case 'low':
     default:
       return 'default';
