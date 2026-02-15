@@ -1,6 +1,5 @@
 """Cached memory repository with LRU caching for performance optimization."""
 
-from functools import lru_cache
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 

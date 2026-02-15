@@ -50,5 +50,5 @@ repos:
         entry: bash -c 'find . -type d -name "__pycache__" -o -name ".pytest_cache" | xargs rm -rf 2>/dev/null || true; find . -type f -name "*.pyc" -o -name "*.pyo" -o -name ".coverage" | xargs rm -f 2>/dev/null || true'
         language: system
         pass_filenames: false
-        always_run: false
+        always_run: true
         stages: [commit]

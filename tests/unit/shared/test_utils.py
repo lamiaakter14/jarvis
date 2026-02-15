@@ -43,7 +43,8 @@ class TestSanitizeFilename:
         assert sanitize_filename('  file.txt  ') == 'file.txt'
         assert sanitize_filename('..file.txt') == 'file.txt'
         assert sanitize_filename('file.txt..') == 'file.txt'
-        # This unusual input leaves internal underscores from dot-space combinations
+        # Edge case: dots surrounded by spaces create underscores that remain
+        # after trimming (since `. .` -> `_._` after space replacement and bracket removal)
         assert sanitize_filename('. . file . .txt') == 'file_._.txt'
     
     def test_windows_reserved_names(self):
