@@ -384,6 +384,8 @@ class FileMemoryRepository(IMemoryRepository):
         Args:
             memory: Memory to save version of
         """
+        import logging
+        
         try:
             version = memory.get_version()
             dir_name = self._get_directory_name(memory.type)
@@ -400,4 +402,4 @@ class FileMemoryRepository(IMemoryRepository):
             
         except Exception as e:
             # Log error but don't fail the save operation
-            print(f"Warning: Failed to save memory version: {e}")
+            logging.warning(f"Failed to save memory version: {e}")

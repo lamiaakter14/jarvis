@@ -8,7 +8,7 @@ from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.shared.constants import MemoryType
 from jarvis_core.shared.exceptions import UseCaseError
 from jarvis_core.domain.schemas.memory_content import StrategicMemoryContent, ADRContent
-from jarvis_core.shared.utils import generate_id
+from jarvis_core.shared.utils import generate_id, current_timestamp
 
 
 class ManageStrategicMemory:
@@ -125,7 +125,7 @@ class ManageStrategicMemory:
             if status:
                 memory.content["status"] = status
             
-            memory.updated_at = datetime.now()
+            memory.updated_at = current_timestamp()
             
             # Increment version
             current_version = memory.get_version()
@@ -202,7 +202,7 @@ class ManageStrategicMemory:
             content_data = {
                 "title": title,
                 "status": status,
-                "date": datetime.now(),
+                "date": current_timestamp(),
                 "context": context,
                 "decision": decision,
                 "consequences": consequences,
