@@ -46,6 +46,11 @@ class ValidationError(ApplicationException):
     pass
 
 
+class UseCaseError(ApplicationException):
+    """Raised when a use case operation fails."""
+    pass
+
+
 class ConfigurationError(InfrastructureException):
     """Raised when configuration is invalid."""
     pass
