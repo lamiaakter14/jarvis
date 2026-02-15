@@ -14,7 +14,8 @@ class Memory:
     """Memory entity representing stored information in the system.
     
     Memories maintain the system's knowledge base, execution history,
-    and strategic context across sessions.
+    and strategic context across sessions. Supports versioning for
+    tracking changes and migration support.
     """
     
     memory_id: str = field(default_factory=lambda: generate_id("mem_"))
@@ -32,17 +33,23 @@ class Memory:
             raise DomainException("Memory key cannot be empty")
         if not isinstance(self.content, dict):
             raise DomainException("Memory content must be a dictionary")
+        
+        # Initialize version in metadata if not present
+        if 'version' not in self.metadata:
+            self.metadata['version'] = 1
     
     def update_content(
         self,
         new_content: Dict[str, Any],
-        merge: bool = False
+        merge: bool = False,
+        increment_version: bool = True
     ) -> None:
         """Update the memory content.
         
         Args:
             new_content: New content to store
             merge: If True, merge with existing content; if False, replace
+            increment_version: If True, increment version number
             
         Raises:
             DomainException: If new_content is not a dictionary
@@ -56,6 +63,11 @@ class Memory:
             self.content = new_content
         
         self.updated_at = current_timestamp()
+        
+        # Increment version if requested
+        if increment_version:
+            current_version = self.metadata.get('version', 1)
+            self.metadata['version'] = current_version + 1
     
     def add_metadata(self, key: str, value: Any) -> None:
         """Add or update a metadata field.
@@ -142,6 +154,66 @@ class Memory:
         """
         return self.get_age_in_days() > max_age_days
     
+    def get_version(self) -> int:
+        """Get the current version of the memory.
+        
+        Returns:
+            Current version number
+        """
+        return self.metadata.get('version', 1)
+    
+    def set_version(self, version: int) -> None:
+        """Set the version of the memory.
+        
+        Args:
+            version: Version number to set
+            
+        Raises:
+            DomainException: If version is invalid
+        """
+        if version < 1:
+            raise DomainException("Version must be at least 1")
+        
+        self.metadata['version'] = version
+        self.updated_at = current_timestamp()
+    
+    def add_tags(self, tags: list[str]) -> None:
+        """Add tags to memory for indexing and search.
+        
+        Args:
+            tags: List of tags to add
+        """
+        if 'tags' not in self.metadata:
+            self.metadata['tags'] = []
+        
+        # Add new tags that don't already exist
+        existing_tags = set(self.metadata['tags'])
+        for tag in tags:
+            if tag and tag not in existing_tags:
+                self.metadata['tags'].append(tag)
+                existing_tags.add(tag)
+        
+        self.updated_at = current_timestamp()
+    
+    def get_tags(self) -> list[str]:
+        """Get all tags associated with this memory.
+        
+        Returns:
+            List of tags
+        """
+        return self.metadata.get('tags', [])
+    
+    def has_tag(self, tag: str) -> bool:
+        """Check if memory has a specific tag.
+        
+        Args:
+            tag: Tag to check for
+            
+        Returns:
+            True if tag exists
+        """
+        return tag in self.get_tags()
+    
     def __str__(self) -> str:
         """String representation of the memory."""
         return f"{self.type.value}: {self.key}"
@@ -150,5 +222,5 @@ class Memory:
         """Detailed representation of the memory."""
         return (
             f"Memory(id={self.memory_id}, type={self.type.value}, "
-            f"key={self.key}, created={self.created_at.date()})"
+            f"key={self.key}, version={self.get_version()}, created={self.created_at.date()})"
         )
