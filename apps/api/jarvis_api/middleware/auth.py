@@ -1,5 +1,6 @@
 """JWT authentication middleware and utilities for the API."""
 
+import os
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 import jwt
@@ -8,11 +9,14 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
 
-# JWT Configuration
-SECRET_KEY = "jarvis-secret-key-change-in-production"  # Should be from environment
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+# JWT Configuration - Load from environment variables
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY environment variable must be set")
+
+ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
 security = HTTPBearer()
 
