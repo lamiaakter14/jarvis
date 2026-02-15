@@ -42,3 +42,13 @@ repos:
       - id: bandit
         args: ["-c", "pyproject.toml"]
         additional_dependencies: ["bandit[toml]"]
+
+  - repo: local
+    hooks:
+      - id: cleanup-artifacts
+        name: Clean up build and test artifacts
+        entry: bash -c 'find . -type d -name "__pycache__" -o -name ".pytest_cache" | xargs rm -rf 2>/dev/null || true; find . -type f -name "*.pyc" -o -name "*.pyo" -o -name ".coverage" | xargs rm -f 2>/dev/null || true'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
