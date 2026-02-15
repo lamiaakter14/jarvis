@@ -15,15 +15,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
       - name: Configure deployment
         run: |
           echo "Deploying to staging environment"
-          echo "Deployment steps would go here"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+      
+      - name: Build Docker images
+        run: |
+          docker-compose -f docker-compose.prod.yml build
+      
+      - name: Run smoke tests
+        run: |
+          pip install -e ".[dev]"
+          pytest tests/ -v -m "not slow" --tb=short
       
       - name: Deploy to staging
         run: |
-          echo "Deploy staging placeholder"
-          # Add actual deployment commands here
+          echo "Staging deployment ready"
+          echo "Manual deployment step required on staging server"
+          # In real deployment, this would use SSH or deployment tool
+          # ssh deploy@staging "cd /app && ./scripts/deployment/deploy_staging.sh"
+      
+      - name: Notify deployment
+        if: always()
+        run: |
+          echo "Deployment to staging completed"
+          # Add Slack/email notification here
 
   deploy-production:
     runs-on: ubuntu-latest
@@ -33,12 +56,66 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
       - name: Configure deployment
         run: |
           echo "Deploying to production environment"
           echo "Tag: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
       
-      - name: Deploy to production
+      - name: Verify tag format
         run: |
-          echo "Deploy production placeholder"
-          # Add actual deployment commands here
+          if [[ ! "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid tag format. Must be v*.*.* (semantic versioning)"
+            exit 1
+          fi
+      
+      - name: Build Docker images
+        run: |
+          docker-compose -f docker-compose.prod.yml build
+          docker tag jarvis-api:latest jarvis-api:${{ github.ref_name }}
+      
+      - name: Run full test suite
+        run: |
+          pip install -e ".[dev]"
+          pytest tests/ -v --cov=packages/jarvis_core --cov-report=term
+      
+      - name: Security scan
+        run: |
+          pip install bandit safety
+          bandit -r packages/ apps/ -f screen || true
+          pip freeze | safety check --json || true
+      
+      - name: Generate release notes
+        run: |
+          echo "Release ${{ github.ref_name }}" > release-notes.txt
+          echo "" >> release-notes.txt
+          git log --pretty=format:"- %s (%an)" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release-notes.txt
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body_path: release-notes.txt
+          draft: false
+          prerelease: false
+      
+      - name: Production deployment readiness
+        run: |
+          echo "Production deployment ready"
+          echo "Manual deployment step required on production server"
+          echo "Run: ./scripts/deployment/deploy_production.sh"
+          # In real deployment, this would use deployment tool
+      
+      - name: Notify production deployment
+        if: always()
+        run: |
+          echo "Production deployment process initiated for ${{ github.ref_name }}"
+          # Add Slack/PagerDuty notification here

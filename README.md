@@ -75,11 +75,30 @@ make type-check
 
 ## 📚 Documentation
 
-- [Quick Start](docs/QUICK_START.md)
-- [Local Testing Guide](docs/LOCAL_TESTING.md)
-- [Architecture Overview](docs/architecture/clean-architecture-overview.md)
-- [API Documentation](http://localhost:8000/docs)
-- [Contributing Guide](CONTRIBUTING.md)
+### Getting Started
+- [Quick Start](docs/QUICK_START.md) - Get up and running in minutes
+- [Installation Guide](docs/INSTALLATION.md) - Detailed installation instructions
+- [Local Testing Guide](docs/LOCAL_TESTING.md) - Test locally before deployment
+
+### Usage & Operations
+- [Usage Guide](docs/USAGE_GUIDE.md) - How to use JARVIS features
+- [API Documentation](docs/API_DOCUMENTATION.md) - Complete API reference
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Solutions to common issues
+
+### Deployment & Monitoring
+- [Deployment Guide](docs/DEPLOYMENT_GUIDE.md) - Production deployment instructions
+- [Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md) - Pre/post deployment checklist
+- [Monitoring Guide](docs/MONITORING_GUIDE.md) - Set up monitoring and alerts
+- [UAT Guide](docs/UAT_GUIDE.md) - User acceptance testing procedures
+
+### Operations & Maintenance
+- [Handover Document](docs/HANDOVER.md) - Complete operations guide
+- [Future Enhancements](docs/FUTURE_ENHANCEMENTS.md) - Roadmap and recommendations
+
+### Architecture
+- [Architecture Overview](docs/architecture/clean-architecture-overview.md) - System design
+- [Project Summary](docs/PROJECT_SUMMARY.md) - Complete project overview
+- [Contributing Guide](CONTRIBUTING.md) - How to contribute
 
 ## Overview
 
