@@ -101,18 +101,65 @@ def format_duration(seconds: float) -> str:
         return f"{hours:.0f}h {minutes:.0f}m"
 
 
-def sanitize_filename(filename: str) -> str:
-    """Sanitize a filename by removing invalid characters.
+def sanitize_filename(filename: str, max_length: int = 255) -> str:
+    r"""Sanitize a filename by removing invalid characters and path traversal attempts.
+    
+    This function provides protection against:
+    - Invalid filesystem characters
+    - Path traversal attacks (../, ..\)
+    - Reserved filenames (CON, PRN, AUX, NUL, etc.)
+    - Leading/trailing dots and spaces
     
     Args:
         filename: Original filename
+        max_length: Maximum allowed filename length (default: 255)
         
     Returns:
-        Sanitized filename
+        Sanitized filename safe for filesystem operations
+        
+    Raises:
+        ValueError: If filename is empty or becomes empty after sanitization
     """
     import re
-    # Remove invalid characters
-    sanitized = re.sub(r'[<>:"/\\|?*]', '', filename)
-    # Replace spaces with underscores
-    sanitized = sanitized.replace(' ', '_')
+    
+    if not filename or not filename.strip():
+        raise ValueError("Filename cannot be empty")
+    
+    # Remove any path components (security: prevent directory traversal)
+    filename = filename.split('/')[-1].split('\\')[-1]
+    
+    # Remove or replace invalid characters for common filesystems
+    # Windows: < > : " / \ | ? *
+    # Also remove control characters (0x00-0x1F) and brackets/parentheses
+    sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f()\[\]]', '', filename)
+    
+    # Replace spaces and multiple underscores with single underscore
+    sanitized = re.sub(r'\s+', '_', sanitized)
+    sanitized = re.sub(r'_+', '_', sanitized)
+    
+    # Remove leading/trailing dots, spaces, and underscores (Windows reserved names)
+    sanitized = sanitized.strip('. _')
+    
+    # Check for Windows reserved names
+    reserved_names = {
+        'CON', 'PRN', 'AUX', 'NUL',
+        'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+        'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+    }
+    name_without_ext = sanitized.split('.')[0].upper()
+    if name_without_ext in reserved_names:
+        sanitized = f"_{sanitized}"
+    
+    # Truncate to max length while preserving extension if possible
+    if len(sanitized) > max_length:
+        if '.' in sanitized:
+            name, ext = sanitized.rsplit('.', 1)
+            max_name_len = max_length - len(ext) - 1
+            sanitized = f"{name[:max_name_len]}.{ext}"
+        else:
+            sanitized = sanitized[:max_length]
+    
+    if not sanitized:
+        raise ValueError("Filename becomes empty after sanitization")
+    
     return sanitized
