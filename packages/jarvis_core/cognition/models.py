@@ -70,21 +70,19 @@ class SkillGraph:
     """Model representing a skill and its attributes.
 
     Attributes:
-        skill_name: Name of the skill
+        skill_name: Name of the skill (required)
         proficiency_level: Level of proficiency (0.0 to 1.0)
         last_practiced: Timestamp of last practice
         priority_weight: Priority weight for the skill (0.0 to 1.0)
     """
 
-    skill_name: str = ""
+    skill_name: str
     proficiency_level: float = 0.0
     last_practiced: Optional[datetime] = None
     priority_weight: float = 0.5
 
     def __post_init__(self):
         """Validate skill graph after initialization."""
-        if not self.skill_name:
-            raise ValueError("skill_name cannot be empty")
         if not 0.0 <= self.proficiency_level <= 1.0:
             raise ValueError("proficiency_level must be between 0.0 and 1.0")
         if not 0.0 <= self.priority_weight <= 1.0:

@@ -136,7 +136,16 @@ class CognitiveService:
             skill_graph: The skill graph to evaluate
 
         Returns:
-            Dictionary containing alignment scores and analysis
+            Dictionary containing:
+            - skill_name: Name of the skill
+            - alignment_score: Final calculated alignment score (0.0-1.0)
+            - base_alignment: Base alignment before adjustments (0.0-1.0)
+            - proficiency_level: Current proficiency level
+            - priority_weight: Priority weight of the skill
+            - needs_practice: Whether skill needs practice
+            - days_since_practice: Days since last practice (if applicable)
+            - decision_context: Decision profile parameters used
+            - recommendation: Actionable recommendation based on analysis
         """
         # Calculate base alignment considering proficiency and priority
         base_alignment = (

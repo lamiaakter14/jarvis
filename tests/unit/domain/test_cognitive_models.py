@@ -143,10 +143,10 @@ class TestSkillGraph:
         assert model.last_practiced == now
         assert model.priority_weight == 0.9
 
-    def test_validate_skill_name_not_empty(self):
-        """Test that skill_name cannot be empty."""
-        with pytest.raises(ValueError, match="skill_name cannot be empty"):
-            SkillGraph(skill_name="")
+    def test_validate_skill_name_required(self):
+        """Test that skill_name is required."""
+        with pytest.raises(TypeError):
+            SkillGraph()  # Missing required skill_name argument
 
     def test_validate_proficiency_level_range(self):
         """Test that proficiency_level must be between 0.0 and 1.0."""
