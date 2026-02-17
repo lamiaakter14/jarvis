@@ -250,6 +250,10 @@ class ExecutorAgent(Agent):
             task: Executed task
             result: Execution result
         """
+        # Memory repo is optional - skip logging if not available
+        if not self.memory_repo:
+            return
+        
         try:
             from datetime import datetime
             

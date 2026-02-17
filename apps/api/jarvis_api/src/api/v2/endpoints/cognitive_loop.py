@@ -126,7 +126,7 @@ def get_orchestrator() -> CognitiveOrchestrator:
 
 @router.post("/cognitive-loop/run", response_model=CognitiveLoopResponse)
 async def run_cognitive_loop(
-    request: CognitiveLoopRequest = None,
+    request: Optional[CognitiveLoopRequest] = None,
     orchestrator: CognitiveOrchestrator = Depends(get_orchestrator)
 ) -> CognitiveLoopResponse:
     """Execute the complete cognitive loop with all agents.

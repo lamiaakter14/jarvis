@@ -345,13 +345,16 @@ class CognitiveOrchestrator:
         ]
         
         # Calculate metrics using metrics engine
+        # TODO: Calculate actual skill_improvement_delta from task completion and skill updates
+        PLACEHOLDER_SKILL_IMPROVEMENT = 0.1
+        
         try:
             metrics_report = self.metrics_engine.calculate_metrics(
                 completed_tasks_related_to_mission=len(strategic_tasks),
                 total_tasks=len(all_tasks),
                 completed_tasks=len(completed_tasks),
                 active_focus_hours=context.available_hours,
-                skill_improvement_delta=0.1,  # Placeholder
+                skill_improvement_delta=PLACEHOLDER_SKILL_IMPROVEMENT,
                 days_elapsed=1,
             )
             
