@@ -14,3 +14,4 @@ class AgentType(str, Enum):
     EXECUTOR = "executor"
     AMPLIFIER = "amplifier"
     INNOVATOR = "innovator"
+    REFLECTOR = "reflector"
