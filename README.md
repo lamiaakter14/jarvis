@@ -98,6 +98,7 @@ make type-check
 ### Architecture
 - [Architecture Overview](docs/architecture/clean-architecture-overview.md) - System design
 - [Project Summary](docs/PROJECT_SUMMARY.md) - Complete project overview
+- [Comprehensive Repository Report](COMPREHENSIVE_REPOSITORY_REPORT.md) - Full developer handoff & snapshot
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
 
 ## Overview
