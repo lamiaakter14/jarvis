@@ -119,6 +119,6 @@ class TestAgentType:
     def test_all_agent_types(self):
         """Test getting all agent types."""
         all_types = list(AgentType)
-        assert len(all_types) == 5
+        assert len(all_types) == 6  # Updated for REFLECTOR agent
         assert AgentType.STRATEGIST in all_types
         assert AgentType.EXECUTOR in all_types

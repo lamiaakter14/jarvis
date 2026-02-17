@@ -16,7 +16,7 @@ help: ## Show this help message
 install: ## Install all dependencies
 	@echo "$(BLUE)Installing dependencies...$(NC)"
 	pip install -e .
-	cd apps/web/dashboard && npm install
+	cd apps/web && npm install
 	@echo "$(GREEN)✓ Dependencies installed$(NC)"
 
 install-dev: ## Install development dependencies
@@ -47,7 +47,7 @@ api: ## Start API server
 
 web: ## Start web dashboard
 	@echo "$(BLUE)Starting web dashboard...$(NC)"
-	cd apps/web/dashboard && npm run dev
+	cd apps/web && npm run dev
 
 cli: ## Run CLI (use: make cli ARGS="strategist plan")
 	@echo "$(BLUE)Running JARVIS CLI...$(NC)"

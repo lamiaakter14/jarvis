@@ -120,7 +120,7 @@ class AgentCoordinator:
                 
                 result = await agent.execute(context)
                 
-                task.complete(result)
+                task.mark_completed(result)
                 await self.task_repository.save(task)
                 
                 results["executed"] += 1
