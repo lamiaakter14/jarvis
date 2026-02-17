@@ -4,5 +4,16 @@
   "active_tasks": [],
   "context_notes": "",
   "energy_level": "",
-  "priorities": []
+  "priorities": [],
+  "reflector_insights": {
+    "last_reflection_date": "",
+    "drift_level": "",
+    "pending_corrections": [],
+    "skill_adjustments": []
+  },
+  "daily_reflections": {
+    "what_went_well": [],
+    "improvements_needed": [],
+    "lessons_learned": []
+  }
 }

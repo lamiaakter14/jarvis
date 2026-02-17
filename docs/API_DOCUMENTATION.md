@@ -71,7 +71,7 @@ Check API health status.
 {
   "status": "healthy",
   "architecture": "clean_architecture",
-  "agents": ["strategist", "mentor", "executor", "innovator", "amplifier"]
+  "agents": ["strategist", "mentor", "executor", "innovator", "amplifier", "reflector"]
 }
 ```
 
@@ -105,6 +105,11 @@ Authorization: Bearer <token>
   },
   "amplifier": {
     "performance": {...}
+  },
+  "reflector": {
+    "reflection_summary": "...",
+    "correction_actions": [...],
+    "drift_analysis": {...}
   }
 }
 ```
@@ -270,6 +275,179 @@ Get task details.
 }
 ```
 
+### Reflector Agent
+
+#### POST /agents/reflector/analyze
+
+Trigger REFLECTOR agent to analyze execution and suggest corrections.
+
+**Request Body:**
+```json
+{
+  "date": "2024-01-01",
+  "context_id": "ctx_abc123"
+}
+```
+
+**Response:**
+```json
+{
+  "reflection_summary": "# Daily Reflection - 2024-01-01\n\n## Execution Performance\n- Tasks Completed: 8 / 10\n- Completion Rate: 80.0%\n- Strategic Alignment: 62.5%\n- Missed Tasks: 2\n\n## Drift Analysis\n- Drift Level: MINOR\n- Drift Score: 0.15\n\n## Recommended Corrections\n1. **Increase strategic task focus** (Priority 1)\n   Strategic alignment is 62.5%. Prioritize tasks that directly contribute to strategic goals.\n2. **Clear backlog of missed tasks** (Priority 2)\n   There are 2 missed tasks. Review and either reschedule, delegate, or cancel.\n3. **Review and optimize daily planning process** (Priority 3)\n   Analyze task estimation accuracy and planning effectiveness.",
+  "correction_actions": [
+    {
+      "priority": 1,
+      "action_type": "strategic_focus",
+      "title": "Increase strategic task focus",
+      "description": "Strategic alignment is 62.5%. Prioritize tasks that directly contribute to strategic goals.",
+      "expected_impact": "high",
+      "effort": "medium"
+    },
+    {
+      "priority": 2,
+      "action_type": "task_cleanup",
+      "title": "Clear backlog of missed tasks",
+      "description": "There are 2 missed tasks. Review and either reschedule, delegate, or cancel.",
+      "expected_impact": "medium",
+      "effort": "medium"
+    },
+    {
+      "priority": 3,
+      "action_type": "process_improvement",
+      "title": "Review and optimize daily planning process",
+      "description": "Analyze task estimation accuracy and planning effectiveness.",
+      "expected_impact": "medium",
+      "effort": "low"
+    }
+  ],
+  "pattern_flags": [
+    {
+      "type": "strategic_misalignment",
+      "severity": "high",
+      "description": "Strategic alignment below target: 62.5%"
+    }
+  ],
+  "skill_graph_updates": [
+    {
+      "skill_pattern": "strategic_planning",
+      "suggested_weight": 0.9,
+      "reason": "Low strategic alignment - boost strategic planning skills",
+      "current_weight": 0.5
+    }
+  ],
+  "drift_analysis": {
+    "drift_score": 0.15,
+    "drift_level": "minor",
+    "requires_intervention": false
+  }
+}
+```
+
+#### GET /agents/reflector/history
+
+Get historical reflection data.
+
+**Query Parameters:**
+- `start_date`: Start date (ISO 8601)
+- `end_date`: End date (ISO 8601)
+- `limit`: Maximum results (default: 30)
+
+**Response:**
+```json
+{
+  "reflections": [
+    {
+      "date": "2024-01-01",
+      "drift_level": "minor",
+      "drift_score": 0.15,
+      "completion_rate": 0.8,
+      "strategic_alignment": 0.625,
+      "corrections_count": 3
+    }
+  ],
+  "total": 1
+}
+```
+
+### Integration Endpoints
+
+#### POST /integrations/github/webhook
+
+Handle GitHub webhook events (for GitHub App integration).
+
+**Headers:**
+```
+X-GitHub-Event: push
+X-Hub-Signature-256: sha256=...
+```
+
+**Request Body:** GitHub webhook payload (varies by event type)
+
+**Response:**
+```json
+{
+  "status": "processed",
+  "event_type": "push",
+  "actions_taken": [
+    "created_task_for_new_issue",
+    "updated_memory_with_code_changes"
+  ]
+}
+```
+
+#### POST /integrations/slack/command
+
+Handle Slack slash commands.
+
+**Request Body:**
+```json
+{
+  "command": "/jarvis",
+  "text": "status",
+  "user_id": "U123ABC",
+  "channel_id": "C456DEF"
+}
+```
+
+**Response:**
+```json
+{
+  "response_type": "in_channel",
+  "text": "JARVIS Status: Healthy\n• Tasks: 8 completed, 5 pending\n• Strategic alignment: 87.5%\n• Last cognitive loop: 2 hours ago"
+}
+```
+
+#### GET /integrations/vscode/context
+
+Get context data for VSCode extension.
+
+**Query Parameters:**
+- `file_path`: Current file path
+- `project_root`: Project root directory
+
+**Response:**
+```json
+{
+  "relevant_tasks": [
+    {
+      "task_id": "task_123",
+      "title": "Implement authentication",
+      "status": "in_progress",
+      "file_path": "src/auth.py"
+    }
+  ],
+  "knowledge_snippets": [
+    {
+      "key": "auth_best_practices",
+      "content": "Use JWT tokens with refresh mechanism",
+      "relevance_score": 0.92
+    }
+  ],
+  "suggestions": [
+    "Consider implementing rate limiting for auth endpoints"
+  ]
+}
+```
+
 ### Analytics
 
 #### GET /analytics/dashboard
@@ -375,20 +553,51 @@ Synchronize STRATEGIST, EXECUTOR, and MENTOR agents.
 
 ### Connection
 
+Connect to the WebSocket endpoint for real-time updates:
+
 ```javascript
-const ws = new WebSocket('ws://localhost:8000/ws');
+const ws = new WebSocket('ws://localhost:8000/ws/cognitive-loop');
 
 ws.onopen = () => {
   console.log('Connected to JARVIS');
+  // Authenticate after connection
+  ws.send(JSON.stringify({
+    type: 'auth',
+    token: 'your_jwt_token'
+  }));
 };
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   console.log('Received:', data);
+  handleEvent(data);
+};
+
+ws.onerror = (error) => {
+  console.error('WebSocket error:', error);
+};
+
+ws.onclose = () => {
+  console.log('Disconnected from JARVIS');
+  // Implement reconnection logic
 };
 ```
 
-### Events
+### Real-time Event Types
+
+#### Cognitive Loop Progress
+
+Receive real-time updates during cognitive loop execution:
+
+```json
+{
+  "type": "cognitive_loop_progress",
+  "stage": "strategist",
+  "status": "in_progress",
+  "progress": 25,
+  "timestamp": "2024-01-01T00:00:00Z"
+}
+```
 
 #### Task Status Updates
 
@@ -421,6 +630,19 @@ ws.onmessage = (event) => {
   "memory_type": "strategic",
   "action": "created",
   "key": "strategic/goal_abc123",
+  "timestamp": "2024-01-01T00:00:00Z"
+}
+```
+
+#### Reflector Analysis Updates
+
+```json
+{
+  "type": "reflector_analysis",
+  "date": "2024-01-01",
+  "drift_level": "minor",
+  "drift_score": 0.15,
+  "corrections_available": 3,
   "timestamp": "2024-01-01T00:00:00Z"
 }
 ```

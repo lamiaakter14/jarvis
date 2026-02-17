@@ -116,7 +116,15 @@ docker-compose up -d postgres redis
 # Run Alembic migrations
 cd apps/api
 alembic upgrade head
+
+# JARVIS V1: Enable pgvector extension for semantic search
+psql $DATABASE_URL -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# Verify pgvector is installed
+psql $DATABASE_URL -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
 ```
+
+**Note**: The `vector` extension enables PostgreSQL to store and query vector embeddings for semantic search capabilities introduced in JARVIS V1.
 
 ### 7. Start the Backend API
 
@@ -426,6 +434,28 @@ WORKERS=4
 # Security
 CORS_ORIGINS=https://jarvis.example.com
 ALLOWED_HOSTS=jarvis.example.com
+
+# JARVIS V1 - REFLECTOR Agent Configuration
+REFLECTOR_ENABLED=true
+REFLECTOR_ANALYSIS_SCHEDULE="0 6 * * *"  # Daily at 6 AM
+REFLECTOR_MIN_TASKS_FOR_ANALYSIS=3
+
+# JARVIS V1 - Semantic Search & ML/NLU Services
+SEMANTIC_SEARCH_ENABLED=true
+EMBEDDING_MODEL=text-embedding-ada-002
+EMBEDDING_DIMENSION=1536
+VECTOR_SIMILARITY_THRESHOLD=0.7
+
+# JARVIS V1 - Integration Services (Optional)
+# GitHub App
+GITHUB_APP_ID=<your-github-app-id>
+GITHUB_PRIVATE_KEY_PATH=/path/to/github-private-key.pem
+GITHUB_WEBHOOK_SECRET=<your-webhook-secret>
+
+# Slack Bot
+SLACK_BOT_TOKEN=xoxb-<your-bot-token>
+SLACK_SIGNING_SECRET=<your-signing-secret>
+SLACK_APP_TOKEN=xapp-<your-app-token>
 
 # Monitoring
 SENTRY_DSN=<your-sentry-dsn>
