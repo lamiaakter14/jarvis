@@ -13,6 +13,87 @@ from jarvis_core.shared.constants import TaskStatus, MemoryType
 from jarvis_core.shared.exceptions import DomainException
 
 
+class MissedTaskCounter:
+    """Counter for tracking missed tasks and escalations.
+    
+    Maintains runtime state of missed tasks and their repetition counts
+    to support priority escalation and drift detection.
+    """
+    
+    def __init__(self):
+        """Initialize missed task counter."""
+        self._missed_tasks: Dict[str, int] = {}  # task_id -> miss count
+        self._escalated_tasks: set = set()  # task_ids that have been escalated
+    
+    def record_miss(self, task_id: str) -> int:
+        """Record a missed task.
+        
+        Args:
+            task_id: ID of the missed task
+            
+        Returns:
+            Number of times this task has been missed
+        """
+        if task_id not in self._missed_tasks:
+            self._missed_tasks[task_id] = 0
+        self._missed_tasks[task_id] += 1
+        return self._missed_tasks[task_id]
+    
+    def get_miss_count(self, task_id: str) -> int:
+        """Get the miss count for a task.
+        
+        Args:
+            task_id: ID of the task
+            
+        Returns:
+            Number of times the task was missed
+        """
+        return self._missed_tasks.get(task_id, 0)
+    
+    def is_escalated(self, task_id: str) -> bool:
+        """Check if a task has been escalated.
+        
+        Args:
+            task_id: ID of the task
+            
+        Returns:
+            True if task has been escalated
+        """
+        return task_id in self._escalated_tasks
+    
+    def mark_escalated(self, task_id: str) -> None:
+        """Mark a task as escalated.
+        
+        Args:
+            task_id: ID of the task
+        """
+        self._escalated_tasks.add(task_id)
+    
+    def clear_task(self, task_id: str) -> None:
+        """Clear tracking for a completed task.
+        
+        Args:
+            task_id: ID of the task
+        """
+        self._missed_tasks.pop(task_id, None)
+        self._escalated_tasks.discard(task_id)
+    
+    def get_repeatedly_missed_tasks(self, threshold: int = 2) -> list:
+        """Get tasks that have been missed multiple times.
+        
+        Args:
+            threshold: Minimum number of misses to include
+            
+        Returns:
+            List of (task_id, miss_count) tuples
+        """
+        return [
+            (task_id, count)
+            for task_id, count in self._missed_tasks.items()
+            if count >= threshold
+        ]
+
+
 class ExecutorAgent(Agent):
     """Executor agent for task execution and status management.
     
@@ -23,13 +104,13 @@ class ExecutorAgent(Agent):
     def __init__(
         self,
         task_repo: ITaskRepository,
-        memory_repo: IMemoryRepository,
+        memory_repo: Optional[IMemoryRepository] = None,
     ):
         """Initialize executor agent.
         
         Args:
             task_repo: Task repository for task management
-            memory_repo: Memory repository for logging
+            memory_repo: Optional memory repository for logging
         """
         super().__init__(
             agent_type=AgentType.EXECUTOR,
@@ -38,6 +119,8 @@ class ExecutorAgent(Agent):
         )
         self.task_repo = task_repo
         self.memory_repo = memory_repo
+        self.missed_task_counter = MissedTaskCounter()
+        self.escalation_threshold = 3  # Tasks missed 3+ times get escalated
     
     async def execute(self, context: Any) -> Dict[str, Any]:
         """Execute tasks based on context.
@@ -243,3 +326,114 @@ class ExecutorAgent(Agent):
         """
         import asyncio
         await asyncio.sleep(seconds)
+    
+    async def check_and_flag_missed_tasks(self) -> Dict[str, Any]:
+        """Check for missed tasks and flag them.
+        
+        Returns:
+            Dictionary with flagged tasks and drift indicators
+        """
+        try:
+            # Get all pending tasks
+            all_tasks = await self.task_repo.list_all()
+            
+            from datetime import date
+            today = date.today()
+            
+            overdue_tasks = [
+                t for t in all_tasks
+                if t.status == "pending" and
+                hasattr(t, 'due_date') and
+                t.due_date and
+                t.due_date < today
+            ]
+            
+            flagged_tasks = []
+            escalated_tasks = []
+            drift_detected = False
+            
+            for task in overdue_tasks:
+                miss_count = self.missed_task_counter.record_miss(task.task_id)
+                
+                task_info = {
+                    "task_id": task.task_id,
+                    "title": task.title,
+                    "miss_count": miss_count,
+                    "days_overdue": (today - task.due_date).days,
+                }
+                
+                # Escalate if threshold reached
+                if miss_count >= self.escalation_threshold:
+                    if not self.missed_task_counter.is_escalated(task.task_id):
+                        # Escalate priority
+                        await self._escalate_task_priority(task)
+                        self.missed_task_counter.mark_escalated(task.task_id)
+                        escalated_tasks.append(task_info)
+                        drift_detected = True
+                
+                flagged_tasks.append(task_info)
+            
+            return {
+                "flagged_tasks": flagged_tasks,
+                "escalated_tasks": escalated_tasks,
+                "total_overdue": len(overdue_tasks),
+                "drift_detected": drift_detected,
+                "drift_severity": self._calculate_drift_severity(flagged_tasks)
+            }
+        
+        except Exception as e:
+            raise DomainException(f"Failed to check missed tasks: {e}")
+    
+    async def _escalate_task_priority(self, task: Task) -> None:
+        """Escalate the priority of a repeatedly missed task."""
+        from jarvis_core.shared.constants import TaskPriority
+        
+        # Escalate priority if not already at highest
+        if task.priority != TaskPriority.CRITICAL:
+            if task.priority == TaskPriority.HIGH:
+                task.priority = TaskPriority.CRITICAL
+            elif task.priority == TaskPriority.MEDIUM:
+                task.priority = TaskPriority.HIGH
+            elif task.priority == TaskPriority.LOW:
+                task.priority = TaskPriority.MEDIUM
+            
+            await self.task_repo.save(task)
+    
+    def _calculate_drift_severity(self, flagged_tasks: list) -> str:
+        """Calculate the severity of task drift."""
+        if not flagged_tasks:
+            return "none"
+        
+        total_missed = len(flagged_tasks)
+        repeated_misses = sum(1 for t in flagged_tasks if t.get("miss_count", 0) > 1)
+        
+        if total_missed >= 10 or repeated_misses >= 5:
+            return "critical"
+        elif total_missed >= 5 or repeated_misses >= 3:
+            return "high"
+        elif total_missed >= 3 or repeated_misses >= 2:
+            return "medium"
+        elif total_missed >= 1:
+            return "low"
+        else:
+            return "none"
+    
+    def get_drift_notification(self) -> Optional[Dict[str, Any]]:
+        """Get drift notification for the orchestrator."""
+        repeatedly_missed = self.missed_task_counter.get_repeatedly_missed_tasks(threshold=2)
+        
+        if not repeatedly_missed:
+            return None
+        
+        return {
+            "drift_type": "task_execution",
+            "severity": "high" if len(repeatedly_missed) >= 3 else "medium",
+            "repeatedly_missed_tasks": [
+                {"task_id": task_id, "miss_count": count}
+                for task_id, count in repeatedly_missed
+            ],
+            "recommendation": (
+                "Multiple tasks are repeatedly missed. "
+                "Consider reviewing task priorities and time allocation."
+            )
+        }
