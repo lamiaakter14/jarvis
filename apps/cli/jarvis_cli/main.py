@@ -1,26 +1,20 @@
 """CLI interface for JARVIS cognitive assistant using Typer."""
 
-import typer
-from typing import Optional
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich import print as rprint
 
+import typer
 from jarvis_core.bridge.agent_bridge import (
-    StrategistBridge,
-    MentorBridge,
+    AmplifierBridge,
     ExecutorBridge,
     InnovatorBridge,
-    AmplifierBridge
+    MentorBridge,
+    StrategistBridge,
 )
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
 
 # Create CLI app
-app = typer.Typer(
-    name="jarvis",
-    help="JARVIS Cognitive Assistant CLI",
-    add_completion=False
-)
+app = typer.Typer(name="jarvis", help="JARVIS Cognitive Assistant CLI", add_completion=False)
 
 console = Console()
 
@@ -29,7 +23,7 @@ console = Console()
 def run():
     """Run the complete cognitive loop with all 5 agents."""
     console.print("\n[bold blue]Running JARVIS Cognitive Loop...[/bold blue]\n")
-    
+
     try:
         # Initialize agents
         strategist = StrategistBridge()
@@ -37,31 +31,31 @@ def run():
         executor = ExecutorBridge()
         innovator = InnovatorBridge()
         amplifier = AmplifierBridge()
-        
+
         # Execute cognitive loop
         console.print("[cyan]→ Step 1: Planning with Strategist[/cyan]")
         plan = strategist.generate_plan()
         console.print(f"  ✓ Generated plan with {len(plan.get('tasks', []))} tasks\n")
-        
+
         console.print("[cyan]→ Step 2: Analyzing with Mentor[/cyan]")
         gaps = mentor.analyze_execution_logs()
-        console.print(f"  ✓ Analyzed execution logs\n")
-        
+        console.print("  ✓ Analyzed execution logs\n")
+
         console.print("[cyan]→ Step 3: Executing with Executor[/cyan]")
         executor.run_tasks()
         console.print("  ✓ Tasks execution completed\n")
-        
+
         console.print("[cyan]→ Step 4: Innovating with Innovator[/cyan]")
         innovations = innovator.create_innovations()
-        innovation_count = len(innovations.get('innovations', []))
+        innovation_count = len(innovations.get("innovations", []))
         console.print(f"  ✓ Generated {innovation_count} innovations\n")
-        
+
         console.print("[cyan]→ Step 5: Optimizing with Amplifier[/cyan]")
         performance = amplifier.amplify()
         console.print(f"  ✓ Productivity score: {performance.get('productivity_score', 0):.2f}\n")
-        
+
         console.print("[bold green]✓ Cognitive loop completed successfully![/bold green]\n")
-        
+
     except Exception as e:
         console.print(f"[bold red]✗ Error: {e}[/bold red]")
         raise typer.Exit(code=1)
@@ -71,12 +65,12 @@ def run():
 def plan():
     """Generate and display today's daily plan."""
     console.print("\n[bold blue]Generating Daily Plan...[/bold blue]\n")
-    
+
     try:
         strategist = StrategistBridge()
-        
+
         plan = strategist.generate_plan()
-        
+
         # Display plan in a table
         table = Table(title=f"Daily Plan - {plan.get('date', 'Today')}")
         table.add_column("Task", style="cyan", no_wrap=False)
@@ -84,19 +78,19 @@ def plan():
         table.add_column("Cognitive Load", style="magenta")
         table.add_column("ROI", style="green")
         table.add_column("Time", style="blue")
-        
-        for task in plan.get('tasks', []):
+
+        for task in plan.get("tasks", []):
             table.add_row(
-                task.get('task', ''),
-                task.get('priority', ''),
-                task.get('cognitive_load', ''),
+                task.get("task", ""),
+                task.get("priority", ""),
+                task.get("cognitive_load", ""),
                 f"{task.get('roi', 0):.2f}",
-                task.get('time_allocated', '')
+                task.get("time_allocated", ""),
             )
-        
+
         console.print(table)
         console.print()
-        
+
     except Exception as e:
         console.print(f"[bold red]✗ Error: {e}[/bold red]")
         raise typer.Exit(code=1)
@@ -106,21 +100,21 @@ def plan():
 def gaps():
     """Identify and display knowledge gaps."""
     console.print("\n[bold blue]Analyzing Knowledge Gaps...[/bold blue]\n")
-    
+
     try:
         mentor = MentorBridge()
-        
+
         result = mentor.analyze_execution_logs()
-        gaps = result.get('updated_gaps', [])
-        
+        gaps = result.get("updated_gaps", [])
+
         if gaps:
             for i, gap in enumerate(gaps, 1):
                 console.print(f"{i}. {gap}")
         else:
             console.print("[green]✓ No significant gaps identified[/green]")
-        
+
         console.print()
-        
+
     except Exception as e:
         console.print(f"[bold red]✗ Error: {e}[/bold red]")
         raise typer.Exit(code=1)
@@ -130,25 +124,25 @@ def gaps():
 def innovate():
     """Generate and display innovations."""
     console.print("\n[bold blue]Generating Innovations...[/bold blue]\n")
-    
+
     try:
         innovator = InnovatorBridge()
-        
+
         result = innovator.create_innovations()
-        innovations = result.get('innovations', [])
-        
+        innovations = result.get("innovations", [])
+
         for i, innovation in enumerate(innovations, 1):
             panel = Panel(
                 f"[bold]{innovation.get('title', 'Untitled')}[/bold]\n\n"
                 f"{innovation.get('description', 'No description')}\n\n"
                 f"Impact Score: [green]{innovation.get('impact_score', 0):.2f}[/green]",
                 title=f"Innovation {i}",
-                border_style="cyan"
+                border_style="cyan",
             )
             console.print(panel)
-        
+
         console.print()
-        
+
     except Exception as e:
         console.print(f"[bold red]✗ Error: {e}[/bold red]")
         raise typer.Exit(code=1)
@@ -158,12 +152,12 @@ def innovate():
 def performance():
     """Display performance metrics and analytics."""
     console.print("\n[bold blue]Performance Analysis...[/bold blue]\n")
-    
+
     try:
         amplifier = AmplifierBridge()
-        
+
         perf = amplifier.amplify()
-        
+
         # Display performance in a panel
         content = (
             f"[cyan]Productivity Score:[/cyan] [bold]{perf.get('productivity_score', 0):.2f}[/bold]\n"
@@ -171,17 +165,17 @@ def performance():
             f"[cyan]Completed Tasks:[/cyan] {perf.get('completed_tasks', 0)}\n"
             f"[cyan]Completion Rate:[/cyan] {perf.get('completed_tasks', 0) / max(perf.get('total_tasks', 1), 1) * 100:.1f}%\n"
         )
-        
-        suggestions = perf.get('optimization_suggestions', [])
+
+        suggestions = perf.get("optimization_suggestions", [])
         if suggestions:
             content += "\n[yellow]Optimization Suggestions:[/yellow]\n"
             for suggestion in suggestions:
                 content += f"  • {suggestion}\n"
-        
+
         panel = Panel(content, title="Performance Metrics", border_style="green")
         console.print(panel)
         console.print()
-        
+
     except Exception as e:
         console.print(f"[bold red]✗ Error: {e}[/bold red]")
         raise typer.Exit(code=1)

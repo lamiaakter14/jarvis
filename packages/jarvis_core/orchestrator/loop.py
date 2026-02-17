@@ -6,19 +6,18 @@ all agents in a deterministic and testable manner.
 
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
-from jarvis_core.orchestrator.context import CognitiveContext, CognitiveProfile
-from jarvis_core.domain.entities.context import Context
-from jarvis_core.domain.repositories import ITaskRepository, IMemoryRepository
-from jarvis_core.infrastructure.agents.strategist_agent import StrategistAgent
-from jarvis_core.infrastructure.agents.executor_agent import ExecutorAgent
-from jarvis_core.infrastructure.agents.innovator_agent import InnovatorAgent
-from jarvis_core.infrastructure.agents.amplifier_agent import AmplifierAgent
 from jarvis_core.agents.reflector import ReflectorAgent
 from jarvis_core.cognition.service import CognitiveService
+from jarvis_core.domain.entities.context import Context
+from jarvis_core.domain.repositories import IMemoryRepository, ITaskRepository
+from jarvis_core.infrastructure.agents.amplifier_agent import AmplifierAgent
+from jarvis_core.infrastructure.agents.executor_agent import ExecutorAgent
+from jarvis_core.infrastructure.agents.innovator_agent import InnovatorAgent
+from jarvis_core.infrastructure.agents.strategist_agent import StrategistAgent
 from jarvis_core.metrics.engine import MetricsEngine
+from jarvis_core.orchestrator.context import CognitiveContext, CognitiveProfile
 from jarvis_core.shared.exceptions import DomainException
 from jarvis_core.shared.utils import current_timestamp
 
@@ -26,7 +25,7 @@ from jarvis_core.shared.utils import current_timestamp
 @dataclass
 class CognitiveLoopResult:
     """Result DTO from cognitive loop execution.
-    
+
     Attributes:
         plan: Daily plan from strategist
         knowledge_gaps: Identified gaps from analysis
@@ -36,7 +35,7 @@ class CognitiveLoopResult:
         execution_time: Total execution time in seconds
         timestamp: When the loop was executed
     """
-    
+
     plan: Dict[str, Any] = field(default_factory=dict)
     knowledge_gaps: List[Dict[str, Any]] = field(default_factory=list)
     innovations: List[Dict[str, Any]] = field(default_factory=list)
@@ -44,10 +43,10 @@ class CognitiveLoopResult:
     metrics: Dict[str, Any] = field(default_factory=dict)
     execution_time: float = 0.0
     timestamp: str = field(default_factory=lambda: current_timestamp().isoformat())
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert result to dictionary.
-        
+
         Returns:
             Dictionary representation of the result
         """
@@ -64,7 +63,7 @@ class CognitiveLoopResult:
 
 class CognitiveOrchestrator:
     """Orchestrator for the complete cognitive loop.
-    
+
     Implements a deterministic, testable cognitive loop that:
     1. Loads CognitiveProfile
     2. Injects EnergyModel
@@ -76,7 +75,7 @@ class CognitiveOrchestrator:
     8. Persists outputs to memory
     9. Returns comprehensive DTO
     """
-    
+
     def __init__(
         self,
         strategist_agent: StrategistAgent,
@@ -90,7 +89,7 @@ class CognitiveOrchestrator:
         memory_repository: IMemoryRepository,
     ):
         """Initialize the cognitive orchestrator.
-        
+
         Args:
             strategist_agent: Agent for strategic planning
             executor_agent: Agent for task execution
@@ -111,69 +110,65 @@ class CognitiveOrchestrator:
         self.metrics_engine = metrics_engine
         self.task_repo = task_repository
         self.memory_repo = memory_repository
-    
+
     async def run(
         self, cognitive_context: Optional[CognitiveContext] = None
     ) -> CognitiveLoopResult:
         """Execute the complete cognitive loop.
-        
+
         Args:
             cognitive_context: Optional cognitive context, creates default if None
-            
+
         Returns:
             CognitiveLoopResult with all outputs
-            
+
         Raises:
             DomainException: If cognitive loop execution fails
         """
         start_time = time.time()
-        
+
         try:
             # Step 1: Load CognitiveProfile (or use provided)
             if cognitive_context is None:
                 cognitive_context = CognitiveContext.create_default()
-            
+
             profile = cognitive_context.profile
             context = cognitive_context.context
-            
+
             # Step 2: Inject EnergyModel into cognitive service
             energy_state = self.cognitive_service.update_energy(profile.energy)
-            
+
             # Update context with energy information
             if "optimal_focus_hours" in energy_state:
                 context.update_available_hours(energy_state["optimal_focus_hours"])
-            
+
             # Step 3: Run STRATEGIST to create daily plan
             plan_result = await self._run_strategist(context, profile)
-            
+
             # Step 4: Run EXECUTOR for task scheduling
             execution_result = await self._run_executor(context)
-            
+
             # Step 5: Run INNOVATOR for automation/delegation ideas
             innovation_result = await self._run_innovator(context)
-            
+
             # Step 6: Run AMPLIFIER to collect metrics
             amplifier_result = await self._run_amplifier(context)
-            
+
             # Step 7: Run REFLECTOR for self-correction
             reflection_result = await self._run_reflector(context)
-            
+
             # Step 8: Calculate comprehensive metrics
             metrics_result = await self._calculate_metrics(
                 context, plan_result, execution_result, amplifier_result
             )
-            
+
             # Step 9: Persist outputs to memory
             await self._persist_loop_results(
-                cognitive_context,
-                plan_result,
-                innovation_result,
-                reflection_result,
-                metrics_result
+                cognitive_context, plan_result, innovation_result, reflection_result, metrics_result
             )
-            
+
             execution_time = time.time() - start_time
-            
+
             # Step 10: Return comprehensive DTO
             return CognitiveLoopResult(
                 plan=plan_result,
@@ -181,70 +176,77 @@ class CognitiveOrchestrator:
                 innovations=innovation_result,
                 reflection=reflection_result,
                 metrics=metrics_result,
-                execution_time=execution_time
+                execution_time=execution_time,
             )
-        
+
         except Exception as e:
             execution_time = time.time() - start_time
             raise DomainException(
                 f"Cognitive loop execution failed after {execution_time:.2f}s: {e}"
             )
-    
-    async def _run_strategist(
-        self, context: Context, profile: CognitiveProfile
-    ) -> Dict[str, Any]:
+
+    async def _run_strategist(self, context: Context, profile: CognitiveProfile) -> Dict[str, Any]:
         """Run strategist agent for planning.
-        
+
         Args:
             context: Execution context
             profile: Cognitive profile
-            
+
         Returns:
             Plan result dictionary
         """
         # Update context with strategic goals from profile
         if profile.identity.current_primary_mission:
             context.add_strategic_goal(profile.identity.current_primary_mission)
-        
+
         plan = await self.strategist.execute(context)
-        
+
         return {
             "date": context.date.isoformat(),
             "tasks": [
                 {
                     "task_id": task.task_id,
                     "title": task.title,
-                    "priority": task.priority.value if hasattr(task.priority, 'value') else str(task.priority),
-                    "estimated_hours": task.cognitive_load.estimated_hours if hasattr(task, 'cognitive_load') else 0.0,
+                    "priority": (
+                        task.priority.value
+                        if hasattr(task.priority, "value")
+                        else str(task.priority)
+                    ),
+                    "estimated_hours": (
+                        task.cognitive_load.estimated_hours
+                        if hasattr(task, "cognitive_load")
+                        else 0.0
+                    ),
                 }
-                for task in (plan.tasks if hasattr(plan, 'tasks') else [])
+                for task in (plan.tasks if hasattr(plan, "tasks") else [])
             ],
-            "total_tasks": len(plan.tasks) if hasattr(plan, 'tasks') else 0,
-            "plan_id": plan.plan_id if hasattr(plan, 'plan_id') else "unknown",
+            "total_tasks": len(plan.tasks) if hasattr(plan, "tasks") else 0,
+            "plan_id": plan.plan_id if hasattr(plan, "plan_id") else "unknown",
         }
-    
+
     async def _run_executor(self, context: Context) -> Dict[str, Any]:
         """Run executor agent for task execution.
-        
+
         Args:
             context: Execution context
-            
+
         Returns:
             Execution result dictionary
         """
         # Get pending tasks for today
         all_tasks = await self.task_repo.list_all()
         pending_tasks = [
-            t for t in all_tasks
-            if t.status == "pending" and 
-            hasattr(t, 'due_date') and
-            t.due_date and
-            t.due_date <= context.date
+            t
+            for t in all_tasks
+            if t.status == "pending"
+            and hasattr(t, "due_date")
+            and t.due_date
+            and t.due_date <= context.date
         ]
-        
+
         executed_count = 0
         failed_count = 0
-        
+
         # Execute tasks (in a real implementation, this would actually run them)
         for task in pending_tasks[:5]:  # Limit to 5 for now
             try:
@@ -252,63 +254,69 @@ class CognitiveOrchestrator:
                 executed_count += 1
             except Exception:
                 failed_count += 1
-        
+
         return {
             "executed": executed_count,
             "failed": failed_count,
             "pending": len(pending_tasks) - executed_count - failed_count,
             "status": "completed" if failed_count == 0 else "partial",
         }
-    
+
     async def _run_innovator(self, context: Context) -> List[Dict[str, Any]]:
         """Run innovator agent for innovation generation.
-        
+
         Args:
             context: Execution context
-            
+
         Returns:
             List of innovations
         """
         innovations = await self.innovator.execute(context)
-        
+
         return [
             {
-                "title": inn.title if hasattr(inn, 'title') else "Unknown",
-                "description": inn.description if hasattr(inn, 'description') else "",
-                "impact_score": inn.impact_score if hasattr(inn, 'impact_score') else 0.5,
-                "category": inn.category if hasattr(inn, 'category') else "general",
+                "title": inn.title if hasattr(inn, "title") else "Unknown",
+                "description": inn.description if hasattr(inn, "description") else "",
+                "impact_score": inn.impact_score if hasattr(inn, "impact_score") else 0.5,
+                "category": inn.category if hasattr(inn, "category") else "general",
             }
             for inn in (innovations if isinstance(innovations, list) else [])
         ]
-    
+
     async def _run_amplifier(self, context: Context) -> Dict[str, Any]:
         """Run amplifier agent for metrics collection.
-        
+
         Args:
             context: Execution context
-            
+
         Returns:
             Amplifier result dictionary
         """
         result = await self.amplifier.execute(context)
-        
+
         return {
-            "productivity_score": result.get("productivity_score", 0.0) if isinstance(result, dict) else 0.0,
-            "optimization_suggestions": result.get("optimization_suggestions", []) if isinstance(result, dict) else [],
-            "performance_trends": result.get("performance_trends", {}) if isinstance(result, dict) else {},
+            "productivity_score": (
+                result.get("productivity_score", 0.0) if isinstance(result, dict) else 0.0
+            ),
+            "optimization_suggestions": (
+                result.get("optimization_suggestions", []) if isinstance(result, dict) else []
+            ),
+            "performance_trends": (
+                result.get("performance_trends", {}) if isinstance(result, dict) else {}
+            ),
         }
-    
+
     async def _run_reflector(self, context: Context) -> Dict[str, Any]:
         """Run reflector agent for self-correction.
-        
+
         Args:
             context: Execution context
-            
+
         Returns:
             Reflection result dictionary
         """
         result = await self.reflector.execute(context)
-        
+
         return {
             "summary": result.get("reflection_summary", ""),
             "correction_actions": result.get("correction_actions", []),
@@ -316,38 +324,39 @@ class CognitiveOrchestrator:
             "skill_graph_updates": result.get("skill_graph_updates", []),
             "drift_level": result.get("drift_level", "none"),
         }
-    
+
     async def _calculate_metrics(
         self,
         context: Context,
         plan_result: Dict[str, Any],
         execution_result: Dict[str, Any],
-        amplifier_result: Dict[str, Any]
+        amplifier_result: Dict[str, Any],
     ) -> Dict[str, Any]:
         """Calculate comprehensive performance metrics.
-        
+
         Args:
             context: Execution context
             plan_result: Plan from strategist
             execution_result: Execution results
             amplifier_result: Amplifier results
-            
+
         Returns:
             Metrics dictionary
         """
         # Get tasks for metrics calculation
         all_tasks = await self.task_repo.list_all()
-        
+
         completed_tasks = [t for t in all_tasks if t.status == "completed"]
         strategic_tasks = [
-            t for t in completed_tasks
-            if hasattr(t, 'tags') and any('strategic' in tag.lower() for tag in t.tags)
+            t
+            for t in completed_tasks
+            if hasattr(t, "tags") and any("strategic" in tag.lower() for tag in t.tags)
         ]
-        
+
         # Calculate metrics using metrics engine
         # TODO: Calculate actual skill_improvement_delta from task completion and skill updates
         PLACEHOLDER_SKILL_IMPROVEMENT = 0.1
-        
+
         try:
             metrics_report = self.metrics_engine.calculate_metrics(
                 completed_tasks_related_to_mission=len(strategic_tasks),
@@ -357,7 +366,7 @@ class CognitiveOrchestrator:
                 skill_improvement_delta=PLACEHOLDER_SKILL_IMPROVEMENT,
                 days_elapsed=1,
             )
-            
+
             return {
                 "strategic_alignment_score": metrics_report.strategic_alignment_score,
                 "cognitive_throughput": metrics_report.cognitive_throughput,
@@ -378,47 +387,49 @@ class CognitiveOrchestrator:
                 "completed_tasks": len(completed_tasks),
                 "productivity_score": amplifier_result.get("productivity_score", 0.0),
             }
-    
+
     def _extract_knowledge_gaps(
         self, context: Context, reflection_result: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Extract knowledge gaps from context and reflection.
-        
+
         Args:
             context: Execution context
             reflection_result: Reflection results
-            
+
         Returns:
             List of knowledge gaps
         """
         gaps = []
-        
+
         # Add gaps from context
         for gap in context.gaps:
             gaps.append(gap)
-        
+
         # Extract gaps from reflection pattern flags
         for flag in reflection_result.get("pattern_flags", []):
             if flag.get("type") in ["strategic_misalignment", "low_completion"]:
-                gaps.append({
-                    "type": "process",
-                    "description": flag.get("description", ""),
-                    "severity": flag.get("severity", "medium"),
-                    "evidence": ["reflection_analysis"]
-                })
-        
+                gaps.append(
+                    {
+                        "type": "process",
+                        "description": flag.get("description", ""),
+                        "severity": flag.get("severity", "medium"),
+                        "evidence": ["reflection_analysis"],
+                    }
+                )
+
         return gaps
-    
+
     async def _persist_loop_results(
         self,
         cognitive_context: CognitiveContext,
         plan_result: Dict[str, Any],
         innovation_result: List[Dict[str, Any]],
         reflection_result: Dict[str, Any],
-        metrics_result: Dict[str, Any]
+        metrics_result: Dict[str, Any],
     ) -> None:
         """Persist cognitive loop results to memory.
-        
+
         Args:
             cognitive_context: Cognitive context
             plan_result: Plan results
@@ -428,7 +439,7 @@ class CognitiveOrchestrator:
         """
         from jarvis_core.domain.entities.memory import Memory
         from jarvis_core.shared.constants import MemoryType
-        
+
         # Store cognitive loop summary
         loop_summary = Memory(
             type=MemoryType.EXECUTION_LOG,
@@ -444,9 +455,9 @@ class CognitiveOrchestrator:
             metadata={
                 "orchestrator": "cognitive_loop_v2",
                 "version": cognitive_context.metadata.get("version", "2.0"),
-            }
+            },
         )
-        
+
         loop_summary.add_tags(["cognitive_loop", "daily", "orchestrator"])
-        
+
         await self.memory_repo.save(loop_summary)

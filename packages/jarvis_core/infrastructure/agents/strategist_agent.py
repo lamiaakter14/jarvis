@@ -1,25 +1,25 @@
 """Strategist agent implementation."""
 
-from typing import Any, Dict
 import time
+from typing import Any, Dict
 
+from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.domain.entities.agent import Agent
 from jarvis_core.domain.entities.context import Context
 from jarvis_core.domain.entities.plan import Plan
-from jarvis_core.domain.value_objects.agent_type import AgentType
-from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
 from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
+from jarvis_core.domain.value_objects.agent_type import AgentType
 from jarvis_core.shared.exceptions import DomainException
 
 
 class StrategistAgent(Agent):
     """Strategist agent for planning and task organization.
-    
+
     The strategist analyzes context, strategic goals, and available resources
     to create optimized daily plans with appropriate task selection and ordering.
     """
-    
+
     def __init__(
         self,
         ai_service: IAIService,
@@ -27,7 +27,7 @@ class StrategistAgent(Agent):
         task_repo: ITaskRepository,
     ):
         """Initialize strategist agent.
-        
+
         Args:
             ai_service: AI service for plan generation
             memory_repo: Memory repository for context access
@@ -41,46 +41,46 @@ class StrategistAgent(Agent):
         self.ai_service = ai_service
         self.memory_repo = memory_repo
         self.task_repo = task_repo
-    
+
     async def execute(self, context: Context) -> Plan:
         """Execute strategist's primary function: generate daily plan.
-        
+
         Args:
             context: Current execution context
-            
+
         Returns:
             Generated daily plan
-            
+
         Raises:
             DomainException: If plan generation fails
         """
         start_time = time.time()
-        
+
         try:
             # Generate plan using AI service
             plan = await self.ai_service.generate_plan(context)
-            
+
             # Persist all tasks from the plan
             for task in plan.tasks:
                 await self.task_repo.save(task)
-            
+
             # Track successful execution
             execution_time = time.time() - start_time
             self.track_execution(success=True, execution_time=execution_time)
-            
+
             return plan
-        
+
         except Exception as e:
             execution_time = time.time() - start_time
             self.track_execution(success=False, execution_time=execution_time)
             raise DomainException(f"Strategist execution failed: {e}")
-    
+
     async def analyze_context(self, context: Context) -> Dict[str, Any]:
         """Analyze context to understand current state and priorities.
-        
+
         Args:
             context: Context to analyze
-            
+
         Returns:
             Dictionary with analysis results
         """
@@ -92,37 +92,37 @@ class StrategistAgent(Agent):
             "strategic_goals_count": len(context.strategic_goals),
             "recommendations": [],
         }
-        
+
         # Add recommendations based on analysis
         if context.available_hours < 4:
             analysis["recommendations"].append(
                 "Limited time available - focus on high-priority items only"
             )
-        
+
         if len(context.get_high_severity_gaps()) > 0:
             analysis["recommendations"].append(
                 "High-severity gaps identified - consider addressing them"
             )
-        
+
         if not context.current_focus:
             analysis["recommendations"].append(
                 "No focus areas defined - consider setting priorities"
             )
-        
+
         return analysis
-    
+
     async def optimize_plan(self, plan: Plan) -> Plan:
         """Optimize an existing plan for better efficiency.
-        
+
         Args:
             plan: Plan to optimize
-            
+
         Returns:
             Optimized plan
         """
         # Sort tasks by score (priority + ROI + efficiency)
         plan.sort_tasks_by_score()
-        
+
         # Check feasibility
         if not plan.is_feasible():
             # Remove lowest-scoring tasks until feasible
@@ -130,5 +130,5 @@ class StrategistAgent(Agent):
                 # Remove last task (lowest score after sorting)
                 lowest_task = plan.tasks[-1]
                 plan.remove_task(lowest_task.task_id)
-        
+
         return plan

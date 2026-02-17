@@ -1,26 +1,26 @@
 """OpenAI-based AI service implementation."""
 
-from typing import List, Dict, Any, Optional
 import json
+from typing import Any, Dict, List, Optional
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
-from jarvis_core.domain.entities.plan import Plan
 from jarvis_core.domain.entities.context import Context
-from jarvis_core.domain.entities.task import Task
 from jarvis_core.domain.entities.innovation import Innovation
-from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.entities.task import Task
 from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.priority import Priority
 from jarvis_core.domain.value_objects.roi import ROI
 from jarvis_core.shared.exceptions import AIServiceError
 
 
 class OpenAIService(IAIService):
     """OpenAI-based implementation of AI service.
-    
+
     Uses OpenAI GPT models for intelligent operations like planning,
     gap analysis, innovation generation, and mentorship.
     """
-    
+
     def __init__(
         self,
         api_key: Optional[str] = None,
@@ -31,7 +31,7 @@ class OpenAIService(IAIService):
         mock_mode: bool = False,
     ):
         """Initialize OpenAI service.
-        
+
         Args:
             api_key: OpenAI API key
             model: Model name to use
@@ -46,35 +46,36 @@ class OpenAIService(IAIService):
         self.max_tokens = max_tokens
         self.timeout = timeout
         self.mock_mode = mock_mode
-        
+
         if not mock_mode and not api_key:
             raise AIServiceError("OpenAI API key is required when not in mock mode")
-        
+
         # Initialize OpenAI client if not in mock mode
         if not mock_mode:
             try:
                 import openai
+
                 self.client = openai.OpenAI(api_key=api_key, timeout=timeout)
             except ImportError:
                 raise AIServiceError("openai package is required but not installed")
         else:
             self.client = None
-    
+
     async def generate_plan(self, context: Context) -> Plan:
         """Generate a daily plan based on current context.
-        
+
         Args:
             context: Current execution context
-            
+
         Returns:
             Generated Plan with scheduled tasks
-            
+
         Raises:
             AIServiceError: If plan generation fails
         """
         if self.mock_mode:
             return self._generate_mock_plan(context)
-        
+
         try:
             prompt = self._build_plan_prompt(context)
             response = self._call_openai(prompt)
@@ -82,22 +83,22 @@ class OpenAIService(IAIService):
             return plan
         except Exception as e:
             raise AIServiceError(f"Failed to generate plan: {e}")
-    
+
     async def analyze_gaps(self, execution_logs: List[Dict]) -> List[Dict]:
         """Analyze execution logs to identify knowledge and skill gaps.
-        
+
         Args:
             execution_logs: List of execution log entries
-            
+
         Returns:
             List of identified gaps
-            
+
         Raises:
             AIServiceError: If gap analysis fails
         """
         if self.mock_mode:
             return self._generate_mock_gaps(execution_logs)
-        
+
         try:
             prompt = self._build_gaps_prompt(execution_logs)
             response = self._call_openai(prompt)
@@ -105,22 +106,22 @@ class OpenAIService(IAIService):
             return gaps
         except Exception as e:
             raise AIServiceError(f"Failed to analyze gaps: {e}")
-    
+
     async def generate_innovations(self, context: Context) -> List[Innovation]:
         """Generate innovative ideas and improvement suggestions.
-        
+
         Args:
             context: Current execution context
-            
+
         Returns:
             List of Innovation entities
-            
+
         Raises:
             AIServiceError: If innovation generation fails
         """
         if self.mock_mode:
             return self._generate_mock_innovations(context)
-        
+
         try:
             prompt = self._build_innovations_prompt(context)
             response = self._call_openai(prompt)
@@ -128,22 +129,22 @@ class OpenAIService(IAIService):
             return innovations
         except Exception as e:
             raise AIServiceError(f"Failed to generate innovations: {e}")
-    
+
     async def provide_mentorship(self, task: Task) -> Dict[str, Any]:
         """Provide mentorship and guidance for a specific task.
-        
+
         Args:
             task: Task requiring mentorship
-            
+
         Returns:
             Dictionary containing mentorship guidance
-            
+
         Raises:
             AIServiceError: If mentorship generation fails
         """
         if self.mock_mode:
             return self._generate_mock_mentorship(task)
-        
+
         try:
             prompt = self._build_mentorship_prompt(task)
             response = self._call_openai(prompt)
@@ -151,17 +152,17 @@ class OpenAIService(IAIService):
             return mentorship
         except Exception as e:
             raise AIServiceError(f"Failed to provide mentorship: {e}")
-    
+
     def _call_openai(self, prompt: str, system_message: Optional[str] = None) -> str:
         """Call OpenAI API with a prompt.
-        
+
         Args:
             prompt: User prompt
             system_message: Optional system message
-            
+
         Returns:
             Response text
-            
+
         Raises:
             AIServiceError: If API call fails
         """
@@ -170,18 +171,18 @@ class OpenAIService(IAIService):
             if system_message:
                 messages.append({"role": "system", "content": system_message})
             messages.append({"role": "user", "content": prompt})
-            
+
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
             )
-            
+
             return response.choices[0].message.content
         except Exception as e:
             raise AIServiceError(f"OpenAI API call failed: {e}")
-    
+
     def _build_plan_prompt(self, context: Context) -> str:
         """Build prompt for plan generation."""
         return f"""Generate a daily plan based on the following context:
@@ -210,15 +211,17 @@ Return tasks in JSON format:
   }}
 ]
 """
-    
+
     def _build_gaps_prompt(self, execution_logs: List[Dict]) -> str:
         """Build prompt for gap analysis."""
-        logs_summary = "\n".join([
-            f"- {log.get('task', 'Unknown')}: {log.get('status', 'unknown')} "
-            f"({log.get('notes', 'no notes')})"
-            for log in execution_logs[:10]  # Limit to recent logs
-        ])
-        
+        logs_summary = "\n".join(
+            [
+                f"- {log.get('task', 'Unknown')}: {log.get('status', 'unknown')} "
+                f"({log.get('notes', 'no notes')})"
+                for log in execution_logs[:10]  # Limit to recent logs
+            ]
+        )
+
         return f"""Analyze the following execution logs to identify knowledge and skill gaps:
 
 {logs_summary}
@@ -238,7 +241,7 @@ Return gaps in JSON format:
   }}
 ]
 """
-    
+
     def _build_innovations_prompt(self, context: Context) -> str:
         """Build prompt for innovation generation."""
         return f"""Based on the current context, suggest innovative improvements:
@@ -262,7 +265,7 @@ Return innovations in JSON format:
   }}
 ]
 """
-    
+
     def _build_mentorship_prompt(self, task: Task) -> str:
         """Build prompt for mentorship generation."""
         return f"""Provide mentorship guidance for the following task:
@@ -286,24 +289,24 @@ Return in JSON format:
   "resources": ["Resource 1", "Resource 2"]
 }}
 """
-    
+
     def _parse_plan_response(self, response: str, context: Context) -> Plan:
         """Parse AI response into a Plan entity."""
         try:
             # Extract JSON from response
-            json_start = response.find('[')
-            json_end = response.rfind(']') + 1
+            json_start = response.find("[")
+            json_end = response.rfind("]") + 1
             if json_start == -1 or json_end == 0:
                 raise ValueError("No JSON array found in response")
-            
+
             tasks_data = json.loads(response[json_start:json_end])
-            
+
             plan = Plan(
                 date=context.date,
                 total_hours=context.available_hours,
                 created_by="ai_strategist",
             )
-            
+
             for task_data in tasks_data:
                 task = Task(
                     title=task_data["title"],
@@ -320,34 +323,34 @@ Return in JSON format:
                 except Exception:
                     # Skip tasks that don't fit
                     continue
-            
+
             return plan
         except Exception as e:
             raise AIServiceError(f"Failed to parse plan response: {e}")
-    
+
     def _parse_gaps_response(self, response: str) -> List[Dict]:
         """Parse AI response into gap list."""
         try:
-            json_start = response.find('[')
-            json_end = response.rfind(']') + 1
+            json_start = response.find("[")
+            json_end = response.rfind("]") + 1
             if json_start == -1 or json_end == 0:
                 raise ValueError("No JSON array found in response")
-            
+
             gaps = json.loads(response[json_start:json_end])
             return gaps
         except Exception as e:
             raise AIServiceError(f"Failed to parse gaps response: {e}")
-    
+
     def _parse_innovations_response(self, response: str) -> List[Innovation]:
         """Parse AI response into Innovation entities."""
         try:
-            json_start = response.find('[')
-            json_end = response.rfind(']') + 1
+            json_start = response.find("[")
+            json_end = response.rfind("]") + 1
             if json_start == -1 or json_end == 0:
                 raise ValueError("No JSON array found in response")
-            
+
             innovations_data = json.loads(response[json_start:json_end])
-            
+
             innovations = []
             for inn_data in innovations_data:
                 innovation = Innovation(
@@ -358,24 +361,24 @@ Return in JSON format:
                     created_by="ai_innovator",
                 )
                 innovations.append(innovation)
-            
+
             return innovations
         except Exception as e:
             raise AIServiceError(f"Failed to parse innovations response: {e}")
-    
+
     def _parse_mentorship_response(self, response: str) -> Dict[str, Any]:
         """Parse AI response into mentorship dictionary."""
         try:
-            json_start = response.find('{')
-            json_end = response.rfind('}') + 1
+            json_start = response.find("{")
+            json_end = response.rfind("}") + 1
             if json_start == -1 or json_end == 0:
                 raise ValueError("No JSON object found in response")
-            
+
             mentorship = json.loads(response[json_start:json_end])
             return mentorship
         except Exception as e:
             raise AIServiceError(f"Failed to parse mentorship response: {e}")
-    
+
     # Mock response generators
     def _generate_mock_plan(self, context: Context) -> Plan:
         """Generate a mock plan for testing."""
@@ -384,7 +387,7 @@ Return in JSON format:
             total_hours=context.available_hours,
             created_by="mock_ai",
         )
-        
+
         # Add sample tasks
         task1 = Task(
             title="Review and prioritize tasks",
@@ -393,7 +396,7 @@ Return in JSON format:
             cognitive_load=CognitiveLoad("low", 1.0),
             roi=ROI(0.7),
         )
-        
+
         task2 = Task(
             title="Implement core feature",
             description="Implement main functionality",
@@ -401,15 +404,15 @@ Return in JSON format:
             cognitive_load=CognitiveLoad("high", 3.0),
             roi=ROI(0.9),
         )
-        
+
         try:
             plan.add_task(task1)
             plan.add_task(task2)
         except Exception:
             pass
-        
+
         return plan
-    
+
     def _generate_mock_gaps(self, execution_logs: List[Dict]) -> List[Dict]:
         """Generate mock gaps for testing."""
         return [
@@ -426,7 +429,7 @@ Return in JSON format:
                 "evidence": ["Low test coverage in recent tasks"],
             },
         ]
-    
+
     def _generate_mock_innovations(self, context: Context) -> List[Innovation]:
         """Generate mock innovations for testing."""
         return [
@@ -445,12 +448,12 @@ Return in JSON format:
                 created_by="mock_ai",
             ),
         ]
-    
+
     def _generate_mock_mentorship(self, task: Task) -> Dict[str, Any]:
         """Generate mock mentorship for testing."""
         return {
             "guidance": f"For '{task.title}', start by breaking down the work into smaller steps. "
-                       "Focus on understanding requirements before implementation.",
+            "Focus on understanding requirements before implementation.",
             "best_practices": [
                 "Write tests first (TDD approach)",
                 "Document your code as you go",

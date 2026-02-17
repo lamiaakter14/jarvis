@@ -5,6 +5,7 @@ from enum import Enum
 
 class AgentType(str, Enum):
     """Available agent types in the system."""
+
     STRATEGIST = "strategist"
     MENTOR = "mentor"
     EXECUTOR = "executor"
@@ -14,6 +15,7 @@ class AgentType(str, Enum):
 
 class TaskPriority(str, Enum):
     """Task priority levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -22,6 +24,7 @@ class TaskPriority(str, Enum):
 
 class TaskStatus(str, Enum):
     """Task execution status."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -31,6 +34,7 @@ class TaskStatus(str, Enum):
 
 class MemoryType(str, Enum):
     """Types of memory in the system."""
+
     WORKING = "working"
     KNOWLEDGE = "knowledge"
     STRATEGIC = "strategic"
@@ -39,6 +43,7 @@ class MemoryType(str, Enum):
 
 class CognitiveLoadLevel(str, Enum):
     """Cognitive load levels for tasks."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -46,6 +51,7 @@ class CognitiveLoadLevel(str, Enum):
 
 class CognitiveLoopStatus(str, Enum):
     """Status of the cognitive loop."""
+
     IDLE = "idle"
     RUNNING = "running"
     PAUSED = "paused"

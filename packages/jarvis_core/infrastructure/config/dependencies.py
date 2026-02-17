@@ -1,40 +1,39 @@
 """Dependency injection container for the application."""
 
-from typing import Optional
 from functools import lru_cache
 
-from jarvis_core.infrastructure.config.settings import settings
-from jarvis_core.infrastructure.persistence.file_memory_repository import FileMemoryRepository
-from jarvis_core.infrastructure.persistence.sqlite_task_repository import SqliteTaskRepository
-from jarvis_core.infrastructure.ai.openai_service import OpenAIService
-from jarvis_core.infrastructure.agents.strategist_agent import StrategistAgent
-from jarvis_core.infrastructure.agents.mentor_agent import MentorAgent
+from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
+from jarvis_core.infrastructure.agents.amplifier_agent import AmplifierAgent
 from jarvis_core.infrastructure.agents.executor_agent import ExecutorAgent
 from jarvis_core.infrastructure.agents.innovator_agent import InnovatorAgent
-from jarvis_core.infrastructure.agents.amplifier_agent import AmplifierAgent
+from jarvis_core.infrastructure.agents.mentor_agent import MentorAgent
+from jarvis_core.infrastructure.agents.strategist_agent import StrategistAgent
+from jarvis_core.infrastructure.ai.openai_service import OpenAIService
+from jarvis_core.infrastructure.config.settings import settings
 from jarvis_core.infrastructure.monitoring.logger import Logger
 from jarvis_core.infrastructure.monitoring.metrics_collector import MetricsCollector
 from jarvis_core.infrastructure.monitoring.tracer import Tracer
-from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
-from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
-from jarvis_core.application.interfaces.i_ai_service import IAIService
+from jarvis_core.infrastructure.persistence.file_memory_repository import FileMemoryRepository
+from jarvis_core.infrastructure.persistence.sqlite_task_repository import SqliteTaskRepository
 
 
 # Repository Dependencies
-@lru_cache()
+@lru_cache
 def get_memory_repository() -> IMemoryRepository:
     """Get memory repository instance.
-    
+
     Returns:
         Singleton instance of memory repository
     """
     return FileMemoryRepository(base_path=settings.memory_base_path)
 
 
-@lru_cache()
+@lru_cache
 def get_task_repository() -> ITaskRepository:
     """Get task repository instance.
-    
+
     Returns:
         Singleton instance of task repository
     """
@@ -42,10 +41,10 @@ def get_task_repository() -> ITaskRepository:
 
 
 # Service Dependencies
-@lru_cache()
+@lru_cache
 def get_ai_service() -> IAIService:
     """Get AI service instance.
-    
+
     Returns:
         Singleton instance of AI service
     """
@@ -60,10 +59,10 @@ def get_ai_service() -> IAIService:
 
 
 # Agent Dependencies
-@lru_cache()
+@lru_cache
 def get_strategist_agent() -> StrategistAgent:
     """Get strategist agent instance.
-    
+
     Returns:
         Singleton instance of strategist agent
     """
@@ -74,10 +73,10 @@ def get_strategist_agent() -> StrategistAgent:
     )
 
 
-@lru_cache()
+@lru_cache
 def get_mentor_agent() -> MentorAgent:
     """Get mentor agent instance.
-    
+
     Returns:
         Singleton instance of mentor agent
     """
@@ -87,10 +86,10 @@ def get_mentor_agent() -> MentorAgent:
     )
 
 
-@lru_cache()
+@lru_cache
 def get_executor_agent() -> ExecutorAgent:
     """Get executor agent instance.
-    
+
     Returns:
         Singleton instance of executor agent
     """
@@ -100,10 +99,10 @@ def get_executor_agent() -> ExecutorAgent:
     )
 
 
-@lru_cache()
+@lru_cache
 def get_innovator_agent() -> InnovatorAgent:
     """Get innovator agent instance.
-    
+
     Returns:
         Singleton instance of innovator agent
     """
@@ -113,10 +112,10 @@ def get_innovator_agent() -> InnovatorAgent:
     )
 
 
-@lru_cache()
+@lru_cache
 def get_amplifier_agent() -> AmplifierAgent:
     """Get amplifier agent instance.
-    
+
     Returns:
         Singleton instance of amplifier agent
     """
@@ -127,10 +126,10 @@ def get_amplifier_agent() -> AmplifierAgent:
 
 
 # Monitoring Dependencies
-@lru_cache()
+@lru_cache
 def get_logger() -> Logger:
     """Get logger instance.
-    
+
     Returns:
         Singleton instance of logger
     """
@@ -141,10 +140,10 @@ def get_logger() -> Logger:
     )
 
 
-@lru_cache()
+@lru_cache
 def get_metrics_collector() -> MetricsCollector:
     """Get metrics collector instance.
-    
+
     Returns:
         Singleton instance of metrics collector
     """
@@ -154,10 +153,10 @@ def get_metrics_collector() -> MetricsCollector:
     )
 
 
-@lru_cache()
+@lru_cache
 def get_tracer() -> Tracer:
     """Get tracer instance.
-    
+
     Returns:
         Singleton instance of tracer
     """
