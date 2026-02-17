@@ -1,7 +1,6 @@
 """API v2 - Enhanced Cognitive Loop."""
 
 from fastapi import APIRouter
-from jarvis_core.orchestrator.loop import CognitiveOrchestrator
 
 from .endpoints import cognitive_loop
 

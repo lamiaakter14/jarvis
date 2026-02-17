@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from jarvis_core.shared.constants import MemoryType
 from jarvis_core.shared.exceptions import DomainException
@@ -21,11 +21,11 @@ class Memory:
     memory_id: str = field(default_factory=lambda: generate_id("mem_"))
     type: MemoryType = MemoryType.WORKING
     key: str = ""
-    content: Dict[str, Any] = field(default_factory=dict)
+    content: dict[str, Any] = field(default_factory=dict)
 
     created_at: datetime = field(default_factory=current_timestamp)
     updated_at: datetime = field(default_factory=current_timestamp)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate memory after initialization."""
@@ -39,7 +39,7 @@ class Memory:
             self.metadata["version"] = 1
 
     def update_content(
-        self, new_content: Dict[str, Any], merge: bool = False, increment_version: bool = True
+        self, new_content: dict[str, Any], merge: bool = False, increment_version: bool = True
     ) -> None:
         """Update the memory content.
 

@@ -1,7 +1,7 @@
 """Rate limiting middleware for API endpoints."""
 
 import time
-from typing import Dict, Optional
+from typing import Optional
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -25,8 +25,8 @@ class RateLimiter:
         self.requests_per_hour = requests_per_hour
 
         # Store request history: {client_id: [(timestamp, count), ...]}
-        self._minute_buckets: Dict[str, list] = {}
-        self._hour_buckets: Dict[str, list] = {}
+        self._minute_buckets: dict[str, list] = {}
+        self._hour_buckets: dict[str, list] = {}
 
     def _get_client_id(self, request: Request) -> str:
         """Extract client identifier from request.
@@ -46,7 +46,7 @@ class RateLimiter:
         client_ip = request.client.host if request.client else "unknown"
         return f"ip:{client_ip}"
 
-    def _clean_old_entries(self, bucket: Dict[str, list], max_age_seconds: int) -> None:
+    def _clean_old_entries(self, bucket: dict[str, list], max_age_seconds: int) -> None:
         """Remove old entries from rate limit bucket.
 
         Args:
@@ -65,7 +65,7 @@ class RateLimiter:
                 del bucket[client_id]
 
     def _check_limit(
-        self, client_id: str, bucket: Dict[str, list], max_requests: int, window_seconds: int
+        self, client_id: str, bucket: dict[str, list], max_requests: int, window_seconds: int
     ) -> tuple[bool, int]:
         """Check if client has exceeded rate limit.
 

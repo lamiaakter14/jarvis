@@ -1,7 +1,8 @@
 """Memory repository interface for the domain layer."""
 
+import builtins
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
 from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.shared.constants import MemoryType
@@ -28,7 +29,6 @@ class IMemoryRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass
 
     @abstractmethod
     async def save(self, memory: Memory) -> None:
@@ -41,10 +41,9 @@ class IMemoryRepository(ABC):
             RepositoryError: If save operation fails
             ValidationError: If memory data is invalid
         """
-        pass
 
     @abstractmethod
-    async def list(self, memory_type: MemoryType) -> List[Memory]:
+    async def list(self, memory_type: MemoryType) -> list[Memory]:
         """List all memories of a specific type.
 
         Args:
@@ -56,7 +55,6 @@ class IMemoryRepository(ABC):
         Raises:
             RepositoryError: If list operation fails
         """
-        pass
 
     @abstractmethod
     async def delete(self, key: str) -> None:
@@ -69,18 +67,17 @@ class IMemoryRepository(ABC):
             RepositoryError: If delete operation fails
             EntityNotFoundError: If memory with key does not exist
         """
-        pass
 
     @abstractmethod
     async def search(
         self,
         memory_type: Optional[MemoryType] = None,
-        keywords: Optional[List[str]] = None,
+        keywords: Optional[builtins.list[str]] = None,
         key_pattern: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[builtins.list[str]] = None,
         limit: int = 100,
         offset: int = 0,
-    ) -> List[Memory]:
+    ) -> builtins.list[Memory]:
         """Search for memories based on multiple criteria.
 
         Args:
@@ -97,7 +94,6 @@ class IMemoryRepository(ABC):
         Raises:
             RepositoryError: If search operation fails
         """
-        pass
 
     @abstractmethod
     async def get_by_version(self, key: str, version: int) -> Optional[Memory]:
@@ -113,10 +109,9 @@ class IMemoryRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass
 
     @abstractmethod
-    async def list_versions(self, key: str) -> List[int]:
+    async def list_versions(self, key: str) -> builtins.list[int]:
         """List all available versions of a memory.
 
         Args:
@@ -128,4 +123,3 @@ class IMemoryRepository(ABC):
         Raises:
             RepositoryError: If list operation fails
         """
-        pass

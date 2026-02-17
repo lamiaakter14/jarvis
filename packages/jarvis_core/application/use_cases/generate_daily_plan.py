@@ -1,7 +1,6 @@
 """Generate Daily Plan use case."""
 
 from datetime import date
-from typing import List
 
 from jarvis_core.application.dto.plan_dto import PlanDTO
 from jarvis_core.application.interfaces.i_ai_service import IAIService
@@ -137,7 +136,7 @@ class GenerateDailyPlan:
 
         return context
 
-    async def _optimize_plan(self, plan: Plan, available_tasks: List, context: Context) -> Plan:
+    async def _optimize_plan(self, plan: Plan, available_tasks: list, context: Context) -> Plan:
         """Optimize the generated plan.
 
         Args:

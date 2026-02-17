@@ -1,6 +1,6 @@
 """Execute Cognitive Loop use case."""
 
-from typing import Any, Dict
+from typing import Any
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
@@ -91,7 +91,7 @@ class ExecuteCognitiveLoop:
             memory_repository=memory_repository,
         )
 
-    async def execute(self) -> Dict[str, Any]:
+    async def execute(self) -> dict[str, Any]:
         """Execute the complete cognitive loop.
 
         Returns:
@@ -190,7 +190,7 @@ class ExecuteCognitiveLoop:
 
             raise DomainException(f"Cognitive loop execution failed: {str(e)}")
 
-    async def _run_strategist(self, today) -> Dict[str, Any]:
+    async def _run_strategist(self, today) -> dict[str, Any]:
         """Run the Strategist agent (planning).
 
         Args:
@@ -214,7 +214,7 @@ class ExecuteCognitiveLoop:
         except Exception as e:
             return {"status": "failed", "error": str(e)}
 
-    async def _run_mentor(self) -> Dict[str, Any]:
+    async def _run_mentor(self) -> dict[str, Any]:
         """Run the Mentor agent (diagnostics).
 
         Returns:
@@ -239,7 +239,7 @@ class ExecuteCognitiveLoop:
         except Exception as e:
             return {"status": "failed", "error": str(e)}
 
-    async def _run_executor(self) -> Dict[str, Any]:
+    async def _run_executor(self) -> dict[str, Any]:
         """Run the Executor agent (task execution).
 
         Returns:
@@ -275,7 +275,7 @@ class ExecuteCognitiveLoop:
         except Exception as e:
             return {"status": "failed", "error": str(e)}
 
-    async def _run_innovator(self) -> Dict[str, Any]:
+    async def _run_innovator(self) -> dict[str, Any]:
         """Run the Innovator agent (creative synthesis).
 
         Returns:
@@ -301,7 +301,7 @@ class ExecuteCognitiveLoop:
         except Exception as e:
             return {"status": "failed", "error": str(e)}
 
-    async def _run_amplifier(self, today) -> Dict[str, Any]:
+    async def _run_amplifier(self, today) -> dict[str, Any]:
         """Run the Amplifier agent (performance analysis).
 
         Args:
@@ -333,7 +333,7 @@ class ExecuteCognitiveLoop:
         except Exception as e:
             return {"status": "failed", "error": str(e)}
 
-    async def _store_loop_summary(self, summary: Dict[str, Any]) -> None:
+    async def _store_loop_summary(self, summary: dict[str, Any]) -> None:
         """Store cognitive loop execution summary.
 
         Args:

@@ -1,7 +1,7 @@
 """Strategist agent implementation."""
 
 import time
-from typing import Any, Dict
+from typing import Any
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.domain.entities.agent import Agent
@@ -75,7 +75,7 @@ class StrategistAgent(Agent):
             self.track_execution(success=False, execution_time=execution_time)
             raise DomainException(f"Strategist execution failed: {e}")
 
-    async def analyze_context(self, context: Context) -> Dict[str, Any]:
+    async def analyze_context(self, context: Context) -> dict[str, Any]:
         """Analyze context to understand current state and priorities.
 
         Args:

@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List
 
 from jarvis_core.domain.events.base_event import BaseEvent
 from jarvis_core.shared.utils import current_timestamp, generate_id
@@ -20,7 +19,7 @@ class GapIdentifiedEvent(BaseEvent):
     description: str = ""
     category: str = "knowledge"  # knowledge, skill, process, tool
     severity: str = "medium"  # low, medium, high, critical
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
     identified_by: str = "system"
     timestamp: datetime = field(default_factory=current_timestamp)
 

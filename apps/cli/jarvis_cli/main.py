@@ -1,6 +1,5 @@
 """CLI interface for JARVIS cognitive assistant using Typer."""
 
-
 import typer
 from jarvis_core.bridge.agent_bridge import (
     AmplifierBridge,
@@ -38,7 +37,7 @@ def run():
         console.print(f"  ✓ Generated plan with {len(plan.get('tasks', []))} tasks\n")
 
         console.print("[cyan]→ Step 2: Analyzing with Mentor[/cyan]")
-        gaps = mentor.analyze_execution_logs()
+        mentor.analyze_execution_logs()
         console.print("  ✓ Analyzed execution logs\n")
 
         console.print("[cyan]→ Step 3: Executing with Executor[/cyan]")

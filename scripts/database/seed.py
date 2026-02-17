@@ -10,13 +10,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 async def seed_database():
     """Seed database with test data."""
     print("Seeding database with test data...")
-    
+
     # Add your seeding logic here
     # Example:
     # - Create test users
     # - Create sample tasks
     # - Create sample plans
-    
+
     print("✅ Database seeding complete!")
 
 

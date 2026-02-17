@@ -66,10 +66,7 @@ class TaskCompletedEvent(BaseEvent):
         if self.result is None:
             return False
 
-        if isinstance(self.result, dict) and "error" in self.result:
-            return False
-
-        return True
+        return not (isinstance(self.result, dict) and "error" in self.result)
 
     def get_duration_minutes(self) -> float:
         """Get task duration in minutes.

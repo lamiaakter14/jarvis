@@ -1,10 +1,11 @@
 """SQLite-based task repository implementation."""
 
+import builtins
 import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 from jarvis_core.domain.entities.task import Task
 from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
@@ -69,15 +70,15 @@ class SqliteTaskRepository(ITaskRepository):
 
                 # Create indexes for common queries
                 cursor.execute("""
-                    CREATE INDEX IF NOT EXISTS idx_status 
+                    CREATE INDEX IF NOT EXISTS idx_status
                     ON tasks(status)
                 """)
                 cursor.execute("""
-                    CREATE INDEX IF NOT EXISTS idx_agent_type 
+                    CREATE INDEX IF NOT EXISTS idx_agent_type
                     ON tasks(agent_type)
                 """)
                 cursor.execute("""
-                    CREATE INDEX IF NOT EXISTS idx_priority 
+                    CREATE INDEX IF NOT EXISTS idx_priority
                     ON tasks(priority_weight DESC)
                 """)
 
@@ -243,7 +244,7 @@ class SqliteTaskRepository(ITaskRepository):
         except Exception as e:
             raise RepositoryError(f"Failed to save task '{task.task_id}': {e}")
 
-    async def list(self, filters: Optional[Dict] = None) -> List[Task]:
+    async def list(self, filters: Optional[dict] = None) -> list[Task]:
         """List tasks with optional filtering.
 
         Args:
@@ -305,7 +306,7 @@ class SqliteTaskRepository(ITaskRepository):
         except Exception as e:
             raise RepositoryError(f"Failed to delete task '{task_id}': {e}")
 
-    async def get_by_status(self, status: TaskStatus) -> List[Task]:
+    async def get_by_status(self, status: TaskStatus) -> builtins.list[Task]:
         """Retrieve all tasks with a specific status.
 
         Args:

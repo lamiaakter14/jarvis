@@ -1,6 +1,6 @@
 """V2 Cognitive Loop endpoint."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from jarvis_core.cognition.models import DecisionProfile, EnergyModel, IdentityModel
@@ -21,13 +21,13 @@ class CognitiveLoopRequest(BaseModel):
         decision_profile: Optional decision profile configuration
     """
 
-    energy_model: Optional[Dict[str, Any]] = Field(
+    energy_model: Optional[dict[str, Any]] = Field(
         default=None, description="Energy model with sleep hours, energy score, etc."
     )
-    identity_model: Optional[Dict[str, Any]] = Field(
+    identity_model: Optional[dict[str, Any]] = Field(
         default=None, description="Identity model with mission and goals"
     )
-    decision_profile: Optional[Dict[str, Any]] = Field(
+    decision_profile: Optional[dict[str, Any]] = Field(
         default=None, description="Decision profile with speed/accuracy bias"
     )
 
@@ -43,11 +43,11 @@ class CognitiveLoopResponse(BaseModel):
         metrics: Performance metrics
     """
 
-    plan: Dict[str, Any] = Field(..., description="Daily plan from strategist")
+    plan: dict[str, Any] = Field(..., description="Daily plan from strategist")
     knowledge_gaps: list = Field(..., description="Identified knowledge gaps")
     innovations: list = Field(..., description="Innovation suggestions")
-    reflection: Dict[str, Any] = Field(..., description="Reflection analysis")
-    metrics: Dict[str, Any] = Field(..., description="Performance metrics")
+    reflection: dict[str, Any] = Field(..., description="Reflection analysis")
+    metrics: dict[str, Any] = Field(..., description="Performance metrics")
 
 
 def get_orchestrator() -> CognitiveOrchestrator:

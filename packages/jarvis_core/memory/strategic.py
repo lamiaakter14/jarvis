@@ -9,7 +9,7 @@ import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.shared.exceptions import RepositoryError
 
@@ -71,7 +71,7 @@ class StrategicMemoryStore:
         except Exception as e:
             raise RepositoryError(f"Failed to initialize strategic memory database: {e}")
 
-    def store_snapshot(self, goal_snapshot: Dict[str, Any]) -> int:
+    def store_snapshot(self, goal_snapshot: dict[str, Any]) -> int:
         """Store a goal snapshot in the database.
 
         Args:
@@ -122,7 +122,7 @@ class StrategicMemoryStore:
         except Exception as e:
             raise RepositoryError(f"Failed to store goal snapshot: {e}")
 
-    def get_latest_snapshot(self, goal_id: str) -> Optional[Dict[str, Any]]:
+    def get_latest_snapshot(self, goal_id: str) -> Optional[dict[str, Any]]:
         """Retrieve the latest snapshot for a goal.
 
         Args:
@@ -159,7 +159,7 @@ class StrategicMemoryStore:
         except Exception as e:
             raise RepositoryError(f"Failed to retrieve latest snapshot for goal {goal_id}: {e}")
 
-    def get_snapshot_history(self, goal_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_snapshot_history(self, goal_id: str, limit: int = 10) -> list[dict[str, Any]]:
         """Retrieve snapshot history for a goal.
 
         Args:
@@ -215,7 +215,7 @@ def _get_store() -> StrategicMemoryStore:
     return _store
 
 
-def store_goal_snapshot(goal_snapshot: Dict[str, Any]) -> int:
+def store_goal_snapshot(goal_snapshot: dict[str, Any]) -> int:
     """Save a goal state snapshot to the database.
 
     This function stores a snapshot of the current goal state, enabling
@@ -249,8 +249,8 @@ def store_goal_snapshot(goal_snapshot: Dict[str, Any]) -> int:
 
 
 def trajectory_delta(
-    previous_snapshot: Dict[str, Any], current_snapshot: Dict[str, Any]
-) -> Dict[str, Any]:
+    previous_snapshot: dict[str, Any], current_snapshot: dict[str, Any]
+) -> dict[str, Any]:
     """Calculate the difference between two goal snapshots.
 
     This function computes the delta between a previous and current goal

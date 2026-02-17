@@ -3,7 +3,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 from jarvis_core.shared.exceptions import RepositoryError
 
@@ -26,13 +26,13 @@ class StrategicMemoryIndex:
         self.index_file = self.base_path / "strategic" / ".index.json"
 
         # In-memory indexes
-        self.by_priority: Dict[str, Set[str]] = {
+        self.by_priority: dict[str, set[str]] = {
             "critical": set(),
             "high": set(),
             "medium": set(),
             "low": set(),
         }
-        self.by_status: Dict[str, Set[str]] = {
+        self.by_status: dict[str, set[str]] = {
             "active": set(),
             "paused": set(),
             "completed": set(),
@@ -42,9 +42,9 @@ class StrategicMemoryIndex:
             "deprecated": set(),
             "superseded": set(),
         }
-        self.by_tag: Dict[str, Set[str]] = {}
-        self.by_type: Dict[str, Set[str]] = {"goal": set(), "adr": set()}
-        self.metadata: Dict[str, Dict] = {}  # key -> metadata
+        self.by_tag: dict[str, set[str]] = {}
+        self.by_type: dict[str, set[str]] = {"goal": set(), "adr": set()}
+        self.metadata: dict[str, dict] = {}  # key -> metadata
 
         # Load existing index
         self._load_index()
@@ -98,7 +98,7 @@ class StrategicMemoryIndex:
         entry_type: str,
         priority: Optional[str] = None,
         status: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[list[str]] = None,
     ) -> None:
         """Add or update an entry in the index.
 
@@ -171,7 +171,7 @@ class StrategicMemoryIndex:
         # Persist index
         self._save_index()
 
-    def find_by_priority(self, priority: str) -> Set[str]:
+    def find_by_priority(self, priority: str) -> set[str]:
         """Find all entries with given priority.
 
         Args:
@@ -182,7 +182,7 @@ class StrategicMemoryIndex:
         """
         return self.by_priority.get(priority, set()).copy()
 
-    def find_by_status(self, status: str) -> Set[str]:
+    def find_by_status(self, status: str) -> set[str]:
         """Find all entries with given status.
 
         Args:
@@ -193,7 +193,7 @@ class StrategicMemoryIndex:
         """
         return self.by_status.get(status, set()).copy()
 
-    def find_by_tag(self, tag: str) -> Set[str]:
+    def find_by_tag(self, tag: str) -> set[str]:
         """Find all entries with given tag.
 
         Args:
@@ -204,7 +204,7 @@ class StrategicMemoryIndex:
         """
         return self.by_tag.get(tag, set()).copy()
 
-    def find_by_tags(self, tags: List[str], match_all: bool = False) -> Set[str]:
+    def find_by_tags(self, tags: list[str], match_all: bool = False) -> set[str]:
         """Find entries matching given tags.
 
         Args:
@@ -234,7 +234,7 @@ class StrategicMemoryIndex:
                 result |= s
             return result
 
-    def find_by_type(self, entry_type: str) -> Set[str]:
+    def find_by_type(self, entry_type: str) -> set[str]:
         """Find all entries of given type.
 
         Args:
@@ -245,7 +245,7 @@ class StrategicMemoryIndex:
         """
         return self.by_type.get(entry_type, set()).copy()
 
-    def get_metadata(self, key: str) -> Optional[Dict]:
+    def get_metadata(self, key: str) -> Optional[dict]:
         """Get metadata for a specific entry.
 
         Args:
@@ -256,7 +256,7 @@ class StrategicMemoryIndex:
         """
         return self.metadata.get(key)
 
-    def get_all_tags(self) -> List[str]:
+    def get_all_tags(self) -> list[str]:
         """Get all tags in the index.
 
         Returns:
@@ -264,7 +264,7 @@ class StrategicMemoryIndex:
         """
         return list(self.by_tag.keys())
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """Get statistics about the indexed strategic memory.
 
         Returns:

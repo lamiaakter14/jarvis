@@ -1,13 +1,15 @@
 """Mock repository fixtures for testing."""
-import pytest
-from unittest.mock import AsyncMock, Mock
-from typing import List, Optional, Dict, Any
 
-from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
-from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
-from jarvis_core.domain.repositories.i_analytics_repository import IAnalyticsRepository
+import builtins
+from typing import Any, Optional
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
+from jarvis_core.domain.repositories.i_analytics_repository import IAnalyticsRepository
+from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
+from jarvis_core.domain.repositories.i_task_repository import ITaskRepository
 
 
 @pytest.fixture
@@ -69,59 +71,59 @@ def mock_notification_service():
 
 class InMemoryTaskRepository(ITaskRepository):
     """In-memory implementation of task repository for testing."""
-    
+
     def __init__(self):
-        self.tasks: Dict[str, Any] = {}
-    
+        self.tasks: dict[str, Any] = {}
+
     async def save(self, task: Any) -> None:
         self.tasks[task.task_id] = task
-    
+
     async def get(self, task_id: str) -> Optional[Any]:
         return self.tasks.get(task_id)
-    
-    async def list(self, filters: Optional[Dict] = None) -> List[Any]:
+
+    async def list(self, filters: Optional[dict] = None) -> list[Any]:
         return list(self.tasks.values())
-    
+
     async def update(self, task: Any) -> None:
         if task.task_id in self.tasks:
             self.tasks[task.task_id] = task
-    
+
     async def delete(self, task_id: str) -> None:
         if task_id in self.tasks:
             del self.tasks[task_id]
-    
-    async def get_by_status(self, status: str) -> List[Any]:
+
+    async def get_by_status(self, status: str) -> builtins.list[Any]:
         return [t for t in self.tasks.values() if t.status == status]
-    
-    async def get_by_date_range(self, start_date: Any, end_date: Any) -> List[Any]:
+
+    async def get_by_date_range(self, start_date: Any, end_date: Any) -> builtins.list[Any]:
         return list(self.tasks.values())
 
 
 class InMemoryMemoryRepository(IMemoryRepository):
     """In-memory implementation of memory repository for testing."""
-    
+
     def __init__(self):
-        self.memory: Dict[str, Dict[str, Any]] = {}
-    
-    async def save(self, memory_type: str, key: str, data: Dict) -> None:
+        self.memory: dict[str, dict[str, Any]] = {}
+
+    async def save(self, memory_type: str, key: str, data: dict) -> None:
         if memory_type not in self.memory:
             self.memory[memory_type] = {}
         self.memory[memory_type][key] = data
-    
-    async def retrieve(self, memory_type: str, key: str) -> Optional[Dict]:
+
+    async def retrieve(self, memory_type: str, key: str) -> Optional[dict]:
         if memory_type in self.memory:
             return self.memory[memory_type].get(key)
         return None
-    
-    async def list(self, memory_type: str) -> List[str]:
+
+    async def list(self, memory_type: str) -> list[str]:
         if memory_type in self.memory:
             return list(self.memory[memory_type].keys())
         return []
-    
+
     async def delete(self, memory_type: str, key: str) -> None:
         if memory_type in self.memory and key in self.memory[memory_type]:
             del self.memory[memory_type][key]
-    
+
     async def exists(self, memory_type: str, key: str) -> bool:
         return memory_type in self.memory and key in self.memory[memory_type]
 

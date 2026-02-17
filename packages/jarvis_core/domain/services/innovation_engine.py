@@ -1,6 +1,6 @@
 """Innovation engine domain service."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.domain.entities.context import Context
 from jarvis_core.domain.entities.innovation import Innovation
@@ -15,7 +15,7 @@ class InnovationEngine:
     and context to generate novel ideas and improvement suggestions.
     """
 
-    def analyze_patterns(self, tasks: List[Task], context: Context) -> List[Innovation]:
+    def analyze_patterns(self, tasks: list[Task], context: Context) -> list[Innovation]:
         """Analyze task patterns to identify innovation opportunities.
 
         Looks for recurring patterns, inefficiencies, and optimization
@@ -112,7 +112,7 @@ class InnovationEngine:
 
         return innovations
 
-    def suggest_improvements(self, performance_data: Dict[str, Any]) -> List[Innovation]:
+    def suggest_improvements(self, performance_data: dict[str, Any]) -> list[Innovation]:
         """Suggest improvements based on performance metrics.
 
         Analyzes execution metrics to identify areas for improvement.
@@ -228,7 +228,7 @@ class InnovationEngine:
         # Normalize to 0-1 range
         return min(max(score, 0.0), 1.0)
 
-    def rank_innovations(self, innovations: List[Innovation]) -> List[Innovation]:
+    def rank_innovations(self, innovations: list[Innovation]) -> list[Innovation]:
         """Rank innovations by their comprehensive score.
 
         Args:
@@ -247,8 +247,8 @@ class InnovationEngine:
         return [inn for _, inn in scored]
 
     def filter_actionable_innovations(
-        self, innovations: List[Innovation], min_score: float = 0.6
-    ) -> List[Innovation]:
+        self, innovations: list[Innovation], min_score: float = 0.6
+    ) -> list[Innovation]:
         """Filter innovations to only those worth acting on.
 
         Args:

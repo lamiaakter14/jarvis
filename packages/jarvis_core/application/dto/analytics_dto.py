@@ -1,6 +1,6 @@
 """Analytics Data Transfer Object for application layer."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -20,8 +20,8 @@ class AnalyticsDTO(BaseModel):
     total_tasks: int = Field(default=0, ge=0, description="Total number of tasks in period")
     completed_tasks: int = Field(default=0, ge=0, description="Number of completed tasks")
     average_roi: float = Field(default=0.0, ge=0.0, le=1.0, description="Average ROI across tasks")
-    top_gaps: List[Dict[str, Any]] = Field(default_factory=list, description="Top identified gaps")
-    recent_innovations: List[Dict[str, Any]] = Field(
+    top_gaps: list[dict[str, Any]] = Field(default_factory=list, description="Top identified gaps")
+    recent_innovations: list[dict[str, Any]] = Field(
         default_factory=list, description="Recent innovations"
     )
     productivity_score: float = Field(
@@ -40,7 +40,7 @@ class AnalyticsDTO(BaseModel):
         default=0.0, ge=0.0, le=1.0, description="Time utilization rate"
     )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert DTO to dictionary.
 
         Returns:

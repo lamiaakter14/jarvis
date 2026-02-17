@@ -1,6 +1,5 @@
 """Strategy engine domain service."""
 
-from typing import List
 
 from jarvis_core.domain.entities.context import Context
 from jarvis_core.domain.entities.task import Task
@@ -15,7 +14,7 @@ class StrategyEngine:
     create optimal schedules, and calculate ROI for strategic decision-making.
     """
 
-    def prioritize_tasks(self, tasks: List[Task]) -> List[Task]:
+    def prioritize_tasks(self, tasks: list[Task]) -> list[Task]:
         """Prioritize tasks by ROI and other strategic factors.
 
         Sorts tasks in descending order of importance based on ROI,
@@ -33,7 +32,7 @@ class StrategyEngine:
         # Sort by task score (which combines ROI, priority, and efficiency)
         return sorted(tasks, key=lambda t: t.get_score(), reverse=True)
 
-    def create_schedule(self, tasks: List[Task], available_hours: float) -> List[Task]:
+    def create_schedule(self, tasks: list[Task], available_hours: float) -> list[Task]:
         """Create an optimal schedule fitting tasks into available time.
 
         Uses a greedy algorithm to select high-value tasks that fit
@@ -125,7 +124,7 @@ class StrategyEngine:
             max_effort_hours=8.0,
         )
 
-    def analyze_task_portfolio(self, tasks: List[Task]) -> dict:
+    def analyze_task_portfolio(self, tasks: list[Task]) -> dict:
         """Analyze a portfolio of tasks for strategic insights.
 
         Provides metrics and recommendations for task management.
@@ -181,7 +180,7 @@ class StrategyEngine:
 
         return analysis
 
-    def optimize_task_sequence(self, tasks: List[Task], context: Context) -> List[Task]:
+    def optimize_task_sequence(self, tasks: list[Task], context: Context) -> list[Task]:
         """Optimize task execution sequence for maximum efficiency.
 
         Orders tasks to minimize context switching and maximize flow.

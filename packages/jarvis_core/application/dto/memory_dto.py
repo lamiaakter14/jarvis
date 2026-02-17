@@ -1,7 +1,7 @@
 """Memory Data Transfer Object for application layer."""
 
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.shared.constants import MemoryType
@@ -22,11 +22,11 @@ class MemoryDTO(BaseModel):
         ..., description="Type of memory (working, knowledge, strategic, execution_log)"
     )
     key: str = Field(..., min_length=1, description="Unique key identifying the memory")
-    content: Dict[str, Any] = Field(..., description="Memory content as dictionary")
+    content: dict[str, Any] = Field(..., description="Memory content as dictionary")
 
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
     version: int = Field(default=1, ge=1, description="Memory version number")
 
     @field_validator("type")
@@ -50,7 +50,7 @@ class MemoryDTO(BaseModel):
 
     @field_validator("content")
     @classmethod
-    def validate_content(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_content(cls, v: dict[str, Any]) -> dict[str, Any]:
         """Validate memory content is a dictionary."""
         if not isinstance(v, dict):
             raise ValueError("Memory content must be a dictionary")
@@ -116,7 +116,7 @@ class MemorySearchQueryDTO(BaseModel):
     memory_type: Optional[str] = Field(None, description="Filter by memory type")
     keywords: Optional[list[str]] = Field(None, description="Keywords to search for")
     key_pattern: Optional[str] = Field(None, description="Pattern to match in keys")
-    context: Optional[Dict[str, Any]] = Field(None, description="Context for semantic search")
+    context: Optional[dict[str, Any]] = Field(None, description="Context for semantic search")
     limit: int = Field(default=100, ge=1, le=1000, description="Maximum results to return")
     offset: int = Field(default=0, ge=0, description="Offset for pagination")
 

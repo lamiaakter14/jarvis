@@ -1,7 +1,7 @@
 """Memory migration service for handling schema version updates."""
 
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
@@ -13,7 +13,6 @@ from pydantic import ValidationError
 class MigrationError(Exception):
     """Exception raised when memory migration fails."""
 
-    pass
 
 
 class MemoryMigration:
@@ -27,7 +26,7 @@ class MemoryMigration:
     """
 
     # Schema version to migration function mapping
-    MIGRATIONS: Dict[str, Dict[int, Callable]] = {
+    MIGRATIONS: dict[str, dict[int, Callable]] = {
         "strategic": {},
         "knowledge": {},
         "working": {},
@@ -36,7 +35,7 @@ class MemoryMigration:
     }
 
     # Current schema versions for each memory type
-    CURRENT_VERSIONS: Dict[str, int] = {
+    CURRENT_VERSIONS: dict[str, int] = {
         "strategic": 1,
         "knowledge": 1,
         "working": 1,
@@ -45,7 +44,7 @@ class MemoryMigration:
     }
 
     @staticmethod
-    def validate_and_fix_memory(memory: Memory) -> tuple[Memory, List[str]]:
+    def validate_and_fix_memory(memory: Memory) -> tuple[Memory, list[str]]:
         """Validate memory content and attempt to fix invalid fields.
 
         Args:
@@ -88,8 +87,8 @@ class MemoryMigration:
 
     @staticmethod
     def _apply_fixes(
-        memory_type: str, content: Dict[str, Any], fixes_log: List[str]
-    ) -> Dict[str, Any]:
+        memory_type: str, content: dict[str, Any], fixes_log: list[str]
+    ) -> dict[str, Any]:
         """Apply type-specific fixes to memory content.
 
         Args:
@@ -116,7 +115,7 @@ class MemoryMigration:
         return fixed_content
 
     @staticmethod
-    def _fix_strategic_memory(content: Dict[str, Any], fixes_log: List[str]) -> Dict[str, Any]:
+    def _fix_strategic_memory(content: dict[str, Any], fixes_log: list[str]) -> dict[str, Any]:
         """Fix strategic memory content."""
         fixed = content.copy()
 
@@ -161,7 +160,7 @@ class MemoryMigration:
         return fixed
 
     @staticmethod
-    def _fix_adr_memory(content: Dict[str, Any], fixes_log: List[str]) -> Dict[str, Any]:
+    def _fix_adr_memory(content: dict[str, Any], fixes_log: list[str]) -> dict[str, Any]:
         """Fix ADR memory content."""
         fixed = content.copy()
 
@@ -210,7 +209,7 @@ class MemoryMigration:
         return fixed
 
     @staticmethod
-    def _fix_knowledge_memory(content: Dict[str, Any], fixes_log: List[str]) -> Dict[str, Any]:
+    def _fix_knowledge_memory(content: dict[str, Any], fixes_log: list[str]) -> dict[str, Any]:
         """Fix knowledge memory content."""
         fixed = content.copy()
 
@@ -241,7 +240,7 @@ class MemoryMigration:
         return fixed
 
     @staticmethod
-    def _fix_execution_log(content: Dict[str, Any], fixes_log: List[str]) -> Dict[str, Any]:
+    def _fix_execution_log(content: dict[str, Any], fixes_log: list[str]) -> dict[str, Any]:
         """Fix execution log memory content."""
         fixed = content.copy()
 
@@ -282,7 +281,7 @@ class MemoryMigration:
         return fixed
 
     @staticmethod
-    def _fix_working_memory(content: Dict[str, Any], fixes_log: List[str]) -> Dict[str, Any]:
+    def _fix_working_memory(content: dict[str, Any], fixes_log: list[str]) -> dict[str, Any]:
         """Fix working memory content."""
         fixed = content.copy()
 
@@ -296,7 +295,7 @@ class MemoryMigration:
     @staticmethod
     async def migrate_memory(
         memory: Memory, target_version: Optional[int] = None
-    ) -> tuple[Memory, List[str]]:
+    ) -> tuple[Memory, list[str]]:
         """Migrate memory to target schema version.
 
         Args:
@@ -335,7 +334,7 @@ class MemoryMigration:
     @staticmethod
     async def validate_repository_memories(
         repository: IMemoryRepository, memory_type: MemoryType, fix_invalid: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Validate all memories of a given type in repository.
 
         Args:

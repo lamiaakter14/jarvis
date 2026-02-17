@@ -3,7 +3,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class Logger:
@@ -127,7 +127,7 @@ class Logger:
         self._log(logging.ERROR, message, kwargs, exc_info=exc_info)
 
     def _log(
-        self, level: int, message: str, extra_data: Dict[str, Any], exc_info: bool = False
+        self, level: int, message: str, extra_data: dict[str, Any], exc_info: bool = False
     ) -> None:
         """Internal log method with structured data support.
 

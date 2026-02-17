@@ -1,7 +1,7 @@
 """Amplifier agent implementation."""
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.domain.entities.agent import Agent
 from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
@@ -36,7 +36,7 @@ class AmplifierAgent(Agent):
         self.memory_repo = memory_repo
         self.metrics_collector = metrics_collector
 
-    async def execute(self, context: Any = None) -> Dict[str, Any]:
+    async def execute(self, context: Any = None) -> dict[str, Any]:
         """Execute amplifier's primary function: analyze and optimize.
 
         Args:
@@ -76,7 +76,7 @@ class AmplifierAgent(Agent):
             self.track_execution(success=False, execution_time=execution_time)
             raise DomainException(f"Amplifier execution failed: {e}")
 
-    async def _collect_metrics(self) -> Dict[str, Any]:
+    async def _collect_metrics(self) -> dict[str, Any]:
         """Collect current performance metrics.
 
         Returns:
@@ -106,7 +106,7 @@ class AmplifierAgent(Agent):
 
         return metrics
 
-    async def analyze_performance(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
+    async def analyze_performance(self, metrics: dict[str, Any]) -> dict[str, Any]:
         """Analyze performance metrics to identify patterns and issues.
 
         Args:
@@ -180,7 +180,7 @@ class AmplifierAgent(Agent):
 
         return analysis
 
-    async def generate_recommendations(self, analysis: Dict[str, Any]) -> List[str]:
+    async def generate_recommendations(self, analysis: dict[str, Any]) -> list[str]:
         """Generate optimization recommendations based on analysis.
 
         Args:
@@ -227,7 +227,7 @@ class AmplifierAgent(Agent):
 
         return recommendations
 
-    async def get_performance_summary(self) -> Dict[str, Any]:
+    async def get_performance_summary(self) -> dict[str, Any]:
         """Get a high-level performance summary.
 
         Returns:
@@ -249,7 +249,7 @@ class AmplifierAgent(Agent):
                 "status": "unknown",
             }
 
-    def _determine_status(self, analysis: Dict[str, Any]) -> str:
+    def _determine_status(self, analysis: dict[str, Any]) -> str:
         """Determine overall status based on analysis.
 
         Args:

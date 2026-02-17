@@ -1,7 +1,7 @@
 """OpenAI-based AI service implementation."""
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.domain.entities.context import Context
@@ -84,7 +84,7 @@ class OpenAIService(IAIService):
         except Exception as e:
             raise AIServiceError(f"Failed to generate plan: {e}")
 
-    async def analyze_gaps(self, execution_logs: List[Dict]) -> List[Dict]:
+    async def analyze_gaps(self, execution_logs: list[dict]) -> list[dict]:
         """Analyze execution logs to identify knowledge and skill gaps.
 
         Args:
@@ -107,7 +107,7 @@ class OpenAIService(IAIService):
         except Exception as e:
             raise AIServiceError(f"Failed to analyze gaps: {e}")
 
-    async def generate_innovations(self, context: Context) -> List[Innovation]:
+    async def generate_innovations(self, context: Context) -> list[Innovation]:
         """Generate innovative ideas and improvement suggestions.
 
         Args:
@@ -130,7 +130,7 @@ class OpenAIService(IAIService):
         except Exception as e:
             raise AIServiceError(f"Failed to generate innovations: {e}")
 
-    async def provide_mentorship(self, task: Task) -> Dict[str, Any]:
+    async def provide_mentorship(self, task: Task) -> dict[str, Any]:
         """Provide mentorship and guidance for a specific task.
 
         Args:
@@ -212,7 +212,7 @@ Return tasks in JSON format:
 ]
 """
 
-    def _build_gaps_prompt(self, execution_logs: List[Dict]) -> str:
+    def _build_gaps_prompt(self, execution_logs: list[dict]) -> str:
         """Build prompt for gap analysis."""
         logs_summary = "\n".join(
             [
@@ -328,7 +328,7 @@ Return in JSON format:
         except Exception as e:
             raise AIServiceError(f"Failed to parse plan response: {e}")
 
-    def _parse_gaps_response(self, response: str) -> List[Dict]:
+    def _parse_gaps_response(self, response: str) -> list[dict]:
         """Parse AI response into gap list."""
         try:
             json_start = response.find("[")
@@ -341,7 +341,7 @@ Return in JSON format:
         except Exception as e:
             raise AIServiceError(f"Failed to parse gaps response: {e}")
 
-    def _parse_innovations_response(self, response: str) -> List[Innovation]:
+    def _parse_innovations_response(self, response: str) -> list[Innovation]:
         """Parse AI response into Innovation entities."""
         try:
             json_start = response.find("[")
@@ -366,7 +366,7 @@ Return in JSON format:
         except Exception as e:
             raise AIServiceError(f"Failed to parse innovations response: {e}")
 
-    def _parse_mentorship_response(self, response: str) -> Dict[str, Any]:
+    def _parse_mentorship_response(self, response: str) -> dict[str, Any]:
         """Parse AI response into mentorship dictionary."""
         try:
             json_start = response.find("{")
@@ -413,7 +413,7 @@ Return in JSON format:
 
         return plan
 
-    def _generate_mock_gaps(self, execution_logs: List[Dict]) -> List[Dict]:
+    def _generate_mock_gaps(self, execution_logs: list[dict]) -> list[dict]:
         """Generate mock gaps for testing."""
         return [
             {
@@ -430,7 +430,7 @@ Return in JSON format:
             },
         ]
 
-    def _generate_mock_innovations(self, context: Context) -> List[Innovation]:
+    def _generate_mock_innovations(self, context: Context) -> list[Innovation]:
         """Generate mock innovations for testing."""
         return [
             Innovation(
@@ -449,7 +449,7 @@ Return in JSON format:
             ),
         ]
 
-    def _generate_mock_mentorship(self, task: Task) -> Dict[str, Any]:
+    def _generate_mock_mentorship(self, task: Task) -> dict[str, Any]:
         """Generate mock mentorship for testing."""
         return {
             "guidance": f"For '{task.title}', start by breaking down the work into smaller steps. "

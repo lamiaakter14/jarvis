@@ -18,7 +18,6 @@ class TaskBase(BaseModel):
 class TaskCreate(TaskBase):
     """Schema for creating a task."""
 
-    pass
 
 
 class TaskUpdate(BaseModel):

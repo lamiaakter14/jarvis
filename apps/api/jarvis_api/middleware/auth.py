@@ -2,7 +2,7 @@
 
 import os
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import jwt
 from fastapi import Depends, HTTPException, Security
@@ -38,7 +38,7 @@ class TokenPair(BaseModel):
     token_type: str = "bearer"
 
 
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create JWT access token.
 
     Args:
@@ -59,7 +59,7 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     return encoded_jwt
 
 
-def create_refresh_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_refresh_token(data: dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create JWT refresh token.
 
     Args:
@@ -99,7 +99,7 @@ def create_token_pair(user_id: str, username: str, role: str = "user") -> TokenP
     return TokenPair(access_token=access_token, refresh_token=refresh_token)
 
 
-def decode_token(token: str) -> Dict[str, Any]:
+def decode_token(token: str) -> dict[str, Any]:
     """Decode and validate JWT token.
 
     Args:
@@ -175,7 +175,7 @@ async def require_admin(current_user: TokenData = Depends(get_current_user)) -> 
     return current_user
 
 
-def verify_refresh_token(token: str) -> Dict[str, Any]:
+def verify_refresh_token(token: str) -> dict[str, Any]:
     """Verify and decode refresh token.
 
     Args:

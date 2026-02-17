@@ -9,7 +9,7 @@ The Reflector Agent is responsible for:
 
 import time
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.domain.entities.agent import Agent
 from jarvis_core.domain.entities.context import Context
@@ -44,7 +44,7 @@ class ReflectorAgent(Agent):
         self.memory_repo = memory_repo
         self.task_repo = task_repo
 
-    async def execute(self, context: Context) -> Dict[str, Any]:
+    async def execute(self, context: Context) -> dict[str, Any]:
         """Execute reflector's primary function: analyze and suggest corrections.
 
         Args:
@@ -103,7 +103,7 @@ class ReflectorAgent(Agent):
             self.track_execution(success=False, execution_time=execution_time)
             raise DomainException(f"Reflector execution failed: {e}")
 
-    async def _analyze_execution(self, context: Context) -> Dict[str, Any]:
+    async def _analyze_execution(self, context: Context) -> dict[str, Any]:
         """Analyze the previous day's execution.
 
         Args:
@@ -164,8 +164,8 @@ class ReflectorAgent(Agent):
         }
 
     async def _detect_mission_drift(
-        self, context: Context, execution_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, context: Context, execution_analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """Detect drift from current mission.
 
         Args:
@@ -231,8 +231,8 @@ class ReflectorAgent(Agent):
         }
 
     async def _generate_correction_actions(
-        self, context: Context, execution_analysis: Dict[str, Any], drift_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, context: Context, execution_analysis: dict[str, Any], drift_analysis: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Generate 3 correction actions to improve alignment.
 
         Args:
@@ -346,8 +346,8 @@ class ReflectorAgent(Agent):
         return sorted(actions, key=lambda x: x["priority"])[:3]
 
     async def _update_skill_graph_weights(
-        self, context: Context, execution_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, context: Context, execution_analysis: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Update SkillGraph weights based on execution patterns.
 
         Args:
@@ -360,7 +360,7 @@ class ReflectorAgent(Agent):
         updates = []
 
         # Get completed tasks to analyze skill usage
-        completed_task_ids = execution_analysis.get("completed_task_ids", [])
+        execution_analysis.get("completed_task_ids", [])
 
         # In a full implementation, we would:
         # 1. Extract skills from completed tasks
@@ -396,9 +396,9 @@ class ReflectorAgent(Agent):
 
     def _create_reflection_summary(
         self,
-        execution_analysis: Dict[str, Any],
-        drift_analysis: Dict[str, Any],
-        correction_actions: List[Dict[str, Any]],
+        execution_analysis: dict[str, Any],
+        drift_analysis: dict[str, Any],
+        correction_actions: list[dict[str, Any]],
     ) -> str:
         """Create a human-readable reflection summary.
 
@@ -447,8 +447,8 @@ class ReflectorAgent(Agent):
         self,
         context: Context,
         reflection_summary: str,
-        correction_actions: List[Dict[str, Any]],
-        drift_analysis: Dict[str, Any],
+        correction_actions: list[dict[str, Any]],
+        drift_analysis: dict[str, Any],
     ) -> None:
         """Store reflection in memory for future reference.
 

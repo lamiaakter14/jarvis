@@ -6,7 +6,7 @@ all agents in a deterministic and testable manner.
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.agents.reflector import ReflectorAgent
 from jarvis_core.cognition.service import CognitiveService
@@ -36,15 +36,15 @@ class CognitiveLoopResult:
         timestamp: When the loop was executed
     """
 
-    plan: Dict[str, Any] = field(default_factory=dict)
-    knowledge_gaps: List[Dict[str, Any]] = field(default_factory=list)
-    innovations: List[Dict[str, Any]] = field(default_factory=list)
-    reflection: Dict[str, Any] = field(default_factory=dict)
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    plan: dict[str, Any] = field(default_factory=dict)
+    knowledge_gaps: list[dict[str, Any]] = field(default_factory=list)
+    innovations: list[dict[str, Any]] = field(default_factory=list)
+    reflection: dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, Any] = field(default_factory=dict)
     execution_time: float = 0.0
     timestamp: str = field(default_factory=lambda: current_timestamp().isoformat())
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert result to dictionary.
 
         Returns:
@@ -185,7 +185,7 @@ class CognitiveOrchestrator:
                 f"Cognitive loop execution failed after {execution_time:.2f}s: {e}"
             )
 
-    async def _run_strategist(self, context: Context, profile: CognitiveProfile) -> Dict[str, Any]:
+    async def _run_strategist(self, context: Context, profile: CognitiveProfile) -> dict[str, Any]:
         """Run strategist agent for planning.
 
         Args:
@@ -224,7 +224,7 @@ class CognitiveOrchestrator:
             "plan_id": plan.plan_id if hasattr(plan, "plan_id") else "unknown",
         }
 
-    async def _run_executor(self, context: Context) -> Dict[str, Any]:
+    async def _run_executor(self, context: Context) -> dict[str, Any]:
         """Run executor agent for task execution.
 
         Args:
@@ -262,7 +262,7 @@ class CognitiveOrchestrator:
             "status": "completed" if failed_count == 0 else "partial",
         }
 
-    async def _run_innovator(self, context: Context) -> List[Dict[str, Any]]:
+    async def _run_innovator(self, context: Context) -> list[dict[str, Any]]:
         """Run innovator agent for innovation generation.
 
         Args:
@@ -283,7 +283,7 @@ class CognitiveOrchestrator:
             for inn in (innovations if isinstance(innovations, list) else [])
         ]
 
-    async def _run_amplifier(self, context: Context) -> Dict[str, Any]:
+    async def _run_amplifier(self, context: Context) -> dict[str, Any]:
         """Run amplifier agent for metrics collection.
 
         Args:
@@ -306,7 +306,7 @@ class CognitiveOrchestrator:
             ),
         }
 
-    async def _run_reflector(self, context: Context) -> Dict[str, Any]:
+    async def _run_reflector(self, context: Context) -> dict[str, Any]:
         """Run reflector agent for self-correction.
 
         Args:
@@ -328,10 +328,10 @@ class CognitiveOrchestrator:
     async def _calculate_metrics(
         self,
         context: Context,
-        plan_result: Dict[str, Any],
-        execution_result: Dict[str, Any],
-        amplifier_result: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        plan_result: dict[str, Any],
+        execution_result: dict[str, Any],
+        amplifier_result: dict[str, Any],
+    ) -> dict[str, Any]:
         """Calculate comprehensive performance metrics.
 
         Args:
@@ -389,8 +389,8 @@ class CognitiveOrchestrator:
             }
 
     def _extract_knowledge_gaps(
-        self, context: Context, reflection_result: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, context: Context, reflection_result: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Extract knowledge gaps from context and reflection.
 
         Args:
@@ -423,10 +423,10 @@ class CognitiveOrchestrator:
     async def _persist_loop_results(
         self,
         cognitive_context: CognitiveContext,
-        plan_result: Dict[str, Any],
-        innovation_result: List[Dict[str, Any]],
-        reflection_result: Dict[str, Any],
-        metrics_result: Dict[str, Any],
+        plan_result: dict[str, Any],
+        innovation_result: list[dict[str, Any]],
+        reflection_result: dict[str, Any],
+        metrics_result: dict[str, Any],
     ) -> None:
         """Persist cognitive loop results to memory.
 

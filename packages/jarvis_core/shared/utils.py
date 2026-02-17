@@ -4,7 +4,7 @@ import json
 import uuid
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 def generate_id(prefix: str = "") -> str:
@@ -20,7 +20,7 @@ def generate_id(prefix: str = "") -> str:
     return f"{prefix}{unique_id}" if prefix else unique_id
 
 
-def safe_json_load(file_path: Path) -> Dict[str, Any]:
+def safe_json_load(file_path: Path) -> dict[str, Any]:
     """Safely load JSON from a file, returning empty dict if file doesn't exist.
 
     Args:
@@ -35,7 +35,7 @@ def safe_json_load(file_path: Path) -> Dict[str, Any]:
     return {}
 
 
-def safe_json_dump(file_path: Path, data: Dict[str, Any], indent: int = 4) -> None:
+def safe_json_dump(file_path: Path, data: dict[str, Any], indent: int = 4) -> None:
     """Safely dump JSON to a file, creating parent directories if needed.
 
     Args:

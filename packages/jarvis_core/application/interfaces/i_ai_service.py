@@ -1,7 +1,7 @@
 """AI Service Interface for application layer."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.domain.entities.context import Context
 from jarvis_core.domain.entities.innovation import Innovation
@@ -33,10 +33,9 @@ class IAIService(ABC):
         Raises:
             AIServiceError: If plan generation fails
         """
-        pass
 
     @abstractmethod
-    async def analyze_gaps(self, execution_logs: List[Dict]) -> List[Dict]:
+    async def analyze_gaps(self, execution_logs: list[dict]) -> list[dict]:
         """Analyze execution logs to identify knowledge and skill gaps.
 
         Uses AI to review execution history and identify patterns that
@@ -51,10 +50,9 @@ class IAIService(ABC):
         Raises:
             AIServiceError: If gap analysis fails
         """
-        pass
 
     @abstractmethod
-    async def generate_innovations(self, context: Context) -> List[Innovation]:
+    async def generate_innovations(self, context: Context) -> list[Innovation]:
         """Generate innovative ideas and improvement suggestions.
 
         Uses AI to analyze current context, patterns, and performance to
@@ -69,10 +67,9 @@ class IAIService(ABC):
         Raises:
             AIServiceError: If innovation generation fails
         """
-        pass
 
     @abstractmethod
-    async def provide_mentorship(self, task: Task) -> Dict[str, Any]:
+    async def provide_mentorship(self, task: Task) -> dict[str, Any]:
         """Provide mentorship and guidance for a specific task.
 
         Uses AI to analyze task requirements and provide contextual
@@ -91,4 +88,3 @@ class IAIService(ABC):
         Raises:
             AIServiceError: If mentorship generation fails
         """
-        pass

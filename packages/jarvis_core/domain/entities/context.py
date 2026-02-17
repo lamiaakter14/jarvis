@@ -1,8 +1,7 @@
 """Context entity for the domain layer."""
 
 from dataclasses import dataclass, field
-from datetime import date
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.shared.exceptions import DomainException
 from jarvis_core.shared.utils import current_date, generate_id
@@ -19,12 +18,12 @@ class Context:
     context_id: str = field(default_factory=lambda: generate_id("ctx_"))
     date: date = field(default_factory=current_date)
 
-    current_focus: List[str] = field(default_factory=list)
+    current_focus: list[str] = field(default_factory=list)
     available_hours: float = 8.0
-    daily_plan: Dict[str, Any] = field(default_factory=dict)
-    gaps: List[Dict[str, Any]] = field(default_factory=list)
-    reflections: List[str] = field(default_factory=list)
-    strategic_goals: List[str] = field(default_factory=list)
+    daily_plan: dict[str, Any] = field(default_factory=dict)
+    gaps: list[dict[str, Any]] = field(default_factory=list)
+    reflections: list[str] = field(default_factory=list)
+    strategic_goals: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         """Validate context after initialization."""
@@ -94,7 +93,7 @@ class Context:
         gap_type: str,
         description: str,
         severity: str = "medium",
-        evidence: Optional[List[str]] = None,
+        evidence: Optional[list[str]] = None,
     ) -> None:
         """Add a knowledge or skill gap to the context.
 
@@ -152,7 +151,7 @@ class Context:
         """
         return self.available_hours >= required_hours
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get a summary of the context.
 
         Returns:
@@ -170,7 +169,7 @@ class Context:
             "has_plan": bool(self.daily_plan),
         }
 
-    def get_high_severity_gaps(self) -> List[Dict[str, Any]]:
+    def get_high_severity_gaps(self) -> list[dict[str, Any]]:
         """Get all high severity gaps.
 
         Returns:
@@ -178,7 +177,7 @@ class Context:
         """
         return [gap for gap in self.gaps if gap.get("severity") == "high"]
 
-    def get_gaps_by_type(self, gap_type: str) -> List[Dict[str, Any]]:
+    def get_gaps_by_type(self, gap_type: str) -> list[dict[str, Any]]:
         """Get gaps filtered by type.
 
         Args:

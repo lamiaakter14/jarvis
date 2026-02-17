@@ -1,6 +1,6 @@
 """FastAPI main application for JARVIS cognitive assistant."""
 
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,7 +47,7 @@ async def health_check():
 
 
 @app.post("/api/cognitive-loop")
-async def run_cognitive_loop() -> Dict[str, Any]:
+async def run_cognitive_loop() -> dict[str, Any]:
     """Execute the complete cognitive loop with all 5 agents.
 
     Returns:
@@ -88,7 +88,7 @@ async def run_cognitive_loop() -> Dict[str, Any]:
 
 
 @app.get("/api/plan/today")
-async def get_daily_plan() -> Dict[str, Any]:
+async def get_daily_plan() -> dict[str, Any]:
     """Get today's daily plan.
 
     Returns:
@@ -103,7 +103,7 @@ async def get_daily_plan() -> Dict[str, Any]:
 
 
 @app.get("/api/gaps")
-async def get_knowledge_gaps() -> Dict[str, Any]:
+async def get_knowledge_gaps() -> dict[str, Any]:
     """Get identified knowledge gaps.
 
     Returns:
@@ -118,7 +118,7 @@ async def get_knowledge_gaps() -> Dict[str, Any]:
 
 
 @app.get("/api/innovations")
-async def get_innovations() -> Dict[str, Any]:
+async def get_innovations() -> dict[str, Any]:
     """Get generated innovations.
 
     Returns:
@@ -133,7 +133,7 @@ async def get_innovations() -> Dict[str, Any]:
 
 
 @app.get("/api/performance")
-async def get_performance_metrics() -> Dict[str, Any]:
+async def get_performance_metrics() -> dict[str, Any]:
     """Get performance metrics and analytics.
 
     Returns:

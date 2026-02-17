@@ -1,6 +1,6 @@
 """Execute Tasks use case."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.application.dto.task_dto import TaskDTO
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
@@ -30,7 +30,7 @@ class ExecuteTasks:
         self.task_repository = task_repository
         self.notification_service = notification_service
 
-    async def execute(self, task_ids: List[str]) -> List[TaskDTO]:
+    async def execute(self, task_ids: list[str]) -> list[TaskDTO]:
         """Execute specified tasks.
 
         Args:
@@ -100,7 +100,7 @@ class ExecuteTasks:
             task.mark_completed(result)
 
             # Emit task completed event
-            event = TaskCompletedEvent(
+            TaskCompletedEvent(
                 task_id=task.task_id,
                 agent_id="system",
                 agent_type=str(task.agent_type),
@@ -117,7 +117,7 @@ class ExecuteTasks:
 
         return task
 
-    async def _simulate_task_execution(self, task: Task) -> Dict[str, Any]:
+    async def _simulate_task_execution(self, task: Task) -> dict[str, Any]:
         """Simulate task execution (placeholder for actual agent execution).
 
         Args:
@@ -133,7 +133,7 @@ class ExecuteTasks:
             "message": f"Task '{task.title}' executed successfully",
         }
 
-    async def get_tasks_by_status(self, status: TaskStatus) -> List[TaskDTO]:
+    async def get_tasks_by_status(self, status: TaskStatus) -> list[TaskDTO]:
         """Retrieve tasks filtered by their current status.
 
         Args:
@@ -153,7 +153,7 @@ class ExecuteTasks:
 
     async def get_tasks_by_priority(
         self, priority: TaskPriority, status: Optional[TaskStatus] = None
-    ) -> List[TaskDTO]:
+    ) -> list[TaskDTO]:
         """Retrieve tasks filtered by priority and optionally by status.
 
         Args:

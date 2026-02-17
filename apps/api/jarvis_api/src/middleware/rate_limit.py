@@ -2,7 +2,6 @@
 
 import time
 from collections import defaultdict
-from typing import Dict
 
 from fastapi import HTTPException, Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -14,7 +13,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, rate_limit: int = 60):
         super().__init__(app)
         self.rate_limit = rate_limit
-        self.requests: Dict[str, list] = defaultdict(list)
+        self.requests: dict[str, list] = defaultdict(list)
 
     async def dispatch(self, request: Request, call_next):
         """Process request with rate limiting."""

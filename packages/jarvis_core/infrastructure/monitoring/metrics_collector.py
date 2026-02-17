@@ -4,7 +4,7 @@ import json
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class MetricsCollector:
@@ -29,7 +29,7 @@ class MetricsCollector:
         self.metrics_file = Path(metrics_file) if metrics_file else None
 
         # In-memory metrics storage
-        self.agent_metrics: Dict[str, Dict[str, Any]] = defaultdict(
+        self.agent_metrics: dict[str, dict[str, Any]] = defaultdict(
             lambda: {
                 "total_executions": 0,
                 "successful_executions": 0,
@@ -39,7 +39,7 @@ class MetricsCollector:
             }
         )
 
-        self.task_metrics: Dict[str, int] = {
+        self.task_metrics: dict[str, int] = {
             "total_tasks": 0,
             "completed_tasks": 0,
             "failed_tasks": 0,
@@ -47,7 +47,7 @@ class MetricsCollector:
             "in_progress_tasks": 0,
         }
 
-        self.system_metrics: Dict[str, Any] = {
+        self.system_metrics: dict[str, Any] = {
             "start_time": datetime.now().isoformat(),
             "api_requests": 0,
             "errors": 0,
@@ -62,7 +62,7 @@ class MetricsCollector:
         agent_name: str,
         success: bool,
         duration: float,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> None:
         """Record agent execution metrics.
 
@@ -190,7 +190,7 @@ class MetricsCollector:
 
         self._persist_metrics()
 
-    def get_agent_metrics(self, agent_name: Optional[str] = None) -> Dict[str, Any]:
+    def get_agent_metrics(self, agent_name: Optional[str] = None) -> dict[str, Any]:
         """Get agent metrics.
 
         Args:
@@ -203,7 +203,7 @@ class MetricsCollector:
             return dict(self.agent_metrics.get(agent_name, {}))
         return {name: dict(metrics) for name, metrics in self.agent_metrics.items()}
 
-    def get_task_metrics(self) -> Dict[str, int]:
+    def get_task_metrics(self) -> dict[str, int]:
         """Get task metrics.
 
         Returns:
@@ -211,7 +211,7 @@ class MetricsCollector:
         """
         return dict(self.task_metrics)
 
-    def get_system_metrics(self) -> Dict[str, Any]:
+    def get_system_metrics(self) -> dict[str, Any]:
         """Get system metrics.
 
         Returns:
@@ -219,7 +219,7 @@ class MetricsCollector:
         """
         return dict(self.system_metrics)
 
-    def get_all_metrics(self) -> Dict[str, Any]:
+    def get_all_metrics(self) -> dict[str, Any]:
         """Get all metrics.
 
         Returns:
@@ -250,7 +250,7 @@ class MetricsCollector:
 
         self._persist_metrics()
 
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         """Get a high-level performance summary.
 
         Returns:

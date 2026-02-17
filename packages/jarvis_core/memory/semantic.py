@@ -6,7 +6,7 @@ pgvector for efficient similarity search in the future.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class SemanticMemoryInterface(ABC):
@@ -22,7 +22,7 @@ class SemanticMemoryInterface(ABC):
 
     @abstractmethod
     def store_embedding(
-        self, key: str, embedding: List[float], metadata: Optional[Dict[str, Any]] = None
+        self, key: str, embedding: list[float], metadata: Optional[dict[str, Any]] = None
     ) -> None:
         """Store an embedding vector with associated metadata.
 
@@ -35,10 +35,9 @@ class SemanticMemoryInterface(ABC):
             RepositoryError: If storage operation fails
             ValueError: If embedding is invalid
         """
-        pass
 
     @abstractmethod
-    def retrieve_embedding(self, key: str) -> Optional[Dict[str, Any]]:
+    def retrieve_embedding(self, key: str) -> Optional[dict[str, Any]]:
         """Retrieve an embedding by its key.
 
         Args:
@@ -50,12 +49,11 @@ class SemanticMemoryInterface(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass
 
     @abstractmethod
     def search_similar(
-        self, query_embedding: List[float], top_k: int = 10, threshold: Optional[float] = None
-    ) -> List[Dict[str, Any]]:
+        self, query_embedding: list[float], top_k: int = 10, threshold: Optional[float] = None
+    ) -> list[dict[str, Any]]:
         """Search for similar embeddings using vector similarity.
 
         Args:
@@ -70,7 +68,6 @@ class SemanticMemoryInterface(ABC):
             RepositoryError: If search operation fails
             ValueError: If query_embedding is invalid
         """
-        pass
 
     @abstractmethod
     def delete_embedding(self, key: str) -> bool:
@@ -85,10 +82,9 @@ class SemanticMemoryInterface(ABC):
         Raises:
             RepositoryError: If deletion operation fails
         """
-        pass
 
     @abstractmethod
-    def list_embeddings(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    def list_embeddings(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """List stored embeddings with pagination.
 
         Args:
@@ -101,7 +97,6 @@ class SemanticMemoryInterface(ABC):
         Raises:
             RepositoryError: If list operation fails
         """
-        pass
 
 
 class InMemorySemanticStore(SemanticMemoryInterface):
@@ -116,10 +111,10 @@ class InMemorySemanticStore(SemanticMemoryInterface):
 
     def __init__(self):
         """Initialize in-memory semantic store."""
-        self._embeddings: Dict[str, Dict[str, Any]] = {}
+        self._embeddings: dict[str, dict[str, Any]] = {}
 
     def store_embedding(
-        self, key: str, embedding: List[float], metadata: Optional[Dict[str, Any]] = None
+        self, key: str, embedding: list[float], metadata: Optional[dict[str, Any]] = None
     ) -> None:
         """Store an embedding vector with associated metadata.
 
@@ -142,7 +137,7 @@ class InMemorySemanticStore(SemanticMemoryInterface):
 
         self._embeddings[key] = {"embedding": embedding, "metadata": metadata or {}, "key": key}
 
-    def retrieve_embedding(self, key: str) -> Optional[Dict[str, Any]]:
+    def retrieve_embedding(self, key: str) -> Optional[dict[str, Any]]:
         """Retrieve an embedding by its key.
 
         Args:
@@ -154,8 +149,8 @@ class InMemorySemanticStore(SemanticMemoryInterface):
         return self._embeddings.get(key)
 
     def search_similar(
-        self, query_embedding: List[float], top_k: int = 10, threshold: Optional[float] = None
-    ) -> List[Dict[str, Any]]:
+        self, query_embedding: list[float], top_k: int = 10, threshold: Optional[float] = None
+    ) -> list[dict[str, Any]]:
         """Search for similar embeddings using cosine similarity.
 
         Args:
@@ -211,7 +206,7 @@ class InMemorySemanticStore(SemanticMemoryInterface):
             return True
         return False
 
-    def list_embeddings(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    def list_embeddings(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """List stored embeddings with pagination.
 
         Args:
@@ -240,7 +235,7 @@ class InMemorySemanticStore(SemanticMemoryInterface):
         ]
 
     @staticmethod
-    def _cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
+    def _cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
         """Calculate cosine similarity between two vectors.
 
         Args:

@@ -1,7 +1,7 @@
 """Executor agent implementation."""
 
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from jarvis_core.domain.entities.agent import Agent
 from jarvis_core.domain.entities.memory import Memory
@@ -22,7 +22,7 @@ class MissedTaskCounter:
 
     def __init__(self):
         """Initialize missed task counter."""
-        self._missed_tasks: Dict[str, int] = {}  # task_id -> miss count
+        self._missed_tasks: dict[str, int] = {}  # task_id -> miss count
         self._escalated_tasks: set = set()  # task_ids that have been escalated
 
     def record_miss(self, task_id: str) -> int:
@@ -120,7 +120,7 @@ class ExecutorAgent(Agent):
         self.missed_task_counter = MissedTaskCounter()
         self.escalation_threshold = 3  # Tasks missed 3+ times get escalated
 
-    async def execute(self, context: Any) -> Dict[str, Any]:
+    async def execute(self, context: Any) -> dict[str, Any]:
         """Execute tasks based on context.
 
         Args:
@@ -162,7 +162,7 @@ class ExecutorAgent(Agent):
             self.track_execution(success=False, execution_time=execution_time)
             raise DomainException(f"Executor execution failed: {e}")
 
-    async def execute_task(self, task: Task) -> Dict[str, Any]:
+    async def execute_task(self, task: Task) -> dict[str, Any]:
         """Execute a specific task.
 
         Args:
@@ -194,7 +194,7 @@ class ExecutorAgent(Agent):
 
     async def execute_task_with_error_handling(
         self, task: Task, max_retries: int = 3
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute a task with error handling and retries.
 
         Args:
@@ -239,7 +239,7 @@ class ExecutorAgent(Agent):
             "attempts": attempt,
         }
 
-    async def _log_execution(self, task: Task, result: Dict[str, Any]) -> None:
+    async def _log_execution(self, task: Task, result: dict[str, Any]) -> None:
         """Log task execution to memory.
 
         Args:
@@ -328,7 +328,7 @@ class ExecutorAgent(Agent):
 
         await asyncio.sleep(seconds)
 
-    async def check_and_flag_missed_tasks(self) -> Dict[str, Any]:
+    async def check_and_flag_missed_tasks(self) -> dict[str, Any]:
         """Check for missed tasks and flag them.
 
         Returns:
@@ -421,7 +421,7 @@ class ExecutorAgent(Agent):
         else:
             return "none"
 
-    def get_drift_notification(self) -> Optional[Dict[str, Any]]:
+    def get_drift_notification(self) -> Optional[dict[str, Any]]:
         """Get drift notification for the orchestrator."""
         repeatedly_missed = self.missed_task_counter.get_repeatedly_missed_tasks(threshold=2)
 

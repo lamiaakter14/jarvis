@@ -1,15 +1,13 @@
 """Unit tests for Cognitive Orchestrator."""
 
-import pytest
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
-from jarvis_core.orchestrator.loop import CognitiveOrchestrator, CognitiveLoopResult
-from jarvis_core.orchestrator.context import CognitiveContext, CognitiveProfile
-from jarvis_core.domain.entities.context import Context
-from jarvis_core.domain.entities.plan import Plan
+import pytest
 from jarvis_core.domain.entities.innovation import Innovation
-from jarvis_core.cognition.models import EnergyModel, IdentityModel
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.orchestrator.context import CognitiveContext
+from jarvis_core.orchestrator.loop import CognitiveLoopResult, CognitiveOrchestrator
 from jarvis_core.shared.exceptions import DomainException
 
 
@@ -54,7 +52,7 @@ class TestCognitiveOrchestrator:
         agent.execute.return_value = {
             "productivity_score": 0.85,
             "optimization_suggestions": ["Optimize morning routine"],
-            "performance_trends": {"last_week": 0.8}
+            "performance_trends": {"last_week": 0.8},
         }
         return agent
 
@@ -64,12 +62,10 @@ class TestCognitiveOrchestrator:
         agent = AsyncMock()
         agent.execute.return_value = {
             "reflection_summary": "Test summary",
-            "correction_actions": [
-                {"priority": 1, "title": "Action 1"}
-            ],
+            "correction_actions": [{"priority": 1, "title": "Action 1"}],
             "pattern_flags": [],
             "skill_graph_updates": [],
-            "drift_level": "none"
+            "drift_level": "none",
         }
         return agent
 
@@ -79,7 +75,7 @@ class TestCognitiveOrchestrator:
         service = MagicMock()
         service.update_energy.return_value = {
             "optimal_focus_hours": 6.0,
-            "adjusted_energy_score": 0.9
+            "adjusted_energy_score": 0.9,
         }
         return service
 
@@ -118,7 +114,7 @@ class TestCognitiveOrchestrator:
         mock_cognitive_service,
         mock_metrics_engine,
         mock_task_repo,
-        mock_memory_repo
+        mock_memory_repo,
     ):
         """Create cognitive orchestrator instance."""
         return CognitiveOrchestrator(
@@ -130,7 +126,7 @@ class TestCognitiveOrchestrator:
             cognitive_service=mock_cognitive_service,
             metrics_engine=mock_metrics_engine,
             task_repository=mock_task_repo,
-            memory_repository=mock_memory_repo
+            memory_repository=mock_memory_repo,
         )
 
     async def test_orchestrator_run_with_default_context(self, orchestrator):
@@ -156,8 +152,13 @@ class TestCognitiveOrchestrator:
         assert result.execution_time > 0
 
     async def test_all_agents_called(
-        self, orchestrator, mock_strategist, mock_executor,
-        mock_innovator, mock_amplifier, mock_reflector
+        self,
+        orchestrator,
+        mock_strategist,
+        mock_executor,
+        mock_innovator,
+        mock_amplifier,
+        mock_reflector,
     ):
         """Test that all agents are called during execution."""
         await orchestrator.run()
@@ -169,17 +170,13 @@ class TestCognitiveOrchestrator:
         assert mock_amplifier.execute.called
         assert mock_reflector.execute.called
 
-    async def test_cognitive_service_updates_energy(
-        self, orchestrator, mock_cognitive_service
-    ):
+    async def test_cognitive_service_updates_energy(self, orchestrator, mock_cognitive_service):
         """Test that cognitive service updates energy model."""
         await orchestrator.run()
 
         assert mock_cognitive_service.update_energy.called
 
-    async def test_results_persisted_to_memory(
-        self, orchestrator, mock_memory_repo
-    ):
+    async def test_results_persisted_to_memory(self, orchestrator, mock_memory_repo):
         """Test that results are persisted to memory."""
         await orchestrator.run()
 
@@ -200,9 +197,7 @@ class TestCognitiveOrchestrator:
         assert "execution_time" in result_dict
         assert "timestamp" in result_dict
 
-    async def test_orchestrator_handles_agent_failure(
-        self, orchestrator, mock_strategist
-    ):
+    async def test_orchestrator_handles_agent_failure(self, orchestrator, mock_strategist):
         """Test that orchestrator handles agent failure gracefully."""
         mock_strategist.execute.side_effect = Exception("Agent failed")
 

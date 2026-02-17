@@ -1,6 +1,6 @@
 """Amplifier agent endpoints."""
 
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/performance")
-async def get_performance() -> Dict[str, Any]:
+async def get_performance() -> dict[str, Any]:
     """Get performance metrics."""
     try:
         if not AmplifierBridge:

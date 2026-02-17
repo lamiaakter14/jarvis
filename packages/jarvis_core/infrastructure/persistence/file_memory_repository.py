@@ -1,7 +1,8 @@
 """File-based memory repository implementation."""
 
+import builtins
 import json
-from typing import List, Optional
+from typing import Optional
 
 from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
@@ -161,7 +162,7 @@ class FileMemoryRepository(IMemoryRepository):
         except Exception as e:
             raise RepositoryError(f"Failed to save memory '{memory.key}': {e}")
 
-    async def list(self, memory_type: MemoryType) -> List[Memory]:
+    async def list(self, memory_type: MemoryType) -> list[Memory]:
         """List all memories of a specific type.
 
         Args:
@@ -234,7 +235,7 @@ class FileMemoryRepository(IMemoryRepository):
 
     async def get_by_type_and_pattern(
         self, memory_type: MemoryType, key_pattern: str
-    ) -> List[Memory]:
+    ) -> builtins.list[Memory]:
         """Get memories by type that match a key pattern.
 
         Args:
@@ -250,12 +251,12 @@ class FileMemoryRepository(IMemoryRepository):
     async def search(
         self,
         memory_type: Optional[MemoryType] = None,
-        keywords: Optional[List[str]] = None,
+        keywords: Optional[builtins.list[str]] = None,
         key_pattern: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[builtins.list[str]] = None,
         limit: int = 100,
         offset: int = 0,
-    ) -> List[Memory]:
+    ) -> builtins.list[Memory]:
         """Search for memories based on multiple criteria.
 
         Uses indexed storage for strategic memory searches to improve performance.
@@ -361,7 +362,7 @@ class FileMemoryRepository(IMemoryRepository):
         except Exception as e:
             raise RepositoryError(f"Failed to get memory version: {e}")
 
-    async def list_versions(self, key: str) -> List[int]:
+    async def list_versions(self, key: str) -> builtins.list[int]:
         """List all available versions of a memory.
 
         Args:

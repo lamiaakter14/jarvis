@@ -1,16 +1,17 @@
 """Fixtures for domain layer tests."""
-import pytest
-from datetime import datetime, date
+
+from datetime import date, datetime
 from uuid import uuid4
 
-from jarvis_core.domain.entities.task import Task
-from jarvis_core.domain.entities.plan import Plan
+import pytest
 from jarvis_core.domain.entities.context import Context
 from jarvis_core.domain.entities.innovation import Innovation
-from jarvis_core.domain.value_objects.priority import Priority
-from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
-from jarvis_core.domain.value_objects.roi import ROI
+from jarvis_core.domain.entities.plan import Plan
+from jarvis_core.domain.entities.task import Task
 from jarvis_core.domain.value_objects.agent_type import AgentType
+from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
+from jarvis_core.domain.value_objects.priority import Priority
+from jarvis_core.domain.value_objects.roi import ROI
 
 
 @pytest.fixture
@@ -25,7 +26,7 @@ def sample_task():
         roi=ROI(0.8),
         status="pending",
         agent_type=AgentType.EXECUTOR,
-        created_at=datetime.now()
+        created_at=datetime.now(),
     )
 
 
@@ -42,7 +43,7 @@ def sample_tasks():
             roi=ROI(0.7 + i * 0.05),
             status="pending",
             agent_type=AgentType.EXECUTOR,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
         for i in range(5)
     ]
@@ -58,7 +59,7 @@ def sample_plan(sample_tasks):
         total_hours=8.0,
         status="active",
         created_by="strategist",
-        created_at=datetime.now()
+        created_at=datetime.now(),
     )
 
 
@@ -72,7 +73,7 @@ def sample_context():
         recent_gaps=["Testing knowledge", "Mock creation"],
         available_hours=8.0,
         energy_level=0.8,
-        timestamp=datetime.now()
+        timestamp=datetime.now(),
     )
 
 
@@ -89,5 +90,5 @@ def sample_innovation():
         roi_score=0.9,
         implementation_complexity="low",
         status="proposed",
-        created_at=datetime.now()
+        created_at=datetime.now(),
     )

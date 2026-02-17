@@ -1,6 +1,6 @@
 """Mentor agent endpoints."""
 
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/gaps")
-async def get_knowledge_gaps() -> Dict[str, Any]:
+async def get_knowledge_gaps() -> dict[str, Any]:
     """Get identified knowledge gaps."""
     try:
         if not MentorBridge:

@@ -1,7 +1,7 @@
 """Plan schemas."""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -20,7 +20,7 @@ class PlanBase(BaseModel):
 
     date: str
     focus_area: Optional[str] = None
-    tasks: List[PlanItem] = []
+    tasks: list[PlanItem] = []
 
 
 class Plan(PlanBase):

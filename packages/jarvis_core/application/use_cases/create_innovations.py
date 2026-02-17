@@ -1,6 +1,5 @@
 """Create Innovations use case."""
 
-from typing import List
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
@@ -42,7 +41,7 @@ class CreateInnovations:
         self.ai_service = ai_service
         self.notification_service = notification_service
 
-    async def execute(self) -> List[Innovation]:
+    async def execute(self) -> list[Innovation]:
         """Generate and store innovations.
 
         Returns:
@@ -150,7 +149,7 @@ class CreateInnovations:
 
         return metrics_memory.content.get("metrics", {})
 
-    def _deduplicate_innovations(self, innovations: List[Innovation]) -> List[Innovation]:
+    def _deduplicate_innovations(self, innovations: list[Innovation]) -> list[Innovation]:
         """Remove duplicate innovations based on title similarity.
 
         Args:
@@ -183,7 +182,7 @@ class CreateInnovations:
 
         return unique
 
-    async def _store_innovations(self, innovations: List[Innovation]) -> None:
+    async def _store_innovations(self, innovations: list[Innovation]) -> None:
         """Store innovations in memory.
 
         Args:
@@ -228,7 +227,7 @@ class CreateInnovations:
         )
         await self.memory_repository.save(innovations_memory)
 
-    async def _notify_innovations(self, innovations: List[Innovation]) -> None:
+    async def _notify_innovations(self, innovations: list[Innovation]) -> None:
         """Send notifications for high-impact innovations.
 
         Args:
@@ -242,7 +241,7 @@ class CreateInnovations:
                     )
 
                     # Emit domain event
-                    event = InnovationCreatedEvent(
+                    InnovationCreatedEvent(
                         innovation_id=innovation.innovation_id,
                         title=innovation.title,
                         category=innovation.category,

@@ -1,7 +1,7 @@
 """Use case for managing strategic memory and long-term goals."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
@@ -32,9 +32,9 @@ class ManageStrategicMemory:
         description: str = "",
         priority: str = "medium",
         target_date: Optional[datetime] = None,
-        milestones: Optional[List[Dict[str, Any]]] = None,
-        dependencies: Optional[List[str]] = None,
-        metrics: Optional[Dict[str, Any]] = None,
+        milestones: Optional[list[dict[str, Any]]] = None,
+        dependencies: Optional[list[str]] = None,
+        metrics: Optional[dict[str, Any]] = None,
     ) -> Memory:
         """Create a new strategic goal.
 
@@ -136,7 +136,7 @@ class ManageStrategicMemory:
         except Exception as e:
             raise UseCaseError(f"Failed to update goal progress: {e}")
 
-    async def list_active_goals(self) -> List[Memory]:
+    async def list_active_goals(self) -> list[Memory]:
         """List all active strategic goals.
 
         Returns:
@@ -172,8 +172,8 @@ class ManageStrategicMemory:
         decision: str,
         consequences: str,
         status: str = "proposed",
-        alternatives: Optional[List[str]] = None,
-        related_decisions: Optional[List[str]] = None,
+        alternatives: Optional[list[str]] = None,
+        related_decisions: Optional[list[str]] = None,
     ) -> Memory:
         """Create an Architecture Decision Record (ADR).
 
@@ -228,7 +228,7 @@ class ManageStrategicMemory:
         except Exception as e:
             raise UseCaseError(f"Failed to create ADR: {e}")
 
-    async def list_adrs(self, status: Optional[str] = None) -> List[Memory]:
+    async def list_adrs(self, status: Optional[str] = None) -> list[Memory]:
         """List all Architecture Decision Records.
 
         Args:
@@ -260,10 +260,10 @@ class ManageStrategicMemory:
 
     async def search_strategic_memory(
         self,
-        keywords: Optional[List[str]] = None,
-        tags: Optional[List[str]] = None,
+        keywords: Optional[list[str]] = None,
+        tags: Optional[list[str]] = None,
         limit: int = 100,
-    ) -> List[Memory]:
+    ) -> list[Memory]:
         """Search strategic memory by keywords and tags.
 
         Args:

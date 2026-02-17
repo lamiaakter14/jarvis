@@ -3,10 +3,10 @@
 import uuid
 from contextvars import ContextVar
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Context variable for storing trace context
-_trace_context: ContextVar[Optional[Dict[str, Any]]] = ContextVar("trace_context", default=None)
+_trace_context: ContextVar[Optional[dict[str, Any]]] = ContextVar("trace_context", default=None)
 
 
 class Tracer:
@@ -27,7 +27,7 @@ class Tracer:
     def start_trace(
         self,
         operation_name: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> str:
         """Start a new trace.
 
@@ -57,7 +57,7 @@ class Tracer:
     def start_span(
         self,
         span_name: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> str:
         """Start a new span within the current trace.
 
@@ -95,7 +95,7 @@ class Tracer:
         self,
         span_id: str,
         status: str = "success",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> None:
         """End a span.
 
@@ -131,8 +131,8 @@ class Tracer:
     def end_trace(
         self,
         status: str = "success",
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> Optional[Dict[str, Any]]:
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> Optional[dict[str, Any]]:
         """End the current trace.
 
         Args:
@@ -178,7 +178,7 @@ class Tracer:
         trace_context = _trace_context.get()
         return trace_context["trace_id"] if trace_context else None
 
-    def get_current_trace_context(self) -> Optional[Dict[str, Any]]:
+    def get_current_trace_context(self) -> Optional[dict[str, Any]]:
         """Get the current trace context.
 
         Returns:
@@ -240,7 +240,7 @@ class Tracer:
                 }
             )
 
-    def create_child_context(self) -> Dict[str, Any]:
+    def create_child_context(self) -> dict[str, Any]:
         """Create a child trace context for propagation.
 
         Returns:
@@ -258,7 +258,7 @@ class Tracer:
             "parent_operation": trace_context["operation_name"],
         }
 
-    def inject_context(self, headers: Dict[str, str]) -> Dict[str, str]:
+    def inject_context(self, headers: dict[str, str]) -> dict[str, str]:
         """Inject trace context into headers for propagation.
 
         Args:
@@ -276,7 +276,7 @@ class Tracer:
 
         return headers
 
-    def extract_context(self, headers: Dict[str, str]) -> Optional[str]:
+    def extract_context(self, headers: dict[str, str]) -> Optional[str]:
         """Extract trace context from headers.
 
         Args:

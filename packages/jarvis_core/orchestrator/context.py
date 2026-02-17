@@ -6,7 +6,7 @@ and provides context for the orchestrator to execute the cognitive loop.
 
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.cognition.models import (
     DecisionProfile,
@@ -34,10 +34,10 @@ class CognitiveProfile:
 
     identity: IdentityModel = field(default_factory=IdentityModel)
     energy: EnergyModel = field(default_factory=EnergyModel)
-    skills: List[SkillGraph] = field(default_factory=list)
+    skills: list[SkillGraph] = field(default_factory=list)
     decision: DecisionProfile = field(default_factory=DecisionProfile)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert cognitive profile to dictionary.
 
         Returns:
@@ -92,7 +92,7 @@ class CognitiveContext:
 
     context: Context = field(default_factory=Context)
     profile: CognitiveProfile = field(default_factory=CognitiveProfile)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def create_default(cls, execution_date: Optional[date] = None) -> "CognitiveContext":
@@ -115,7 +115,7 @@ class CognitiveContext:
             },
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert cognitive context to dictionary.
 
         Returns:

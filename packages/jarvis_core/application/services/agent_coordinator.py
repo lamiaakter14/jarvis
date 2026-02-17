@@ -2,7 +2,7 @@
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.domain.entities.agent import Agent
 from jarvis_core.domain.entities.context import Context
@@ -28,7 +28,7 @@ class AgentCoordinator:
             task_repository: Repository for task persistence
         """
         self.task_repository = task_repository
-        self._agent_registry: Dict[AgentType, Agent] = {}
+        self._agent_registry: dict[AgentType, Agent] = {}
 
     def register_agent(self, agent: Agent) -> None:
         """Register an agent for coordination.
@@ -51,7 +51,7 @@ class AgentCoordinator:
 
     async def coordinate_task_execution(
         self, context: Context, priority_threshold: Optional[TaskPriority] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Coordinate task execution across agents with priority handling.
 
         Args:
@@ -146,8 +146,8 @@ class AgentCoordinator:
         return results
 
     async def coordinate_agents_parallel(
-        self, context: Context, agent_types: List[AgentType], max_concurrent: int = 3
-    ) -> Dict[str, Any]:
+        self, context: Context, agent_types: list[AgentType], max_concurrent: int = 3
+    ) -> dict[str, Any]:
         """Coordinate parallel agent execution with concurrency control.
 
         Args:
@@ -200,7 +200,7 @@ class AgentCoordinator:
 
         return results
 
-    async def synchronize_strategic_agents(self, context: Context) -> Dict[str, Any]:
+    async def synchronize_strategic_agents(self, context: Context) -> dict[str, Any]:
         """Synchronize STRATEGIST, EXECUTOR, and MENTOR agents.
 
         Executes agents in a coordinated workflow:

@@ -1,7 +1,8 @@
 """Task repository interface for the domain layer."""
 
+import builtins
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Optional
 
 from jarvis_core.domain.entities.task import Task
 from jarvis_core.shared.constants import TaskStatus
@@ -28,7 +29,6 @@ class ITaskRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass
 
     @abstractmethod
     async def save(self, task: Task) -> None:
@@ -41,10 +41,9 @@ class ITaskRepository(ABC):
             RepositoryError: If save operation fails
             ValidationError: If task data is invalid
         """
-        pass
 
     @abstractmethod
-    async def list(self, filters: Optional[Dict] = None) -> List[Task]:
+    async def list(self, filters: Optional[dict] = None) -> list[Task]:
         """List tasks with optional filtering.
 
         Args:
@@ -57,7 +56,6 @@ class ITaskRepository(ABC):
         Raises:
             RepositoryError: If list operation fails
         """
-        pass
 
     @abstractmethod
     async def delete(self, task_id: str) -> None:
@@ -70,10 +68,9 @@ class ITaskRepository(ABC):
             RepositoryError: If delete operation fails
             EntityNotFoundError: If task with ID does not exist
         """
-        pass
 
     @abstractmethod
-    async def get_by_status(self, status: TaskStatus) -> List[Task]:
+    async def get_by_status(self, status: TaskStatus) -> builtins.list[Task]:
         """Retrieve all tasks with a specific status.
 
         Args:
@@ -85,4 +82,3 @@ class ITaskRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass

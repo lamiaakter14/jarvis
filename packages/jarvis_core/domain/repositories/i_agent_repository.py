@@ -1,7 +1,7 @@
 """Agent repository interface for the domain layer."""
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
 from jarvis_core.domain.entities.agent import Agent
 from jarvis_core.domain.value_objects.agent_type import AgentType
@@ -28,10 +28,9 @@ class IAgentRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass
 
     @abstractmethod
-    async def list_all(self) -> List[Agent]:
+    async def list_all(self) -> list[Agent]:
         """Retrieve all agents in the system.
 
         Returns:
@@ -40,7 +39,6 @@ class IAgentRepository(ABC):
         Raises:
             RepositoryError: If list operation fails
         """
-        pass
 
     @abstractmethod
     async def get_by_type(self, agent_type: AgentType) -> Optional[Agent]:
@@ -55,4 +53,3 @@ class IAgentRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass

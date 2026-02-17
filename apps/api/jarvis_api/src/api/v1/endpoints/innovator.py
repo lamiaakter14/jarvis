@@ -1,6 +1,6 @@
 """Innovator agent endpoints."""
 
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/innovations")
-async def get_innovations() -> Dict[str, Any]:
+async def get_innovations() -> dict[str, Any]:
     """Get generated innovations."""
     try:
         if not InnovatorBridge:

@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Any, Dict, List
+from typing import Any
 
 
 class IAnalyticsRepository(ABC):
@@ -14,7 +14,7 @@ class IAnalyticsRepository(ABC):
     """
 
     @abstractmethod
-    async def save_execution_metrics(self, metrics: Dict[str, Any]) -> None:
+    async def save_execution_metrics(self, metrics: dict[str, Any]) -> None:
         """Save execution metrics for analysis.
 
         Args:
@@ -26,10 +26,9 @@ class IAnalyticsRepository(ABC):
             RepositoryError: If save operation fails
             ValidationError: If metrics data is invalid
         """
-        pass
 
     @abstractmethod
-    async def get_performance_data(self, start_date: date, end_date: date) -> Dict[str, Any]:
+    async def get_performance_data(self, start_date: date, end_date: date) -> dict[str, Any]:
         """Retrieve performance data for a date range.
 
         Args:
@@ -44,10 +43,9 @@ class IAnalyticsRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass
 
     @abstractmethod
-    async def get_gaps_summary(self) -> List[Dict[str, Any]]:
+    async def get_gaps_summary(self) -> list[dict[str, Any]]:
         """Retrieve summary of identified knowledge and capability gaps.
 
         Returns:
@@ -58,10 +56,9 @@ class IAnalyticsRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass
 
     @abstractmethod
-    async def get_innovations_summary(self) -> List[Dict[str, Any]]:
+    async def get_innovations_summary(self) -> list[dict[str, Any]]:
         """Retrieve summary of identified innovations and improvements.
 
         Returns:
@@ -72,4 +69,3 @@ class IAnalyticsRepository(ABC):
         Raises:
             RepositoryError: If retrieval operation fails
         """
-        pass

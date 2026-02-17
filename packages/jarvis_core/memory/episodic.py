@@ -8,7 +8,7 @@ maintain a persistent record of system activities.
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from jarvis_core.shared.exceptions import RepositoryError
 
@@ -69,7 +69,7 @@ class EpisodicMemoryStore:
         except Exception as e:
             raise RepositoryError(f"Failed to initialize episodic memory database: {e}")
 
-    def store_entries(self, entries: List[str]) -> None:
+    def store_entries(self, entries: list[str]) -> None:
         """Store multiple log entries for the current day.
 
         Args:
@@ -105,7 +105,7 @@ class EpisodicMemoryStore:
         except Exception as e:
             raise RepositoryError(f"Failed to store daily log entries: {e}")
 
-    def retrieve_last_n_days(self, n: int) -> List[dict]:
+    def retrieve_last_n_days(self, n: int) -> list[dict]:
         """Retrieve logs from the last n days.
 
         Args:
@@ -168,7 +168,7 @@ def _get_store() -> EpisodicMemoryStore:
     return _store
 
 
-def store_daily_log(entries: List[str]) -> None:
+def store_daily_log(entries: list[str]) -> None:
     """Store daily logs in the database.
 
     This function stores a list of log entries for the current day in the
@@ -192,7 +192,7 @@ def store_daily_log(entries: List[str]) -> None:
     store.store_entries(entries)
 
 
-def retrieve_last_n_days(n: int) -> List[dict]:
+def retrieve_last_n_days(n: int) -> list[dict]:
     """Retrieve logs from the last n days.
 
     This function retrieves all log entries from the last n days, ordered

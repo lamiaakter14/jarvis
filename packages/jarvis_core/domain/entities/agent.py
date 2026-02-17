@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from jarvis_core.domain.value_objects.agent_type import AgentType
 from jarvis_core.shared.utils import current_timestamp, generate_id
@@ -50,7 +50,6 @@ class Agent(ABC):
         Raises:
             DomainException: If execution fails
         """
-        pass
 
     def track_execution(self, success: bool, execution_time: float) -> None:
         """Track metrics for an execution.
@@ -88,7 +87,7 @@ class Agent(ABC):
             return 0.0
         return self.total_execution_time / self.total_executions
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get all execution metrics.
 
         Returns:

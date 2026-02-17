@@ -1,7 +1,7 @@
 """Analyze Performance use case."""
 
 from datetime import date
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.application.dto.analytics_dto import AnalyticsDTO
 from jarvis_core.domain.repositories import IAnalyticsRepository, IMemoryRepository, ITaskRepository
@@ -147,7 +147,7 @@ class AnalyzePerformance:
         except Exception as e:
             raise DomainException(f"Failed to analyze performance: {str(e)}")
 
-    async def _get_top_gaps(self, limit: int = 5) -> List[Dict[str, Any]]:
+    async def _get_top_gaps(self, limit: int = 5) -> list[dict[str, Any]]:
         """Get top identified gaps.
 
         Args:
@@ -173,7 +173,7 @@ class AnalyzePerformance:
 
         return sorted_gaps[:limit]
 
-    async def _get_recent_innovations(self, limit: int = 5) -> List[Dict[str, Any]]:
+    async def _get_recent_innovations(self, limit: int = 5) -> list[dict[str, Any]]:
         """Get recent innovations.
 
         Args:

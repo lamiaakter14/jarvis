@@ -1,6 +1,6 @@
 """Memory coordinator domain service."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.domain.entities.context import Context
 from jarvis_core.domain.entities.memory import Memory
@@ -25,7 +25,7 @@ class MemoryCoordinator:
         """
         self.memory_repository = memory_repository
 
-    async def store_working_memory(self, key: str, content: Dict[str, Any]) -> None:
+    async def store_working_memory(self, key: str, content: dict[str, Any]) -> None:
         """Store content in working memory.
 
         Working memory holds temporary data needed during execution,
@@ -118,7 +118,7 @@ class MemoryCoordinator:
         except Exception as e:
             raise DomainException(f"Failed to save context: {str(e)}")
 
-    async def update_gaps(self, gaps: List[Dict[str, Any]]) -> None:
+    async def update_gaps(self, gaps: list[dict[str, Any]]) -> None:
         """Update the gap list in memory.
 
         Persists identified gaps for tracking and resolution.
@@ -142,7 +142,7 @@ class MemoryCoordinator:
         except Exception as e:
             raise DomainException(f"Failed to update gaps: {str(e)}")
 
-    async def retrieve_gaps(self) -> List[Dict[str, Any]]:
+    async def retrieve_gaps(self) -> list[dict[str, Any]]:
         """Retrieve all identified gaps from memory.
 
         Returns:
@@ -189,7 +189,7 @@ class MemoryCoordinator:
         except Exception as e:
             raise DomainException(f"Failed to store execution result: {str(e)}")
 
-    async def get_memory_summary(self) -> Dict[str, Any]:
+    async def get_memory_summary(self) -> dict[str, Any]:
         """Get a summary of current memory state.
 
         Provides an overview of what's stored in memory without

@@ -1,6 +1,6 @@
 """Strategist agent endpoints."""
 
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/plan/today")
-async def get_daily_plan() -> Dict[str, Any]:
+async def get_daily_plan() -> dict[str, Any]:
     """Get today's daily plan."""
     try:
         if not StrategistBridge:

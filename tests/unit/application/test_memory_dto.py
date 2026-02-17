@@ -1,12 +1,12 @@
 """Unit tests for Memory DTO."""
 
-import pytest
 from datetime import datetime
 
+import pytest
 from jarvis_core.application.dto.memory_dto import (
     MemoryDTO,
     MemorySearchQueryDTO,
-    MemorySearchResultDTO
+    MemorySearchResultDTO,
 )
 from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.shared.constants import MemoryType
@@ -15,7 +15,7 @@ from jarvis_core.shared.constants import MemoryType
 @pytest.mark.unit
 class TestMemoryDTO:
     """Test MemoryDTO validation and conversions."""
-    
+
     def test_create_memory_dto(self):
         """Test creating a MemoryDTO with valid data."""
         dto = MemoryDTO(
@@ -26,15 +26,15 @@ class TestMemoryDTO:
             created_at=datetime.now(),
             updated_at=datetime.now(),
             metadata={},
-            version=1
+            version=1,
         )
-        
+
         assert dto.memory_id == "mem_123"
         assert dto.type == "working"
         assert dto.key == "test_key"
         assert dto.content == {"data": "test"}
         assert dto.version == 1
-    
+
     def test_memory_dto_validates_type(self):
         """Test that MemoryDTO validates memory type."""
         with pytest.raises(ValueError, match="Invalid memory type"):
@@ -46,10 +46,11 @@ class TestMemoryDTO:
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             )
-    
+
     def test_memory_dto_validates_key(self):
         """Test that MemoryDTO validates non-empty key."""
         from pydantic import ValidationError
+
         with pytest.raises(ValidationError):
             MemoryDTO(
                 memory_id="mem_123",
@@ -59,10 +60,11 @@ class TestMemoryDTO:
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             )
-    
+
     def test_memory_dto_validates_content(self):
         """Test that MemoryDTO validates content is a dictionary."""
         from pydantic import ValidationError
+
         with pytest.raises(ValidationError):
             MemoryDTO(
                 memory_id="mem_123",
@@ -72,7 +74,7 @@ class TestMemoryDTO:
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             )
-    
+
     def test_memory_dto_from_entity(self):
         """Test creating MemoryDTO from Memory entity."""
         memory = Memory(
@@ -81,14 +83,14 @@ class TestMemoryDTO:
             key="knowledge_key",
             content={"title": "Test Knowledge"},
         )
-        
+
         dto = MemoryDTO.from_entity(memory)
-        
+
         assert dto.memory_id == memory.memory_id
         assert dto.type == memory.type.value
         assert dto.key == memory.key
         assert dto.content == memory.content
-    
+
     def test_memory_dto_to_entity(self):
         """Test converting MemoryDTO to Memory entity."""
         dto = MemoryDTO(
@@ -99,17 +101,17 @@ class TestMemoryDTO:
             created_at=datetime.now(),
             updated_at=datetime.now(),
             metadata={"version": 2},
-            version=2
+            version=2,
         )
-        
+
         memory = dto.to_entity()
-        
+
         assert memory.memory_id == dto.memory_id
         assert memory.type == MemoryType.STRATEGIC
         assert memory.key == dto.key
         assert memory.content == dto.content
         assert memory.get_version() == 2
-    
+
     def test_memory_dto_to_dict(self):
         """Test converting MemoryDTO to dictionary."""
         dto = MemoryDTO(
@@ -120,9 +122,9 @@ class TestMemoryDTO:
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
-        
+
         result = dto.to_dict()
-        
+
         assert isinstance(result, dict)
         assert result["memory_id"] == "mem_123"
         assert result["type"] == "working"
@@ -131,7 +133,7 @@ class TestMemoryDTO:
 @pytest.mark.unit
 class TestMemorySearchQueryDTO:
     """Test MemorySearchQueryDTO validation."""
-    
+
     def test_create_search_query(self):
         """Test creating a search query DTO."""
         query = MemorySearchQueryDTO(
@@ -139,35 +141,33 @@ class TestMemorySearchQueryDTO:
             keywords=["test", "search"],
             key_pattern="pattern",
             limit=50,
-            offset=10
+            offset=10,
         )
-        
+
         assert query.memory_type == "knowledge"
         assert query.keywords == ["test", "search"]
         assert query.limit == 50
         assert query.offset == 10
-    
+
     def test_search_query_validates_memory_type(self):
         """Test that search query validates memory type."""
         with pytest.raises(ValueError, match="Invalid memory type"):
-            MemorySearchQueryDTO(
-                memory_type="invalid_type"
-            )
-    
+            MemorySearchQueryDTO(memory_type="invalid_type")
+
     def test_search_query_default_values(self):
         """Test default values in search query."""
         query = MemorySearchQueryDTO()
-        
+
         assert query.memory_type is None
         assert query.keywords is None
         assert query.limit == 100
         assert query.offset == 0
-    
+
     def test_search_query_validates_limit_range(self):
         """Test that limit is within valid range."""
         with pytest.raises(ValueError):
             MemorySearchQueryDTO(limit=0)
-        
+
         with pytest.raises(ValueError):
             MemorySearchQueryDTO(limit=2000)
 
@@ -175,7 +175,7 @@ class TestMemorySearchQueryDTO:
 @pytest.mark.unit
 class TestMemorySearchResultDTO:
     """Test MemorySearchResultDTO."""
-    
+
     def test_create_search_result(self):
         """Test creating a search result DTO."""
         memories = [
@@ -188,29 +188,21 @@ class TestMemorySearchResultDTO:
                 updated_at=datetime.now(),
             )
         ]
-        
+
         result = MemorySearchResultDTO(
-            memories=memories,
-            total_count=100,
-            offset=0,
-            limit=10,
-            has_more=True
+            memories=memories, total_count=100, offset=0, limit=10, has_more=True
         )
-        
+
         assert len(result.memories) == 1
         assert result.total_count == 100
         assert result.has_more is True
-    
+
     def test_search_result_empty(self):
         """Test creating an empty search result."""
         result = MemorySearchResultDTO(
-            memories=[],
-            total_count=0,
-            offset=0,
-            limit=10,
-            has_more=False
+            memories=[], total_count=0, offset=0, limit=10, has_more=False
         )
-        
+
         assert len(result.memories) == 0
         assert result.total_count == 0
         assert result.has_more is False

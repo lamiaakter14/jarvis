@@ -1,6 +1,6 @@
 """Cognitive loop endpoint."""
 
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -25,7 +25,7 @@ router = APIRouter()
 
 
 @router.post("/cognitive-loop")
-async def run_cognitive_loop() -> Dict[str, Any]:
+async def run_cognitive_loop() -> dict[str, Any]:
     """Execute the complete cognitive loop with all 5 agents."""
     try:
         if not all(

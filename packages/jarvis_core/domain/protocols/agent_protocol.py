@@ -1,6 +1,6 @@
 """Agent Protocol for standardized agent interfaces."""
 
-from typing import Any, Dict, Protocol
+from typing import Any, Protocol
 
 from jarvis_core.domain.entities.context import Context
 
@@ -16,7 +16,7 @@ class AgentProtocol(Protocol):
         """Track execution metrics for monitoring."""
         ...
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get execution metrics for the agent."""
         ...
 

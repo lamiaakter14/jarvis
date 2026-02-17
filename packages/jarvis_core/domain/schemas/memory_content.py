@@ -1,7 +1,7 @@
 """Schema definitions for memory content validation using Pydantic."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -15,7 +15,7 @@ class WorkingMemoryContent(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    data: Dict[str, Any] = Field(..., description="Working memory data")
+    data: dict[str, Any] = Field(..., description="Working memory data")
     session_id: Optional[str] = Field(None, description="Session identifier")
     agent_id: Optional[str] = Field(None, description="Agent that created this memory")
     expires_at: Optional[datetime] = Field(None, description="Expiration timestamp")
@@ -33,7 +33,7 @@ class KnowledgeMemoryContent(BaseModel):
     description: str = Field(default="", description="Knowledge description")
     content: str = Field(..., min_length=1, description="Knowledge content")
     category: Optional[str] = Field(None, description="Knowledge category")
-    tags: List[str] = Field(default_factory=list, description="Knowledge tags for indexing")
+    tags: list[str] = Field(default_factory=list, description="Knowledge tags for indexing")
     source: Optional[str] = Field(None, description="Source of this knowledge")
     confidence: float = Field(default=1.0, ge=0.0, le=1.0, description="Confidence score")
     last_accessed: Optional[datetime] = Field(None, description="Last access timestamp")
@@ -56,9 +56,9 @@ class StrategicMemoryContent(BaseModel):
     )
     target_date: Optional[datetime] = Field(None, description="Target completion date")
     progress: float = Field(default=0.0, ge=0.0, le=100.0, description="Progress percentage")
-    milestones: List[Dict[str, Any]] = Field(default_factory=list, description="List of milestones")
-    dependencies: List[str] = Field(default_factory=list, description="Dependencies on other goals")
-    metrics: Dict[str, Any] = Field(default_factory=dict, description="Success metrics")
+    milestones: list[dict[str, Any]] = Field(default_factory=list, description="List of milestones")
+    dependencies: list[str] = Field(default_factory=list, description="Dependencies on other goals")
+    metrics: dict[str, Any] = Field(default_factory=dict, description="Success metrics")
 
     @field_validator("priority")
     @classmethod
@@ -96,7 +96,7 @@ class ExecutionLogContent(BaseModel):
     duration_seconds: Optional[float] = Field(None, ge=0, description="Execution duration")
     result: Optional[Any] = Field(None, description="Execution result")
     error: Optional[str] = Field(None, description="Error message if failed")
-    metrics: Dict[str, Any] = Field(default_factory=dict, description="Execution metrics")
+    metrics: dict[str, Any] = Field(default_factory=dict, description="Execution metrics")
 
     @field_validator("status")
     @classmethod
@@ -124,10 +124,10 @@ class ADRContent(BaseModel):
     context: str = Field(..., min_length=1, description="Context and background")
     decision: str = Field(..., min_length=1, description="The decision made")
     consequences: str = Field(..., min_length=1, description="Consequences of the decision")
-    alternatives: List[str] = Field(
+    alternatives: list[str] = Field(
         default_factory=list, description="Alternative options considered"
     )
-    related_decisions: List[str] = Field(default_factory=list, description="Related ADR IDs")
+    related_decisions: list[str] = Field(default_factory=list, description="Related ADR IDs")
     superseded_by: Optional[str] = Field(None, description="ADR ID that supersedes this one")
 
     @field_validator("status")
@@ -140,7 +140,7 @@ class ADRContent(BaseModel):
         return v.lower()
 
 
-def validate_memory_content(memory_type: str, content: Dict[str, Any]) -> BaseModel:
+def validate_memory_content(memory_type: str, content: dict[str, Any]) -> BaseModel:
     """Validate memory content against its type-specific schema.
 
     Args:

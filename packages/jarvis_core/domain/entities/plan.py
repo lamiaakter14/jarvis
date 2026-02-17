@@ -1,8 +1,8 @@
 """Plan entity for the domain layer."""
 
 from dataclasses import dataclass, field
-from datetime import date, datetime
-from typing import List, Optional
+from datetime import datetime
+from typing import Optional
 
 from jarvis_core.domain.entities.task import Task
 from jarvis_core.shared.exceptions import DomainException
@@ -19,7 +19,7 @@ class Plan:
 
     plan_id: str = field(default_factory=lambda: generate_id("plan_"))
     date: date = field(default_factory=current_date)
-    tasks: List[Task] = field(default_factory=list)
+    tasks: list[Task] = field(default_factory=list)
     total_hours: float = 8.0
     created_by: str = "system"
     created_at: datetime = field(default_factory=current_timestamp)
@@ -86,7 +86,7 @@ class Plan:
                 return task
         return None
 
-    def get_high_priority_tasks(self) -> List[Task]:
+    def get_high_priority_tasks(self) -> list[Task]:
         """Get all high priority tasks in the plan.
 
         Returns:
@@ -94,7 +94,7 @@ class Plan:
         """
         return [task for task in self.tasks if task.is_high_priority()]
 
-    def get_tasks_by_priority(self, priority) -> List[Task]:
+    def get_tasks_by_priority(self, priority) -> list[Task]:
         """Get all tasks with specified priority.
 
         Args:
@@ -105,7 +105,7 @@ class Plan:
         """
         return [task for task in self.tasks if task.priority == priority]
 
-    def get_pending_tasks(self) -> List[Task]:
+    def get_pending_tasks(self) -> list[Task]:
         """Get all pending tasks in the plan.
 
         Returns:
@@ -113,7 +113,7 @@ class Plan:
         """
         return [task for task in self.tasks if task.is_pending()]
 
-    def get_completed_tasks(self) -> List[Task]:
+    def get_completed_tasks(self) -> list[Task]:
         """Get all completed tasks in the plan.
 
         Returns:
@@ -121,7 +121,7 @@ class Plan:
         """
         return [task for task in self.tasks if task.is_completed()]
 
-    def get_in_progress_tasks(self) -> List[Task]:
+    def get_in_progress_tasks(self) -> list[Task]:
         """Get all in-progress tasks in the plan.
 
         Returns:

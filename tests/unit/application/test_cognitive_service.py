@@ -276,7 +276,10 @@ class TestCognitiveService:
         result = service.calculate_alignment_score(decision_profile, skill_graph)
 
         assert result["alignment_score"] < 0.4
-        assert "deprioritizing" in result["recommendation"].lower() or "low" in result["recommendation"].lower()
+        assert (
+            "deprioritizing" in result["recommendation"].lower()
+            or "low" in result["recommendation"].lower()
+        )
 
     def test_calculate_alignment_score_recommendation_for_high_alignment(self, service):
         """Test recommendation generation for high alignment."""
@@ -290,4 +293,7 @@ class TestCognitiveService:
         result = service.calculate_alignment_score(decision_profile, skill_graph)
 
         assert result["alignment_score"] >= 0.7
-        assert "high" in result["recommendation"].lower() or "well-positioned" in result["recommendation"].lower()
+        assert (
+            "high" in result["recommendation"].lower()
+            or "well-positioned" in result["recommendation"].lower()
+        )

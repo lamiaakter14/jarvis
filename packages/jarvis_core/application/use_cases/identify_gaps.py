@@ -1,6 +1,5 @@
 """Identify Gaps use case."""
 
-from typing import Dict, List
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
@@ -33,7 +32,7 @@ class IdentifyGaps:
         self.ai_service = ai_service
         self.notification_service = notification_service
 
-    async def execute(self) -> List[Dict]:
+    async def execute(self) -> list[dict]:
         """Identify gaps from execution logs.
 
         Returns:
@@ -66,7 +65,7 @@ class IdentifyGaps:
         except Exception as e:
             raise DomainException(f"Failed to identify gaps: {str(e)}")
 
-    async def _load_execution_logs(self, limit: int = 100) -> List[Dict]:
+    async def _load_execution_logs(self, limit: int = 100) -> list[dict]:
         """Load recent execution logs.
 
         Args:
@@ -92,7 +91,7 @@ class IdentifyGaps:
 
         return all_logs
 
-    async def _enrich_gaps(self, gaps: List[Dict]) -> List[Dict]:
+    async def _enrich_gaps(self, gaps: list[dict]) -> list[dict]:
         """Enrich gaps with additional context.
 
         Args:
@@ -131,7 +130,7 @@ class IdentifyGaps:
 
         return enriched
 
-    async def _store_gaps(self, gaps: List[Dict]) -> None:
+    async def _store_gaps(self, gaps: list[dict]) -> None:
         """Store identified gaps in memory.
 
         Args:
@@ -164,7 +163,7 @@ class IdentifyGaps:
         )
         await self.memory_repository.save(gaps_memory)
 
-    async def _notify_gaps(self, gaps: List[Dict]) -> None:
+    async def _notify_gaps(self, gaps: list[dict]) -> None:
         """Send notifications for important gaps.
 
         Args:
@@ -179,7 +178,7 @@ class IdentifyGaps:
                     await self.notification_service.notify_gap_identified(gap)
 
                     # Emit domain event
-                    event = GapIdentifiedEvent(
+                    GapIdentifiedEvent(
                         description=gap.get("description", ""),
                         category=gap.get("type", "unknown"),
                         severity=severity,

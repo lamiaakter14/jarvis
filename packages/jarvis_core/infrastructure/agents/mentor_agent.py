@@ -1,7 +1,7 @@
 """Mentor agent implementation."""
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.domain.entities.agent import Agent
@@ -37,7 +37,7 @@ class MentorAgent(Agent):
         self.ai_service = ai_service
         self.memory_repo = memory_repo
 
-    async def execute(self, context: Any) -> Dict[str, Any]:
+    async def execute(self, context: Any) -> dict[str, Any]:
         """Execute mentor's primary function: analyze logs and identify gaps.
 
         Args:
@@ -72,7 +72,7 @@ class MentorAgent(Agent):
             self.track_execution(success=False, execution_time=execution_time)
             raise DomainException(f"Mentor execution failed: {e}")
 
-    async def provide_task_mentorship(self, task: Task) -> Dict[str, Any]:
+    async def provide_task_mentorship(self, task: Task) -> dict[str, Any]:
         """Provide mentorship guidance for a specific task.
 
         Args:
@@ -89,7 +89,7 @@ class MentorAgent(Agent):
             "mentorship": mentorship,
         }
 
-    async def analyze_execution_logs(self, execution_logs: List[Dict]) -> Dict[str, Any]:
+    async def analyze_execution_logs(self, execution_logs: list[dict]) -> dict[str, Any]:
         """Analyze execution logs to identify patterns and gaps.
 
         Args:
@@ -116,7 +116,7 @@ class MentorAgent(Agent):
             "logs_analyzed": len(execution_logs),
         }
 
-    def _generate_recommendations(self, gaps: List[Dict]) -> List[str]:
+    def _generate_recommendations(self, gaps: list[dict]) -> list[str]:
         """Generate recommendations based on identified gaps.
 
         Args:
@@ -156,7 +156,7 @@ class MentorAgent(Agent):
 
         return recommendations
 
-    async def _load_execution_logs(self) -> List[Dict]:
+    async def _load_execution_logs(self) -> list[dict]:
         """Load execution logs from memory.
 
         Returns:
@@ -172,7 +172,7 @@ class MentorAgent(Agent):
         except Exception:
             return []
 
-    async def identify_learning_needs(self, gaps: List[Dict]) -> List[Dict]:
+    async def identify_learning_needs(self, gaps: list[dict]) -> list[dict]:
         """Identify specific learning needs from gaps.
 
         Args:
@@ -194,7 +194,7 @@ class MentorAgent(Agent):
 
         return learning_needs
 
-    def _suggest_resources(self, gap: Dict) -> List[str]:
+    def _suggest_resources(self, gap: dict) -> list[str]:
         """Suggest learning resources for a gap.
 
         Args:

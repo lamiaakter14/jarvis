@@ -1,7 +1,6 @@
 """Notification Service Interface for application layer."""
 
 from abc import ABC, abstractmethod
-from typing import Dict
 
 from jarvis_core.domain.entities.task import Task
 
@@ -25,7 +24,6 @@ class INotificationService(ABC):
         Raises:
             NotificationError: If notification sending fails
         """
-        pass
 
     @abstractmethod
     async def notify_task_completed(self, task: Task) -> None:
@@ -40,10 +38,9 @@ class INotificationService(ABC):
         Raises:
             NotificationError: If notification sending fails
         """
-        pass
 
     @abstractmethod
-    async def notify_gap_identified(self, gap: Dict) -> None:
+    async def notify_gap_identified(self, gap: dict) -> None:
         """Send notification when a gap is identified.
 
         Sends a notification about newly identified knowledge or skill gaps
@@ -59,4 +56,3 @@ class INotificationService(ABC):
         Raises:
             NotificationError: If notification sending fails
         """
-        pass

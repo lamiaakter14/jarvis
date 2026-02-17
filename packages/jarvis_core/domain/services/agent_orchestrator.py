@@ -1,6 +1,6 @@
 """Agent orchestrator domain service."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.domain.entities.agent import Agent
 from jarvis_core.domain.entities.context import Context
@@ -15,7 +15,7 @@ class AgentOrchestrator:
     agents execute in the optimal order and have access to necessary context.
     """
 
-    async def coordinate_agents(self, context: Context, agents: List[Agent]) -> Dict[str, Any]:
+    async def coordinate_agents(self, context: Context, agents: list[Agent]) -> dict[str, Any]:
         """Coordinate execution of multiple agents in parallel.
 
         Executes agents concurrently when possible, aggregating their results
@@ -84,7 +84,7 @@ class AgentOrchestrator:
 
         return results
 
-    async def execute_agent_sequence(self, agents: List[Agent], context: Context) -> List[Any]:
+    async def execute_agent_sequence(self, agents: list[Agent], context: Context) -> list[Any]:
         """Execute agents in sequence, passing results forward.
 
         Each agent receives the context and results from previous agents.
@@ -130,7 +130,7 @@ class AgentOrchestrator:
 
         return results
 
-    def validate_agent_compatibility(self, agents: List[Agent], context: Context) -> Dict[str, Any]:
+    def validate_agent_compatibility(self, agents: list[Agent], context: Context) -> dict[str, Any]:
         """Validate that agents can work with the given context.
 
         Checks for sufficient resources, compatible agent types, and

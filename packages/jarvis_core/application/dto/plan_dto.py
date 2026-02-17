@@ -2,7 +2,7 @@
 
 from datetime import date as date_type
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -22,7 +22,7 @@ class PlanDTO(BaseModel):
 
     plan_id: str = Field(..., description="Unique identifier for the plan")
     date: date_type = Field(..., description="Date for which the plan is created")
-    tasks: List["TaskDTO"] = Field(default_factory=list, description="List of tasks in the plan")
+    tasks: list["TaskDTO"] = Field(default_factory=list, description="List of tasks in the plan")
     total_hours: float = Field(..., gt=0, le=24, description="Total hours available")
     status: str = Field(..., description="Plan status (draft, active, completed, archived)")
     created_by: str = Field(default="system", description="Creator of the plan")
@@ -50,7 +50,7 @@ class PlanDTO(BaseModel):
             created_at=plan.created_at,
         )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert DTO to dictionary.
 
         Returns:
@@ -58,7 +58,7 @@ class PlanDTO(BaseModel):
         """
         data = self.model_dump()
         # Convert nested task DTOs to dicts
-        data["tasks"] = [task for task in data["tasks"]]
+        data["tasks"] = list(data["tasks"])
         return data
 
     def get_planned_hours(self) -> float:

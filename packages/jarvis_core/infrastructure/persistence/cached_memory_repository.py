@@ -1,7 +1,8 @@
 """Cached memory repository with LRU caching for performance optimization."""
 
+import builtins
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.domain.entities.memory import Memory
 from jarvis_core.domain.repositories.i_memory_repository import IMemoryRepository
@@ -35,10 +36,10 @@ class CachedMemoryRepository(IMemoryRepository):
         self._cache_ttl = timedelta(seconds=cache_ttl_seconds)
 
         # Cache for individual memory lookups (key -> (memory, timestamp))
-        self._memory_cache: Dict[str, tuple[Memory, datetime]] = {}
+        self._memory_cache: dict[str, tuple[Memory, datetime]] = {}
 
         # Cache for list operations (memory_type -> (list, timestamp))
-        self._list_cache: Dict[MemoryType, tuple[List[Memory], datetime]] = {}
+        self._list_cache: dict[MemoryType, tuple[list[Memory], datetime]] = {}
 
         # Cache statistics
         self._stats = {"hits": 0, "misses": 0, "invalidations": 0, "evictions": 0}
@@ -126,7 +127,7 @@ class CachedMemoryRepository(IMemoryRepository):
         # Invalidate list cache as it's now stale
         self._list_cache.clear()
 
-    async def list(self, memory_type: MemoryType) -> List[Memory]:
+    async def list(self, memory_type: MemoryType) -> list[Memory]:
         """List all memories of a specific type (with caching).
 
         Args:
@@ -169,7 +170,7 @@ class CachedMemoryRepository(IMemoryRepository):
 
     async def get_by_type_and_pattern(
         self, memory_type: MemoryType, key_pattern: str
-    ) -> List[Memory]:
+    ) -> builtins.list[Memory]:
         """Get memories by type that match a key pattern.
 
         Note: Pattern-based queries are not cached as they vary too much.
@@ -187,12 +188,12 @@ class CachedMemoryRepository(IMemoryRepository):
     async def search(
         self,
         memory_type: Optional[MemoryType] = None,
-        keywords: Optional[List[str]] = None,
+        keywords: Optional[builtins.list[str]] = None,
         key_pattern: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[builtins.list[str]] = None,
         limit: Optional[int] = None,
         offset: int = 0,
-    ) -> List[Memory]:
+    ) -> builtins.list[Memory]:
         """Search memories with filters.
 
         Note: Complex search queries are not cached.
@@ -218,7 +219,7 @@ class CachedMemoryRepository(IMemoryRepository):
             offset=offset,
         )
 
-    def get_cache_stats(self) -> Dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache performance statistics.
 
         Returns:
@@ -259,7 +260,7 @@ class CachedMemoryRepository(IMemoryRepository):
         # Version queries bypass cache
         return await self._repository.get_by_version(key, version)
 
-    async def list_versions(self, key: str) -> List[int]:
+    async def list_versions(self, key: str) -> builtins.list[int]:
         """List all available versions of a memory.
 
         Note: Version listing is not cached as it is infrequent.

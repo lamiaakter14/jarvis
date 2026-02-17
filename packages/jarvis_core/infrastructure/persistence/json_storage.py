@@ -3,7 +3,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jarvis_core.shared.exceptions import RepositoryError
 
@@ -24,7 +24,7 @@ class JsonStorage:
         self.base_path = Path(base_path)
         self.base_path.mkdir(parents=True, exist_ok=True)
 
-    def load(self, file_path: str, default: Optional[Dict] = None) -> Dict[str, Any]:
+    def load(self, file_path: str, default: Optional[dict] = None) -> dict[str, Any]:
         """Load JSON data from a file.
 
         Args:
@@ -50,7 +50,7 @@ class JsonStorage:
         except Exception as e:
             raise RepositoryError(f"Failed to load {file_path}: {e}")
 
-    def save(self, file_path: str, data: Dict[str, Any], indent: int = 2) -> None:
+    def save(self, file_path: str, data: dict[str, Any], indent: int = 2) -> None:
         """Save JSON data to a file.
 
         Args:
@@ -72,7 +72,7 @@ class JsonStorage:
         except Exception as e:
             raise RepositoryError(f"Failed to save {file_path}: {e}")
 
-    def list_files(self, pattern: str = "*.json") -> List[Path]:
+    def list_files(self, pattern: str = "*.json") -> list[Path]:
         """List all JSON files matching a pattern.
 
         Args:
@@ -158,7 +158,7 @@ class JsonStorage:
             return obj.value
         raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-    def append_to_list(self, file_path: str, item: Dict[str, Any]) -> None:
+    def append_to_list(self, file_path: str, item: dict[str, Any]) -> None:
         """Append an item to a JSON list file.
 
         Args:
@@ -184,7 +184,7 @@ class JsonStorage:
         """
         self.save(file_path, {"items": []})
 
-    def get_list_items(self, file_path: str) -> List[Dict[str, Any]]:
+    def get_list_items(self, file_path: str) -> list[dict[str, Any]]:
         """Get all items from a JSON list file.
 
         Args:

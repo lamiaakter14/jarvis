@@ -1,7 +1,7 @@
 """Innovator agent implementation."""
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.domain.entities.agent import Agent
@@ -40,7 +40,7 @@ class InnovatorAgent(Agent):
         self.ai_service = ai_service
         self.memory_repo = memory_repo
 
-    async def execute(self, context: Context) -> List[Innovation]:
+    async def execute(self, context: Context) -> list[Innovation]:
         """Execute innovator's primary function: generate innovations.
 
         Args:
@@ -71,7 +71,7 @@ class InnovatorAgent(Agent):
             self.track_execution(success=False, execution_time=execution_time)
             raise DomainException(f"Innovator execution failed: {e}")
 
-    async def _store_innovations(self, innovations: List[Innovation]) -> None:
+    async def _store_innovations(self, innovations: list[Innovation]) -> None:
         """Store innovations in memory.
 
         Args:
@@ -103,7 +103,7 @@ class InnovatorAgent(Agent):
             # Log error but don't fail the execution
             print(f"Warning: Failed to store innovations: {e}")
 
-    def _innovation_to_dict(self, innovation: Innovation) -> Dict[str, Any]:
+    def _innovation_to_dict(self, innovation: Innovation) -> dict[str, Any]:
         """Convert Innovation entity to dictionary.
 
         Args:
@@ -123,7 +123,7 @@ class InnovatorAgent(Agent):
             "created_by": innovation.created_by,
         }
 
-    async def get_high_impact_innovations(self) -> List[Dict[str, Any]]:
+    async def get_high_impact_innovations(self) -> list[dict[str, Any]]:
         """Get all high-impact innovations.
 
         Returns:
@@ -139,7 +139,7 @@ class InnovatorAgent(Agent):
         except Exception:
             return []
 
-    async def get_innovations_by_category(self, category: str) -> List[Dict[str, Any]]:
+    async def get_innovations_by_category(self, category: str) -> list[dict[str, Any]]:
         """Get innovations filtered by category.
 
         Args:
@@ -158,7 +158,7 @@ class InnovatorAgent(Agent):
         except Exception:
             return []
 
-    async def analyze_innovation_trends(self) -> Dict[str, Any]:
+    async def analyze_innovation_trends(self) -> dict[str, Any]:
         """Analyze trends in generated innovations.
 
         Returns:
@@ -199,7 +199,7 @@ class InnovatorAgent(Agent):
                 "total_innovations": 0,
             }
 
-    async def suggest_quick_wins(self) -> List[Dict[str, Any]]:
+    async def suggest_quick_wins(self) -> list[dict[str, Any]]:
         """Suggest quick wins - high impact, easy to implement innovations.
 
         Returns:

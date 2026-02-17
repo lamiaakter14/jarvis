@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from jarvis_core.shared.utils import current_timestamp, generate_id
 
@@ -19,7 +19,7 @@ class BaseEvent:
     event_id: str = field(default_factory=lambda: generate_id("evt_"))
     event_type: str = field(default="")
     timestamp: datetime = field(default_factory=current_timestamp)
-    payload: Dict[str, Any] = field(default_factory=dict)
+    payload: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate event after initialization."""
@@ -27,7 +27,7 @@ class BaseEvent:
         if not self.event_type:
             object.__setattr__(self, "event_type", self.__class__.__name__)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert event to dictionary representation.
 
         Returns:

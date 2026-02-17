@@ -6,7 +6,7 @@ while we gradually migrate to the new architecture.
 """
 
 from datetime import date
-from typing import Any, Dict
+from typing import Any
 
 
 class BridgeAgentWrapper:
@@ -14,13 +14,12 @@ class BridgeAgentWrapper:
 
     def __init__(self):
         """Initialize wrapper."""
-        pass
 
 
 class StrategistBridge(BridgeAgentWrapper):
     """Bridge for Strategist agent - provides simplified fallback."""
 
-    def generate_plan(self) -> Dict[str, Any]:
+    def generate_plan(self) -> dict[str, Any]:
         """Generate plan - returns basic structure for now."""
         return {
             "date": str(date.today()),
@@ -46,11 +45,11 @@ class StrategistBridge(BridgeAgentWrapper):
 class MentorBridge(BridgeAgentWrapper):
     """Bridge for Mentor agent."""
 
-    def analyze_execution_logs(self) -> Dict[str, Any]:
+    def analyze_execution_logs(self) -> dict[str, Any]:
         """Analyze execution logs."""
         return {"updated_gaps": [], "status": "analyzed"}
 
-    def mentor_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    def mentor_task(self, task: dict[str, Any]) -> dict[str, Any]:
         """Provide mentorship for a task."""
         return {
             "task": task.get("task", "unknown"),
@@ -71,7 +70,7 @@ class ExecutorBridge(BridgeAgentWrapper):
 class InnovatorBridge(BridgeAgentWrapper):
     """Bridge for Innovator agent."""
 
-    def create_innovations(self) -> Dict[str, Any]:
+    def create_innovations(self) -> dict[str, Any]:
         """Create innovations."""
         return {
             "innovations": [
@@ -87,7 +86,7 @@ class InnovatorBridge(BridgeAgentWrapper):
 class AmplifierBridge(BridgeAgentWrapper):
     """Bridge for Amplifier agent."""
 
-    def amplify(self) -> Dict[str, Any]:
+    def amplify(self) -> dict[str, Any]:
         """Analyze and optimize performance."""
         return {
             "productivity_score": 0.78,
