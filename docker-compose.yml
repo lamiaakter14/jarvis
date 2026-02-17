@@ -51,6 +51,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Note: For production with semantic search, use postgres:15 with pgvector extension
+      # Build custom image: FROM postgres:15 && apt-get install postgresql-15-pgvector
     ports:
       - "5432:5432"
     networks:
