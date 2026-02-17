@@ -601,7 +601,109 @@ bash scripts/setup/quick_start.sh
    - Configure agents
    - Import sample data
 
-3. **Explore the features**:
+## Advanced Configuration
+
+### REFLECTOR Agent Setup
+
+The REFLECTOR agent (introduced in JARVIS V1) analyzes execution patterns and provides self-correction recommendations. It requires:
+
+1. **Historical execution data**: The agent needs at least 1 day of task execution history to provide meaningful insights.
+
+2. **Memory repository access**: Ensure the memory repository is properly configured:
+   ```bash
+   # Memory directories are created during installation
+   # Verify they exist:
+   ls -la memory/
+   # Should show: strategic/, knowledge/, working_template.json, etc.
+   ```
+
+3. **Enable REFLECTOR in configuration** (`.env`):
+   ```bash
+   # REFLECTOR Agent Configuration
+   REFLECTOR_ENABLED=true
+   REFLECTOR_ANALYSIS_SCHEDULE="0 6 * * *"  # Run at 6 AM daily
+   REFLECTOR_MIN_TASKS_FOR_ANALYSIS=3  # Minimum tasks needed for analysis
+   ```
+
+4. **Verify REFLECTOR agent**:
+   ```bash
+   # Test REFLECTOR endpoint
+   curl -X POST http://localhost:8000/api/agents/reflector/analyze \
+     -H "Content-Type: application/json" \
+     -d '{"date": "2024-01-01"}'
+   ```
+
+### Semantic Search & ML/NLU Services
+
+JARVIS V1 includes semantic memory for vector-based knowledge retrieval:
+
+1. **PostgreSQL with pgvector** (Production-ready):
+   ```bash
+   # Install pgvector extension
+   psql -U postgres -d jarvis_dev
+   CREATE EXTENSION IF NOT EXISTS vector;
+   \q
+   ```
+
+2. **Configure semantic search** (`.env`):
+   ```bash
+   # Semantic Search Configuration
+   SEMANTIC_SEARCH_ENABLED=true
+   EMBEDDING_MODEL=text-embedding-ada-002  # OpenAI model
+   EMBEDDING_DIMENSION=1536
+   VECTOR_SIMILARITY_THRESHOLD=0.7
+   ```
+
+3. **Initialize semantic memory**:
+   ```bash
+   # Run initialization script
+   python -m jarvis_core.memory.semantic init
+   
+   # Verify setup
+   python -m jarvis_core.memory.semantic status
+   ```
+
+### Integration Services (Optional)
+
+#### GitHub App Integration
+
+1. **Create GitHub App**: Go to GitHub Settings > Developer settings > GitHub Apps
+2. **Configure webhook URL**: `https://your-domain.com/api/integrations/github/webhook`
+3. **Set permissions**: Repository contents (read), Issues (read/write), Pull requests (read/write)
+4. **Add to `.env`**:
+   ```bash
+   GITHUB_APP_ID=your_app_id
+   GITHUB_PRIVATE_KEY_PATH=/path/to/private-key.pem
+   GITHUB_WEBHOOK_SECRET=your_webhook_secret
+   ```
+
+#### Slack Bot Integration
+
+1. **Create Slack App**: Go to https://api.slack.com/apps
+2. **Add Bot Token Scopes**: `chat:write`, `commands`, `app_mentions:read`
+3. **Install to workspace** and get bot token
+4. **Add to `.env`**:
+   ```bash
+   SLACK_BOT_TOKEN=xoxb-your-bot-token
+   SLACK_SIGNING_SECRET=your_signing_secret
+   SLACK_APP_TOKEN=xapp-your-app-token  # For socket mode
+   ```
+
+#### VSCode Extension
+
+1. **Install extension** from VSCode marketplace (search for "JARVIS AI")
+2. **Configure in VSCode settings**:
+   ```json
+   {
+     "jarvis.apiUrl": "http://localhost:8000",
+     "jarvis.apiKey": "your_api_key",
+     "jarvis.enableRealtime": true
+   }
+   ```
+
+---
+
+## Post-Installation
    - Create strategic goals
    - Manage tasks
    - View analytics dashboard
@@ -683,5 +785,6 @@ When reporting issues, please include:
 ---
 
 **Document Version**: 1.0  
-**Last Updated**: February 15, 2026  
+**Last Updated**: February 17, 2026  
 **Tested On**: Ubuntu 22.04, macOS 13, Windows 11
+**JARVIS Version**: V1 (includes REFLECTOR agent)

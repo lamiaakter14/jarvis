@@ -61,12 +61,12 @@
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │  AGENTS (Implementation)                                │   │
 │  │  • StrategistAgent  • MentorAgent  • ExecutorAgent     │   │
-│  │  • InnovatorAgent   • AmplifierAgent                   │   │
+│  │  • InnovatorAgent   • AmplifierAgent  • ReflectorAgent │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │  PERSISTENCE (Repository Implementations)              │   │
 │  │  • FileMemoryRepository  • SQLiteTaskRepository        │   │
-│  │  • JSONStorage                                         │   │
+│  │  • JSONStorage  • SemanticMemory (vector search)      │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │  EXTERNAL SERVICES (Adapters)                          │   │
@@ -116,7 +116,8 @@ Infrastructure Layer
    ├─→ IdentifyGaps (Mentor)
    ├─→ ExecuteTasks (Executor)
    ├─→ CreateInnovations (Innovator)
-   └─→ AnalyzePerformance (Amplifier)
+   ├─→ AnalyzePerformance (Amplifier)
+   └─→ ReflectAndCorrect (Reflector)
         ↓
 4. Use Cases call Domain Services
         ↓
@@ -291,7 +292,54 @@ async def run_cognitive_loop():
 - [x] Remove old `agents/` and `core/` directories
 - [x] All code uses clean architecture
 - [x] Update all documentation
-- [ ] Training for team
+- [x] Training for team
+
+## JARVIS V1 Updates (Phase 2 & 3)
+
+### Phase 2: Enhanced Multi-Agent Orchestration
+
+**REFLECTOR Agent (NEW)**
+- **Purpose**: Self-correction and alignment analysis
+- **Responsibilities**:
+  - Analyze previous day's execution patterns
+  - Detect drift from strategic mission
+  - Suggest 3 correction actions for improved alignment
+  - Update SkillGraph weights based on execution patterns
+- **Integration**: Runs at end of cognitive loop or on-demand
+- **Output**: Reflection summary, correction actions, drift analysis
+
+**Enhanced Memory System**
+- **Episodic Memory**: Daily execution logs with temporal tracking
+- **Semantic Memory**: Vector-based knowledge storage (pgvector-ready)
+  - Embedding storage and retrieval
+  - Similarity search for knowledge retrieval
+  - Prepared for ML/NLU integration
+- **Strategic Memory**: Long-term goals and ADRs with indexing
+
+### Phase 3: Integration & Real-time Features
+
+**WebSocket Support**
+- Real-time cognitive loop updates
+- Connection management for concurrent clients
+- Event-driven notifications
+
+**Third-Party Integrations**
+- **GitHub App**: Repository integration and webhooks
+- **Slack Bot**: Team notifications and commands
+- **VSCode Extension**: IDE integration for developers
+
+**Memory Enhancements**
+- Working memory with REFLECTOR reflections field
+- Gaps tracking with meta-learning suggestions
+- Innovation scoring driven by ML/NLU analysis
+
+### Architecture Benefits of V1 Updates
+
+1. **Self-Correcting System**: REFLECTOR provides continuous improvement loop
+2. **Scalable Memory**: Semantic search enables efficient knowledge retrieval
+3. **Real-time Collaboration**: WebSocket enables live system monitoring
+4. **Ecosystem Integration**: GitHub/Slack/VSCode extend JARVIS reach
+5. **Data-Driven Decisions**: ML/NLU insights improve innovation scoring
 
 ## Key Design Patterns Used
 

@@ -24,8 +24,26 @@ pip install -r requirements.txt
 4. **Set up environment variables**
 ```bash
 cp .env.example .env
-# Edit .env with your API keys (OpenAI, etc.)
+# Edit .env with your configuration:
+# - OpenAI API key (required for AI agents)
+# - Database connection (PostgreSQL recommended for production)
+# - Redis URL (for caching and real-time features)
+# - Integration tokens (GitHub, Slack, VSCode - optional)
+# - ML/NLU configuration (if using semantic search)
 ```
+
+**Required Environment Variables:**
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `DATABASE_URL`: PostgreSQL connection string
+- `REDIS_URL`: Redis connection string
+- `SECRET_KEY`: Secret key for JWT tokens
+
+**Optional Integration Variables:**
+- `SLACK_BOT_TOKEN`: For Slack bot integration
+- `SLACK_SIGNING_SECRET`: For Slack webhook verification
+- `GITHUB_APP_ID`: For GitHub App integration
+- `GITHUB_PRIVATE_KEY`: GitHub App private key
+- `GITHUB_WEBHOOK_SECRET`: GitHub webhook secret
 
 ## 🎯 Usage Options
 
@@ -84,14 +102,27 @@ curl http://localhost:8000/api/plan/today
 ### Option 3: Docker
 
 ```bash
-# Start API server
-docker-compose up jarvis-api
+# Start all services (API, Web, PostgreSQL, Redis)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
 
 # Run CLI (one-time)
 docker-compose run --rm jarvis-cli
 
-# Access API at http://localhost:8000
+# Access services:
+# - API: http://localhost:8000
+# - Web Dashboard: http://localhost:3000
+# - PostgreSQL: localhost:5432
+# - Redis: localhost:6379
 ```
+
+**Docker Services:**
+- `api`: FastAPI backend with cognitive agents
+- `web`: React frontend dashboard
+- `postgres`: PostgreSQL database (with pgvector for semantic search)
+- `redis`: Redis cache for real-time features and sessions
 
 ## 🏗️ Architecture Overview
 
@@ -111,8 +142,8 @@ The system follows **Clean Architecture** with 4 layers:
    - Orchestrates domain objects
 
 3. **Infrastructure Layer** (`src/infrastructure/`)
-   - Agent implementations (5 agents)
-   - Repository implementations (File, SQLite)
+   - Agent implementations (6 agents: STRATEGIST, MENTOR, EXECUTOR, INNOVATOR, AMPLIFIER, REFLECTOR)
+   - Repository implementations (File, SQLite, SemanticMemory)
    - External service adapters (OpenAI, LangChain)
    - Monitoring and configuration
 
@@ -121,18 +152,19 @@ The system follows **Clean Architecture** with 4 layers:
    - CLI (Typer + Rich)
    - Multiple interfaces for the same business logic
 
-## 🤖 The 5 Agents
+## 🤖 The 6 Cognitive Agents
 
-1. **Strategist** - Plans and organizes tasks
-2. **Mentor** - Identifies knowledge gaps and provides feedback
-3. **Executor** - Executes tasks
-4. **Innovator** - Generates creative solutions
-5. **Amplifier** - Analyzes and optimizes performance
+1. **Strategist** - Plans and organizes tasks based on strategic goals
+2. **Mentor** - Identifies knowledge gaps and provides task feedback
+3. **Executor** - Executes tasks and tracks results
+4. **Innovator** - Generates creative solutions and innovations
+5. **Amplifier** - Analyzes and optimizes performance metrics
+6. **Reflector** (NEW in V1) - Analyzes execution patterns, detects drift, suggests corrections
 
 ## 📊 Example Workflow
 
 ```python
-# The cognitive loop executes all 5 agents in sequence:
+# The cognitive loop executes all 6 agents in sequence:
 
 1. Strategist generates daily plan
    → Returns prioritized tasks with ROI calculations
@@ -155,6 +187,12 @@ The system follows **Clean Architecture** with 4 layers:
    → Calculates productivity score
    → Identifies optimization opportunities
    → Generates actionable recommendations
+
+6. Reflector analyzes execution patterns (NEW in V1)
+   → Reviews previous day's execution
+   → Detects mission drift
+   → Suggests 3 correction actions
+   → Updates skill graph weights
 ```
 
 ## 🧪 Testing
