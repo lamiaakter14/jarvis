@@ -1,9 +1,11 @@
 """Health check endpoint."""
-from fastapi import APIRouter
-from datetime import datetime
-from ...schemas.response import HealthResponse
-from ...config.settings import settings
 
+from datetime import datetime
+
+from fastapi import APIRouter
+
+from ...config.settings import settings
+from ...schemas.response import HealthResponse
 
 router = APIRouter()
 
@@ -12,7 +14,5 @@ router = APIRouter()
 async def health_check():
     """Health check endpoint."""
     return HealthResponse(
-        status="healthy",
-        version=settings.app_version,
-        timestamp=datetime.utcnow().isoformat()
+        status="healthy", version=settings.app_version, timestamp=datetime.utcnow().isoformat()
     )

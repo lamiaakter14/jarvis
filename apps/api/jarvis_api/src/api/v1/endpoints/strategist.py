@@ -1,6 +1,8 @@
 """Strategist agent endpoints."""
+
+from typing import Any, Dict
+
 from fastapi import APIRouter, HTTPException
-from typing import Dict, Any
 
 try:
     from jarvis_core.bridge.agent_bridge import StrategistBridge
@@ -17,12 +19,9 @@ async def get_daily_plan() -> Dict[str, Any]:
     try:
         if not StrategistBridge:
             raise HTTPException(status_code=503, detail="Strategist bridge not available")
-        
+
         strategist = StrategistBridge()
         plan = strategist.generate_plan()
-        return {
-            "status": "success",
-            "plan": plan
-        }
+        return {"status": "success", "plan": plan}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate plan: {str(e)}")

@@ -1,9 +1,10 @@
 """Authentication middleware."""
-from fastapi import Request, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError
-from ..config.security import decode_access_token
 
+from fastapi import HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError
+
+from ..config.security import decode_access_token
 
 security = HTTPBearer()
 
@@ -11,7 +12,7 @@ security = HTTPBearer()
 async def get_current_user(credentials: HTTPAuthorizationCredentials) -> dict:
     """Get current authenticated user from JWT token."""
     token = credentials.credentials
-    
+
     try:
         payload = decode_access_token(token)
         user_id: str = payload.get("sub")

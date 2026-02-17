@@ -1,8 +1,10 @@
 """API v1 router."""
-from fastapi import APIRouter
-from .endpoints import health, cognitive_loop, strategist, mentor, innovator, amplifier
-from .websocket import cognitive_loop as ws_cognitive_loop, realtime_events
 
+from fastapi import APIRouter
+
+from .endpoints import amplifier, cognitive_loop, health, innovator, mentor, strategist
+from .websocket import cognitive_loop as ws_cognitive_loop
+from .websocket import realtime_events
 
 router = APIRouter()
 

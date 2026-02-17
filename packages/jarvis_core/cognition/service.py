@@ -39,9 +39,7 @@ class CognitiveService:
             Dictionary containing updated energy attributes and recommendations
         """
         # Calculate adjusted energy score based on sleep and cognitive load
-        adjusted_energy = energy_model.energy_score * (
-            1.0 - (energy_model.cognitive_load * 0.5)
-        )
+        adjusted_energy = energy_model.energy_score * (1.0 - (energy_model.cognitive_load * 0.5))
 
         # Determine optimal focus window based on energy
         optimal_focus_hours = energy_model.focus_window_hours * adjusted_energy
@@ -71,9 +69,7 @@ class CognitiveService:
             "recommendations": recommendations,
         }
 
-    def compress_goal_to_daily_plan(
-        self, identity_model: IdentityModel
-    ) -> dict[str, Any]:
+    def compress_goal_to_daily_plan(self, identity_model: IdentityModel) -> dict[str, Any]:
         """Convert long-term goals into actionable daily plans.
 
         Args:
@@ -91,11 +87,13 @@ class CognitiveService:
 
         # Extract action items from current primary mission
         if identity_model.current_primary_mission:
-            daily_plan["action_items"].append({
-                "title": f"Advance: {identity_model.current_primary_mission}",
-                "priority": "high",
-                "category": "primary_mission",
-            })
+            daily_plan["action_items"].append(
+                {
+                    "title": f"Advance: {identity_model.current_primary_mission}",
+                    "priority": "high",
+                    "category": "primary_mission",
+                }
+            )
 
         # Add strategic context for alignment
         daily_plan["strategic_context"] = {
@@ -108,18 +106,22 @@ class CognitiveService:
 
         # Add progressive steps based on targets
         if identity_model.one_year_target:
-            daily_plan["action_items"].append({
-                "title": f"One-year progress: {identity_model.one_year_target}",
-                "priority": "medium",
-                "category": "one_year_target",
-            })
+            daily_plan["action_items"].append(
+                {
+                    "title": f"One-year progress: {identity_model.one_year_target}",
+                    "priority": "medium",
+                    "category": "one_year_target",
+                }
+            )
 
         if identity_model.three_year_target:
-            daily_plan["action_items"].append({
-                "title": f"Three-year alignment: {identity_model.three_year_target}",
-                "priority": "low",
-                "category": "three_year_target",
-            })
+            daily_plan["action_items"].append(
+                {
+                    "title": f"Three-year alignment: {identity_model.three_year_target}",
+                    "priority": "low",
+                    "category": "three_year_target",
+                }
+            )
 
         # Cache the plan
         self._goal_cache[datetime.now().date().isoformat()] = daily_plan
@@ -148,21 +150,14 @@ class CognitiveService:
             - recommendation: Actionable recommendation based on analysis
         """
         # Calculate base alignment considering proficiency and priority
-        base_alignment = (
-            skill_graph.proficiency_level * 0.6 +
-            skill_graph.priority_weight * 0.4
-        )
+        base_alignment = skill_graph.proficiency_level * 0.6 + skill_graph.priority_weight * 0.4
 
         # Adjust for decision profile characteristics
         # Higher accuracy bias benefits higher proficiency
-        accuracy_adjustment = (
-            decision_profile.accuracy_bias * skill_graph.proficiency_level * 0.2
-        )
+        accuracy_adjustment = decision_profile.accuracy_bias * skill_graph.proficiency_level * 0.2
 
         # Higher speed bias reduces the weight of proficiency
-        speed_penalty = (
-            decision_profile.speed_bias * (1.0 - skill_graph.proficiency_level) * 0.1
-        )
+        speed_penalty = decision_profile.speed_bias * (1.0 - skill_graph.proficiency_level) * 0.1
 
         # Calculate final alignment score
         alignment_score = base_alignment + accuracy_adjustment - speed_penalty
@@ -172,9 +167,7 @@ class CognitiveService:
         needs_practice = False
         days_since_practice = None
         if skill_graph.last_practiced:
-            days_since_practice = (
-                datetime.now() - skill_graph.last_practiced
-            ).days
+            days_since_practice = (datetime.now() - skill_graph.last_practiced).days
             needs_practice = days_since_practice > decision_profile.strategic_horizon_days
 
         return {
