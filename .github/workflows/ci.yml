@@ -15,7 +15,16 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      
+            - name: Detect web changes
+        id: web_changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            web:
+              - 'apps/web/**'
+              - 'Dockerfile'
+              - 'docker-compose.yml'
+              - 'compose.yml'
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -76,13 +85,32 @@ jobs:
           docker --version
           docker compose version
 
-      - name: Build Docker images
+            - name: Build Docker images (api only)
+        if: steps.web_changes.outputs.web != 'true'
+        env:
+          POSTGRES_PASSWORD: ci-password
+        run: |
+          docker compose build api
+
+      - name: Build Docker images (full, includes web)
+        if: steps.web_changes.outputs.web == 'true'
         env:
           POSTGRES_PASSWORD: ci-password
         run: |
           docker compose build
       
-      - name: Test Docker Compose
+            - name: Test Docker Compose (api only)
+        if: steps.web_changes.outputs.web != 'true'
+        env:
+          POSTGRES_PASSWORD: ci-password
+        run: |
+          docker compose up -d api
+          sleep 10
+          docker compose ps
+          docker compose down
+
+      - name: Test Docker Compose (full, includes web)
+        if: steps.web_changes.outputs.web == 'true'
         env:
           POSTGRES_PASSWORD: ci-password
         run: |
