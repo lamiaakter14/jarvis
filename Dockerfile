@@ -7,40 +7,34 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip (and basic build tooling)
+RUN python -m pip install --upgrade pip setuptools wheel
 
-# Copy packages (core logic)
-COPY packages/ /app/packages/
-
-# Copy pyproject.toml for package installation
+# Copy project metadata first (for caching)
 COPY pyproject.toml /app/
+COPY README.md /app/
+COPY LICENSE /app/
 
-# Install jarvis package
-RUN pip install -e .
-
-# Copy apps
+# Copy source code
+COPY packages/ /app/packages/
 COPY apps/ /app/apps/
-
-# Copy memory (curated knowledge)
 COPY memory/ /app/memory/
 
-# Create runtime directory structure
+# Install jarvis package (runtime)
+RUN pip install -e .
+
+# Create runtime directories
 RUN mkdir -p /app/runtime/working \
              /app/runtime/metrics \
              /app/runtime/innovations \
              /app/runtime/cache \
              /app/runtime/working/execution_logs
 
-# Copy configuration
+# Copy configuration example
 COPY .env.example /app/.env.example
 
-# Set Python path
 ENV PYTHONPATH=/app/packages:/app/apps:$PYTHONPATH
 
-# Expose API port
 EXPOSE 8000
 
-# Default command: run API
 CMD ["python", "-m", "jarvis_api.main"]
