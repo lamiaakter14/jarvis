@@ -7,17 +7,18 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip and build tools
+RUN python -m pip install --upgrade pip setuptools wheel
 
-# Copy packages (core logic)
+# Copy project metadata first (for better layer caching)
+COPY pyproject.toml /app/
+COPY README.md /app/
+COPY LICENSE /app/
+
+# Copy source code
 COPY packages/ /app/packages/
 
-# Copy pyproject.toml for package installation
-COPY pyproject.toml /app/
-
-# Install jarvis package
+# Install jarvis package (runtime dependencies via pyproject.toml)
 RUN pip install -e .
 
 # Copy apps

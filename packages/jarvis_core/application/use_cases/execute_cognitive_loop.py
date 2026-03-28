@@ -1,5 +1,6 @@
 """Execute Cognitive Loop use case."""
 
+import logging
 from typing import Any
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
@@ -350,5 +351,7 @@ class ExecuteCognitiveLoop:
             )
             await self.memory_repository.save(loop_memory)
         except Exception:
-            # Log but don't fail
-            pass
+            logging.getLogger(__name__).exception(
+                "Failed to save cognitive loop summary memory (key=%s)",
+                f"loop_{summary['date']}",
+            )

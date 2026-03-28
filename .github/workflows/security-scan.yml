@@ -27,7 +27,10 @@ jobs:
       - name: Run Bandit scan
         run: |
           bandit -r packages/ apps/ -f json -o bandit-report.json || true
-          # TODO: re-enable strict mode after fixing pre-existing findings
+          # TODO: re-enable strict mode after resolving remaining B104 (hardcoded_bind_all_interfaces)
+          # findings in apps/api/jarvis_api/main.py, apps/api/jarvis_api/src/config/settings.py,
+          # and packages/jarvis_core/infrastructure/config/settings.py (host="0.0.0.0").
+          # B110/B112 findings have been resolved.
           bandit -r packages/ apps/ -f screen || true
 
   safety:
