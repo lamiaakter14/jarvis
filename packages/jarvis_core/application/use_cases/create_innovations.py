@@ -1,5 +1,6 @@
 """Create Innovations use case."""
 
+import logging
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
@@ -251,5 +252,8 @@ class CreateInnovations:
                     # In a real implementation, this would publish to an event bus
 
                 except Exception:
-                    # Log error but don't fail
-                    pass
+                    logging.getLogger(__name__).exception(
+                        "Failed to send innovation notification (innovation_id=%s, title=%s)",
+                        getattr(innovation, "innovation_id", None),
+                        getattr(innovation, "title", None),
+                    )
