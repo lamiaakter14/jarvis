@@ -1,0 +1,5 @@
+node_modules
+# dist is generated during `npm run build` inside Docker, not copied from host
+dist
+.git
+*.md
