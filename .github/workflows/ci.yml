@@ -76,6 +76,10 @@ jobs:
           docker --version
           docker compose version
 
+      - name: Create CI .env for docker compose
+        run: |
+          echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)" >> .env
+
       - name: Build Docker images
         run: |
           docker compose build
