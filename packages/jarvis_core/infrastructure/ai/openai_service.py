@@ -1,6 +1,7 @@
 """OpenAI-based AI service implementation."""
 
 import json
+import logging
 from typing import Any, Optional
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
@@ -12,6 +13,8 @@ from jarvis_core.domain.value_objects.cognitive_load import CognitiveLoad
 from jarvis_core.domain.value_objects.priority import Priority
 from jarvis_core.domain.value_objects.roi import ROI
 from jarvis_core.shared.exceptions import AIServiceError
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAIService(IAIService):
@@ -320,8 +323,11 @@ Return in JSON format:
                 )
                 try:
                     plan.add_task(task)
+                except (ValueError, TypeError) as e:
+                    logger.info("Skipping task that doesn't fit plan constraints: %s", e)
+                    continue
                 except Exception:
-                    # Skip tasks that don't fit
+                    logger.exception("Unexpected error while adding task to plan; skipping")
                     continue
 
             return plan
@@ -409,7 +415,7 @@ Return in JSON format:
             plan.add_task(task1)
             plan.add_task(task2)
         except Exception:
-            pass
+            logger.exception("Failed to add mock tasks to plan")
 
         return plan
 

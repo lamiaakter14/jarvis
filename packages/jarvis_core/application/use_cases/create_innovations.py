@@ -1,5 +1,6 @@
 """Create Innovations use case."""
 
+import logging
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
 from jarvis_core.application.interfaces.i_notification_service import INotificationService
@@ -9,6 +10,8 @@ from jarvis_core.domain.events import InnovationCreatedEvent
 from jarvis_core.domain.repositories import IMemoryRepository, ITaskRepository
 from jarvis_core.domain.services.innovation_engine import InnovationEngine
 from jarvis_core.shared.exceptions import DomainException
+
+logger = logging.getLogger(__name__)
 
 
 class CreateInnovations:
@@ -252,4 +255,8 @@ class CreateInnovations:
 
                 except Exception:
                     # Log error but don't fail
-                    pass
+                    logger.exception(
+                        "Failed to send innovation notification (innovation_id=%s, title=%s)",
+                        getattr(innovation, "innovation_id", None),
+                        getattr(innovation, "title", None),
+                    )
