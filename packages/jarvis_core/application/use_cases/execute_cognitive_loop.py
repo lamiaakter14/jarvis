@@ -1,5 +1,6 @@
 """Execute Cognitive Loop use case."""
 
+import logging
 from typing import Any
 
 from jarvis_core.application.interfaces.i_ai_service import IAIService
@@ -14,6 +15,8 @@ from jarvis_core.domain.services.innovation_engine import InnovationEngine
 from jarvis_core.domain.services.strategy_engine import StrategyEngine
 from jarvis_core.shared.exceptions import DomainException
 from jarvis_core.shared.utils import current_date, current_timestamp
+
+logger = logging.getLogger(__name__)
 
 
 class ExecuteCognitiveLoop:
@@ -351,4 +354,4 @@ class ExecuteCognitiveLoop:
             await self.memory_repository.save(loop_memory)
         except Exception:
             # Log but don't fail
-            pass
+            logger.exception("Failed to save cognitive loop summary memory (date=%s)", summary.get("date"))
