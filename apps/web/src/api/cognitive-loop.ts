@@ -1,22 +1,43 @@
 import { apiClient } from './axios';
 
+export interface StrategistPlan {
+  tasks?: Array<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
+export interface MentorGaps {
+  [key: string]: unknown;
+}
+
+export interface MentorTaskFeedbackItem {
+  [key: string]: unknown;
+}
+
+export interface InnovatorResult {
+  [key: string]: unknown;
+}
+
+export interface AmplifierPerformance {
+  [key: string]: unknown;
+}
+
 export interface CognitiveLoopResult {
   status: string;
   strategist: {
-    plan: any;
+    plan: StrategistPlan;
   };
   mentor: {
-    gaps: any;
-    task_feedback: any[];
+    gaps: MentorGaps;
+    task_feedback: MentorTaskFeedbackItem[];
   };
   executor: {
     status: string;
   };
   innovator: {
-    innovations: any;
+    innovations: InnovatorResult;
   };
   amplifier: {
-    performance: any;
+    performance: AmplifierPerformance;
   };
 }
 

@@ -2,76 +2,164 @@ import React, { useState } from 'react';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
-import { Brain, CheckCircle, Loader } from 'lucide-react';
-import { cognitiveLoopApi } from '../api/cognitive-loop';
+import { Brain, CheckCircle, Loader, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { cognitiveLoopApi, CognitiveLoopResult } from '../api/cognitive-loop';
 import toast from 'react-hot-toast';
 
-interface AgentResult {
-  name: string;
-  status: 'pending' | 'running' | 'completed' | 'error';
-  result?: any;
-  error?: string;
+type AgentStatus = 'pending' | 'running' | 'completed' | 'error';
+
+interface BadgeVariantMap {
+  pending: 'default';
+  running: 'info';
+  completed: 'success';
+  error: 'error';
 }
 
-export const CognitiveLoop: React.FC = () => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [results, setResults] = useState<any>(null);
-  const [agents, setAgents] = useState<AgentResult[]>([
-    { name: 'Strategist', status: 'pending' },
-    { name: 'Mentor', status: 'pending' },
-    { name: 'Executor', status: 'pending' },
-    { name: 'Innovator', status: 'pending' },
-    { name: 'Amplifier', status: 'pending' },
-  ]);
+const BADGE_VARIANTS: BadgeVariantMap = {
+  pending: 'default',
+  running: 'info',
+  completed: 'success',
+  error: 'error',
+};
 
-  const runCognitiveLoop = async () => {
-    setIsRunning(true);
-    setResults(null);
+type AgentKey = 'strategist' | 'mentor' | 'executor' | 'innovator' | 'amplifier';
 
-    try {
-      // Simulate agent progression
-      for (let i = 0; i < agents.length; i++) {
-        setAgents(prev => prev.map((agent, idx) => 
-          idx === i ? { ...agent, status: 'running' } : agent
-        ));
-        await new Promise(resolve => setTimeout(resolve, 500));
+interface AgentCard {
+  key: AgentKey;
+  name: string;
+  description: string;
+  status: AgentStatus;
+}
+
+const INITIAL_AGENTS: AgentCard[] = [
+  { key: 'strategist', name: 'Strategist', description: 'Daily plan & priorities', status: 'pending' },
+  { key: 'mentor', name: 'Mentor', description: 'Knowledge gaps & task guidance', status: 'pending' },
+  { key: 'executor', name: 'Executor', description: 'Task execution & tracking', status: 'pending' },
+  { key: 'innovator', name: 'Innovator', description: 'New ideas & automation', status: 'pending' },
+  { key: 'amplifier', name: 'Amplifier', description: 'Performance metrics', status: 'pending' },
+];
+
+function getAgentSummary(key: AgentKey, result: CognitiveLoopResult): string {
+  switch (key) {
+    case 'strategist': {
+      const tasks = result.strategist?.plan?.tasks;
+      if (Array.isArray(tasks) && tasks.length > 0) {
+        return `${tasks.length} task(s) planned`;
       }
-
-      const result = await cognitiveLoopApi.runLoop();
-      
-      setAgents(agents.map(agent => ({ ...agent, status: 'completed' })));
-      setResults(result);
-      toast.success('Cognitive loop completed successfully!');
-    } catch (err: any) {
-      toast.error('Failed to run cognitive loop');
-      setAgents(agents.map(agent => ({ 
-        ...agent, 
-        status: agent.status === 'running' ? 'error' : agent.status 
-      })));
-    } finally {
-      setIsRunning(false);
+      return 'Plan generated';
     }
-  };
+    case 'mentor': {
+      const feedback = result.mentor?.task_feedback;
+      const gapKeys = result.mentor?.gaps ? Object.keys(result.mentor.gaps) : [];
+      const parts: string[] = [];
+      if (gapKeys.length > 0) parts.push(`${gapKeys.length} gap(s) identified`);
+      if (Array.isArray(feedback) && feedback.length > 0) parts.push(`${feedback.length} task(s) reviewed`);
+      return parts.length > 0 ? parts.join(', ') : 'Analysis complete';
+    }
+    case 'executor':
+      return result.executor?.status ?? 'Tasks executed';
+    case 'innovator': {
+      const innovations = result.innovator?.innovations;
+      if (innovations && typeof innovations === 'object') {
+        const count = Object.keys(innovations).length;
+        return count > 0 ? `${count} innovation(s) generated` : 'Innovations generated';
+      }
+      return 'Innovations generated';
+    }
+    case 'amplifier': {
+      const perf = result.amplifier?.performance;
+      if (perf && typeof perf === 'object') {
+        const count = Object.keys(perf).length;
+        return count > 0 ? `${count} metric(s) collected` : 'Metrics collected';
+      }
+      return 'Metrics collected';
+    }
+  }
+}
 
-  const getStatusIcon = (status: AgentResult['status']) => {
+const AgentResultCard: React.FC<{
+  agent: AgentCard;
+  result: CognitiveLoopResult | null;
+}> = ({ agent, result }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const getStatusIcon = (status: AgentStatus) => {
     switch (status) {
       case 'completed':
         return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'running':
         return <Loader className="w-5 h-5 text-blue-600 animate-spin" />;
+      case 'error':
+        return <AlertCircle className="w-5 h-5 text-red-500" />;
       default:
         return <div className="w-5 h-5 rounded-full border-2 border-gray-300" />;
     }
   };
 
-  const getStatusBadge = (status: AgentResult['status']) => {
-    const variants: Record<AgentResult['status'], any> = {
-      pending: 'default',
-      running: 'info',
-      completed: 'success',
-      error: 'error',
-    };
-    return <Badge variant={variants[status]}>{status}</Badge>;
+  return (
+    <Card className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {getStatusIcon(agent.status)}
+          <div>
+            <h3 className="font-semibold text-sm">{agent.name}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{agent.description}</p>
+          </div>
+        </div>
+        <Badge variant={BADGE_VARIANTS[agent.status]}>{agent.status}</Badge>
+      </div>
+
+      {result && agent.status === 'completed' && (
+        <>
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            {getAgentSummary(agent.key, result)}
+          </p>
+          <button
+            className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline self-start"
+            onClick={() => setExpanded(prev => !prev)}
+            aria-expanded={expanded}
+          >
+            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            {expanded ? 'Hide details' : 'Show details'}
+          </button>
+          {expanded && (
+            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-lg overflow-x-auto">
+              <pre className="text-xs">
+                {JSON.stringify(result[agent.key], null, 2)}
+              </pre>
+            </div>
+          )}
+        </>
+      )}
+    </Card>
+  );
+};
+
+export const CognitiveLoop: React.FC = () => {
+  const [isRunning, setIsRunning] = useState(false);
+  const [result, setResult] = useState<CognitiveLoopResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [agents, setAgents] = useState<AgentCard[]>(INITIAL_AGENTS);
+
+  const runCognitiveLoop = async () => {
+    setIsRunning(true);
+    setResult(null);
+    setError(null);
+    setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'running' })));
+
+    try {
+      const data = await cognitiveLoopApi.runLoop();
+      setResult(data);
+      setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'completed' })));
+      toast.success('Cognitive loop completed successfully!');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to run cognitive loop';
+      setError(message);
+      setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'error' })));
+      toast.error('Failed to run cognitive loop');
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   return (
@@ -94,58 +182,19 @@ export const CognitiveLoop: React.FC = () => {
         </Button>
       </div>
 
-      {/* Agent Status Cards */}
+      {error && (
+        <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm">{error}</span>
+        </div>
+      )}
+
+      {/* Agent Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {agents.map((agent) => (
-          <Card key={agent.name} className="text-center">
-            <div className="flex flex-col items-center gap-3">
-              {getStatusIcon(agent.status)}
-              <div>
-                <h3 className="font-semibold">{agent.name}</h3>
-                <div className="mt-2">{getStatusBadge(agent.status)}</div>
-              </div>
-            </div>
-          </Card>
+          <AgentResultCard key={agent.key} agent={agent} result={result} />
         ))}
       </div>
-
-      {/* Results */}
-      {results && (
-        <Card>
-          <h2 className="text-xl font-semibold mb-4">Results</h2>
-          <div className="space-y-4">
-            {/* Strategist Results */}
-            <div>
-              <h3 className="font-medium mb-2">Strategist - Plan Generated</h3>
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <pre className="text-sm overflow-x-auto">
-                  {JSON.stringify(results.strategist, null, 2)}
-                </pre>
-              </div>
-            </div>
-
-            {/* Mentor Results */}
-            <div>
-              <h3 className="font-medium mb-2">Mentor - Knowledge Gaps</h3>
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <pre className="text-sm overflow-x-auto">
-                  {JSON.stringify(results.mentor, null, 2)}
-                </pre>
-              </div>
-            </div>
-
-            {/* Other results */}
-            <div>
-              <h3 className="font-medium mb-2">Full Results</h3>
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <pre className="text-sm overflow-x-auto">
-                  {JSON.stringify(results, null, 2)}
-                </pre>
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
     </div>
   );
 };
