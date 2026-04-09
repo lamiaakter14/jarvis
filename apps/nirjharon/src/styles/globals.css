@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --forest: #1B4332;
+    --orange-brand: #FB8500;
+    --cream: #FDFCF5;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-body text-gray-800 bg-cream;
+    font-family: 'Lato', 'Hind Siliguri', sans-serif;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .bn {
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-orange-brand text-white font-semibold px-6 py-3 rounded-full
+           hover:bg-orange-dark transition-all duration-300 shadow-orange
+           hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border-2 border-forest text-forest font-semibold px-6 py-3 rounded-full
+           hover:bg-forest hover:text-cream transition-all duration-300;
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+
+  .btn-outline-orange {
+    @apply bg-transparent border-2 border-orange-brand text-orange-brand font-semibold px-6 py-3 rounded-full
+           hover:bg-orange-brand hover:text-white transition-all duration-300;
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+
+  .card-product {
+    @apply bg-white rounded-2xl overflow-hidden shadow-brand hover:shadow-brand-lg
+           transition-all duration-300 hover:-translate-y-1;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-forest mb-3;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .section-subtitle {
+    @apply text-lg text-gray-600 mb-10;
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+
+  .badge-fresh {
+    @apply inline-flex items-center gap-1 bg-green-100 text-forest text-xs font-semibold
+           px-3 py-1 rounded-full;
+  }
+
+  .badge-popular {
+    @apply inline-flex items-center gap-1 bg-orange-100 text-orange-dark text-xs font-semibold
+           px-3 py-1 rounded-full;
+  }
+
+  .price-tag {
+    @apply text-2xl font-bold text-orange-brand;
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+
+  .strike-price {
+    @apply text-sm text-gray-400 line-through ml-1;
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--forest);
+  border-radius: 3px;
+}
+
+/* WhatsApp floating button pulse ring */
+.whatsapp-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #25D366;
+  animation: whatsappPulse 2s ease-out infinite;
+}
+
+@keyframes whatsappPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
