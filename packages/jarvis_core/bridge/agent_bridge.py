@@ -172,7 +172,7 @@ class InnovatorBridge(BridgeAgentWrapper):
                 "id": str(uuid4()),
                 "title": "Focus Block Scheduler",
                 "description": (
-                    "Analyse historical productivity patterns and auto-block deep-work "
+                    "Analyze historical productivity patterns and auto-block deep-work "
                     "windows in the calendar aligned with peak cognitive hours."
                 ),
                 "category": "productivity",

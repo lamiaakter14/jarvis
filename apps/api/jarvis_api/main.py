@@ -53,8 +53,8 @@ _TASKS: list[dict[str, Any]] = [
     },
     {
         "task_id": "task_4",
-        "title": "Database Optimisation",
-        "description": "Optimise database queries for better performance",
+        "title": "Database Optimization",
+        "description": "Optimize database queries for better performance",
         "priority": "high",
         "status": "in_progress",
         "agent_type": "executor",
