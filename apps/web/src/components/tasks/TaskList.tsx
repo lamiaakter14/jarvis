@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getTasks, deleteTask } from '../../api/taskApi';
-import { Task } from '../../types/Task';
-import { StatsCard } from '../dashboard/StatsCard';
+import { Task } from '../../types/task';
 import { ErrorMessage } from '../common/ErrorMessage';
 
 export const TaskList: React.FC = () => {
@@ -19,7 +18,7 @@ export const TaskList: React.FC = () => {
     try {
       const data = await getTasks();
       setTasks(data);
-    } catch (err) {
+    } catch {
       setError("Failed to load tasks. Please try again.");
     } finally {
       setLoading(false);
@@ -46,16 +45,15 @@ export const TaskList: React.FC = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Tasks</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         {["Pending", "Completed", "Failed"].map((status) => (
-          <StatsCard
-            key={status}
-            title={status}
-            value={tasks.filter(task => task.status === status.toLowerCase()).length}
-            color={status === "Completed" ? "green" : status === "Failed" ? "red" : "blue"}
-            icon={status === "Completed" ? "CheckSquare" : "ListTodo"}
-          />
+          <div key={status} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+            <p className="text-sm text-gray-600 dark:text-gray-400">{status}</p>
+            <p className="text-2xl font-bold">
+              {tasks.filter(task => task.status === status.toLowerCase()).length}
+            </p>
+          </div>
         ))}
       </div>
 

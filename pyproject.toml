@@ -54,7 +54,7 @@ dev = [
 ]
 
 [project.scripts]
-jarvis-api = "jarvis_api.main:main"
+jarvis-api = "jarvis_api.main:app"
 jarvis-cli = "jarvis_cli.main:app"
 
 [tool.setuptools]

@@ -17,17 +17,20 @@ services:
     env_file:
       - .env
     environment:
-      - PYTHONPATH=/app/packages:/app/apps
+      - PYTHONPATH=/app/packages:/app/apps/api
       - API_HOST=0.0.0.0
       - API_PORT=8000
       - MEMORY_BASE_PATH=/app/memory
       - RUNTIME_BASE_PATH=/app/runtime
-    depends_on:
-      - postgres
-      - redis
     networks:
       - jarvis_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
 
   web:
     build:
@@ -37,7 +40,8 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - jarvis_network
     restart: unless-stopped
@@ -51,8 +55,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Note: For production with semantic search, use postgres:15 with pgvector extension
-      # Build custom image: FROM postgres:15 && apt-get install postgresql-15-pgvector
     ports:
       - "5432:5432"
     networks:
@@ -63,6 +65,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    profiles:
+      - full
 
   redis:
     image: redis:7-alpine
@@ -79,6 +83,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    profiles:
+      - full
 
 volumes:
   postgres_data:
@@ -89,3 +95,4 @@ volumes:
 networks:
   jarvis_network:
     driver: bridge
+
