@@ -215,12 +215,7 @@ class PoliticalMediaService(IPoliticalMediaService):
 
         # Only invoke the AI (or mock) when there are actual errors to fix.
         # When the XML is already valid, return it as-is regardless of mode.
-        if errors_found and not self._mock_mode:
-            ai_pass_needed = True
-        elif errors_found and self._mock_mode:
-            ai_pass_needed = True
-        else:
-            ai_pass_needed = False
+        ai_pass_needed = bool(errors_found)
 
         if ai_pass_needed:
             system = (
@@ -530,7 +525,7 @@ class PoliticalMediaService(IPoliticalMediaService):
     @staticmethod
     def _extract_cta(text: str) -> Optional[str]:
         """Attempt to extract the last sentence as a call-to-action."""
-        sentences = [s.strip() for s in re.split(r"[।!?।\n]", text) if s.strip()]
+        sentences = [s.strip() for s in re.split(r"[।!?\n]", text) if s.strip()]
         return sentences[-1] if sentences else None
 
     @staticmethod

@@ -73,7 +73,7 @@ absent, proceed with sensible defaults.
 - Include relevant emojis sparingly.
 - Reinforce at least one key message.
 - Close with a clear call-to-action (CTA).
-- Deliver TWO variants: SHORT (≤ 280 chars) and LONG (≤ 2 000 chars).
+- Deliver TWO variants: SHORT (≤ 280 chars) and LONG (≤ 2,000 chars).
 - Append 5–8 platform-appropriate hashtags.
 - Output format:
     SHORT:

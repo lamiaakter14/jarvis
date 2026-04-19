@@ -279,4 +279,9 @@ class PoliticalMediaAgent(Agent):
             memory.add_tags(["political_media", command.command.value, command.language])
             await self.memory_repo.save(memory)
         except Exception as exc:
-            logger.warning("Failed to persist political media result: %s", exc)
+            logger.warning(
+                "Failed to persist political media result for command %s (%s): %s",
+                command.command.value,
+                command.command_id,
+                exc,
+            )
