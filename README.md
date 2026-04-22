@@ -54,22 +54,37 @@ cd jarvis
 ### Manual Setup
 
 ```bash
-# 1. Install dependencies
+# 1. Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 2. Install dependencies
 make install
 
-# 2. Configure environment
+# 3. Configure environment
 cp .env.example .env
 # Edit .env with your API keys
 
-# 3. Start infrastructure
+# 4. Start infrastructure (Docker daemon must be running)
 docker-compose up -d postgres redis
 
-# 4. Run migrations
+# 5. Run migrations
 make db-migrate
 
-# 5. Start applications
+# 6. Start applications
 make api     # Terminal 1: API server
 make web     # Terminal 2: Web dashboard
+```
+
+### macOS Notes
+
+- Install and open **Docker Desktop** before running any `docker-compose` commands.
+- Use `python3` to create your virtual environment (`python3 -m venv .venv`), then activate it with `source .venv/bin/activate`.
+- Validate migrations directly from the API directory when needed:
+
+```bash
+cd apps/api/jarvis_api
+alembic -c alembic.ini upgrade head
 ```
 
 ### Access Points

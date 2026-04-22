@@ -83,7 +83,7 @@ echo ""
 echo -e "${BLUE}Running database migrations...${NC}"
 cd apps/api/jarvis_api
 if [ -f "alembic.ini" ]; then
-    alembic upgrade head || echo -e "${YELLOW}⚠ Migration failed or no migrations to run${NC}"
+    alembic -c alembic.ini upgrade head || echo -e "${YELLOW}⚠ Migration failed or no migrations to run${NC}"
 else
     echo -e "${YELLOW}⚠ No alembic.ini found, skipping migrations${NC}"
 fi
