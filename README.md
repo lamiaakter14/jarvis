@@ -65,7 +65,7 @@ make install
 cp .env.example .env
 # Edit .env with your API keys
 
-# 4. Start infrastructure (Docker Desktop must be running)
+# 4. Start infrastructure (Docker daemon must be running)
 docker-compose up -d postgres redis
 
 # 5. Run migrations
@@ -78,7 +78,7 @@ make web     # Terminal 2: Web dashboard
 
 ### macOS Notes
 
-- Install and open **Docker Desktop for Mac** before running any `docker-compose` commands.
+- Install and open **Docker Desktop** before running any `docker-compose` commands.
 - Use `python3` to create your virtual environment (`python3 -m venv .venv`), then activate it with `source .venv/bin/activate`.
 - Validate migrations directly from the API directory when needed:
 
