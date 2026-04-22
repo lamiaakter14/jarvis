@@ -1,5 +1,6 @@
 """Alembic environment configuration."""
 
+import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -9,6 +10,7 @@ from sqlalchemy import engine_from_config, pool
 # from jarvis_api.src.models import Base
 
 config = context.config
+config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", "sqlite:///./jarvis.db"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

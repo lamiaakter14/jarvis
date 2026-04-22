@@ -6,6 +6,8 @@ GREEN := \033[0;32m
 YELLOW := \033[0;33m
 RED := \033[0;31m
 NC := \033[0m
+VENV_PYTHON := $(CURDIR)/.venv/bin/python
+PYTHON := $(if $(wildcard $(VENV_PYTHON)),$(VENV_PYTHON),python3)
 
 help: ## Show this help message
 	@echo "$(BLUE)JARVIS - AI Cognitive Assistant$(NC)"
@@ -43,7 +45,7 @@ dev: ## Start all services for development
 
 api: ## Start API server
 	@echo "$(BLUE)Starting API server...$(NC)"
-	python -m uvicorn apps.api.jarvis_api.main:app --reload --host 0.0.0.0 --port 8000
+	$(PYTHON) -m uvicorn apps.api.jarvis_api.main:app --reload --host 0.0.0.0 --port 8000
 
 web: ## Start web dashboard
 	@echo "$(BLUE)Starting web dashboard...$(NC)"
@@ -51,7 +53,7 @@ web: ## Start web dashboard
 
 cli: ## Run CLI (use: make cli ARGS="strategist plan")
 	@echo "$(BLUE)Running JARVIS CLI...$(NC)"
-	python -m apps.cli.jarvis_cli.main $(ARGS)
+	$(PYTHON) -m apps.cli.jarvis_cli.main $(ARGS)
 
 test: ## Run all tests
 	@echo "$(BLUE)Running tests...$(NC)"
@@ -90,12 +92,12 @@ type-check: ## Run type checker
 
 db-migrate: ## Run database migrations
 	@echo "$(BLUE)Running database migrations...$(NC)"
-	cd apps/api/jarvis_api && alembic upgrade head
+	cd apps/api/jarvis_api && alembic -c alembic.ini upgrade head
 	@echo "$(GREEN)✓ Migrations completed$(NC)"
 
 db-rollback: ## Rollback last migration
 	@echo "$(YELLOW)Rolling back last migration...$(NC)"
-	cd apps/api/jarvis_api && alembic downgrade -1
+	cd apps/api/jarvis_api && alembic -c alembic.ini downgrade -1
 
 db-reset: ## Reset database (WARNING: destroys data)
 	@echo "$(RED)⚠ WARNING: This will destroy all data!$(NC)"
@@ -110,7 +112,7 @@ db-reset: ## Reset database (WARNING: destroys data)
 
 seed: ## Seed database with test data
 	@echo "$(BLUE)Seeding database...$(NC)"
-	python scripts/database/seed.py
+	$(PYTHON) scripts/database/seed.py
 	@echo "$(GREEN)✓ Database seeded$(NC)"
 
 clean: ## Clean build artifacts and cache
@@ -163,7 +165,7 @@ logs: ## Show application logs
 
 version: ## Show version information
 	@echo "$(BLUE)JARVIS Version Information$(NC)"
-	@echo "Python: $$(python --version 2>&1)"
+	@echo "Python: $$($(PYTHON) --version 2>&1)"
 	@echo "Node: $$(node --version 2>&1)"
 	@echo "Docker: $$(docker --version 2>&1)"
 	@echo "Docker Compose: $$(docker-compose --version 2>&1)"
