@@ -1,10 +1,13 @@
 """FastAPI main application for JARVIS cognitive assistant."""
 
-from typing import Any
+from datetime import datetime, timezone
+from typing import Any, Literal, Optional
+from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from jarvis_core.bridge.agent_bridge import (
     AmplifierBridge,
     ExecutorBridge,
@@ -29,6 +32,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------------------------------------------------------------------------
+# In-memory task store (no database required for development)
+# ---------------------------------------------------------------------------
+_tasks: dict[str, dict[str, Any]] = {}
+
+TaskStatus = Literal["todo", "in_progress", "done"]
+TaskPriority = Literal["low", "medium", "high", "critical"]
+
+
+class TaskCreate(BaseModel):
+    """Schema for creating a new task."""
+
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field("", max_length=2000)
+    status: TaskStatus = "todo"
+    priority: TaskPriority = "medium"
+    roi: float = Field(0.5, ge=0.0, le=1.0)
+    cognitive_load: int = Field(3, ge=1, le=10)
+    estimated_hours: float = Field(1.0, gt=0.0)
+    tags: list[str] = Field(default_factory=list)
+
+
+class TaskUpdate(BaseModel):
+    """Schema for updating an existing task (all fields optional)."""
+
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=2000)
+    status: Optional[TaskStatus] = None
+    priority: Optional[TaskPriority] = None
+    roi: Optional[float] = Field(None, ge=0.0, le=1.0)
+    cognitive_load: Optional[int] = Field(None, ge=1, le=10)
+    estimated_hours: Optional[float] = Field(None, gt=0.0)
+    tags: Optional[list[str]] = None
+
+
+def _make_task(data: TaskCreate) -> dict[str, Any]:
+    """Create a new task dict with generated id and timestamps."""
+    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    return {
+        "id": str(uuid4()),
+        "title": data.title,
+        "description": data.description,
+        "status": data.status,
+        "priority": data.priority,
+        "roi": data.roi,
+        "cognitive_load": data.cognitive_load,
+        "estimated_hours": data.estimated_hours,
+        "tags": data.tags,
+        "created_at": now,
+        "completed_at": None,
+    }
+
 
 @app.get("/")
 async def root():
@@ -46,26 +101,24 @@ async def health_check():
     }
 
 
+# ---------------------------------------------------------------------------
+# Cognitive Loop
+# ---------------------------------------------------------------------------
+
+
 @app.post("/api/cognitive-loop")
 async def run_cognitive_loop() -> dict[str, Any]:
-    """Execute the complete cognitive loop with all 5 agents.
-
-    Returns:
-        Dictionary with results from all agents
-    """
+    """Execute the complete cognitive loop with all 5 agents."""
     try:
-        # Initialize agents
         strategist = StrategistBridge()
         mentor = MentorBridge()
         executor = ExecutorBridge()
         innovator = InnovatorBridge()
         amplifier = AmplifierBridge()
 
-        # Execute each agent
         plan = strategist.generate_plan()
         gaps = mentor.analyze_execution_logs()
 
-        # Mentor each task in the plan
         task_feedback = []
         for task in plan.get("tasks", []):
             feedback = mentor.mentor_task(task)
@@ -87,13 +140,14 @@ async def run_cognitive_loop() -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Cognitive loop failed: {str(e)}")
 
 
+# ---------------------------------------------------------------------------
+# Plans
+# ---------------------------------------------------------------------------
+
+
 @app.get("/api/plan/today")
 async def get_daily_plan() -> dict[str, Any]:
-    """Get today's daily plan.
-
-    Returns:
-        Daily plan with tasks
-    """
+    """Get today's daily plan."""
     try:
         strategist = StrategistBridge()
         plan = strategist.generate_plan()
@@ -102,13 +156,25 @@ async def get_daily_plan() -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Failed to generate plan: {str(e)}")
 
 
+@app.post("/api/plan/generate")
+async def generate_plan() -> dict[str, Any]:
+    """Generate a new daily plan."""
+    try:
+        strategist = StrategistBridge()
+        plan = strategist.generate_plan()
+        return {"status": "success", "plan": plan}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate plan: {str(e)}")
+
+
+# ---------------------------------------------------------------------------
+# Knowledge Gaps
+# ---------------------------------------------------------------------------
+
+
 @app.get("/api/gaps")
 async def get_knowledge_gaps() -> dict[str, Any]:
-    """Get identified knowledge gaps.
-
-    Returns:
-        List of knowledge gaps
-    """
+    """Get identified knowledge gaps."""
     try:
         mentor = MentorBridge()
         gaps = mentor.analyze_execution_logs()
@@ -117,13 +183,14 @@ async def get_knowledge_gaps() -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Failed to analyze gaps: {str(e)}")
 
 
+# ---------------------------------------------------------------------------
+# Innovations
+# ---------------------------------------------------------------------------
+
+
 @app.get("/api/innovations")
 async def get_innovations() -> dict[str, Any]:
-    """Get generated innovations.
-
-    Returns:
-        List of innovations
-    """
+    """Get generated innovations."""
     try:
         innovator = InnovatorBridge()
         innovations = innovator.create_innovations()
@@ -132,19 +199,66 @@ async def get_innovations() -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Failed to create innovations: {str(e)}")
 
 
+# ---------------------------------------------------------------------------
+# Performance
+# ---------------------------------------------------------------------------
+
+
 @app.get("/api/performance")
 async def get_performance_metrics() -> dict[str, Any]:
-    """Get performance metrics and analytics.
-
-    Returns:
-        Performance metrics
-    """
+    """Get performance metrics and analytics."""
     try:
         amplifier = AmplifierBridge()
         performance = amplifier.amplify()
         return {"status": "success", "performance": performance}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to analyze performance: {str(e)}")
+
+
+# ---------------------------------------------------------------------------
+# Tasks (in-memory CRUD)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/tasks")
+async def list_tasks() -> list[dict[str, Any]]:
+    """List all tasks."""
+    return list(_tasks.values())
+
+
+@app.post("/api/tasks", status_code=201)
+async def create_task(data: TaskCreate) -> dict[str, Any]:
+    """Create a new task."""
+    task = _make_task(data)
+    _tasks[task["id"]] = task
+    return task
+
+
+@app.patch("/api/tasks/{task_id}")
+async def update_task(task_id: str, data: TaskUpdate) -> dict[str, Any]:
+    """Update an existing task."""
+    if task_id not in _tasks:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task = _tasks[task_id]
+    updates = data.model_dump(exclude_none=True)
+    task.update(updates)
+    if updates.get("status") == "done" and task.get("completed_at") is None:
+        task["completed_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    _tasks[task_id] = task
+    return task
+
+
+@app.delete("/api/tasks/{task_id}", status_code=204)
+async def delete_task(task_id: str) -> None:
+    """Delete a task."""
+    if task_id not in _tasks:
+        raise HTTPException(status_code=404, detail="Task not found")
+    del _tasks[task_id]
+
+
+# ---------------------------------------------------------------------------
+# Error handlers
+# ---------------------------------------------------------------------------
 
 
 @app.exception_handler(404)

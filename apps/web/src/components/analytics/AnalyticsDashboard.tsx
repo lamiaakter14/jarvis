@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   PieChart,
@@ -74,7 +72,7 @@ export const AnalyticsDashboard: React.FC = () => {
   const generateTaskProgressData = () => {
     const days = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : 30;
     return Array.from({ length: days }, (_, i) => ({
-      date: \`Day \${i + 1}\`,
+      date: `Day ${i + 1}`,
       completed: Math.floor(Math.random() * 50) + 20,
       pending: Math.floor(Math.random() * 20) + 5,
       failed: Math.floor(Math.random() * 5),
@@ -84,7 +82,7 @@ export const AnalyticsDashboard: React.FC = () => {
   const generatePerformanceData = () => {
     const points = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : 30;
     return Array.from({ length: points }, (_, i) => ({
-      timestamp: \`T\${i + 1}\`,
+      timestamp: `T${i + 1}`,
       latency: Math.floor(Math.random() * 300) + 100,
       throughput: Math.floor(Math.random() * 1000) + 500,
     }));
@@ -104,7 +102,7 @@ export const AnalyticsDashboard: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h2>
         <div className="flex gap-2">
           {(['24h', '7d', '30d'] as const).map((range) => (
-            <button key={range} onClick={() => setTimeRange(range)} className={\`px-4 py-2 rounded-lg text-sm font-medium transition-colors \${timeRange === range ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}\`}>{range}</button>
+            <button key={range} onClick={() => setTimeRange(range)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${timeRange === range ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}>{range}</button>
           ))}
         </div>
       </div>
@@ -135,7 +133,7 @@ export const AnalyticsDashboard: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={analyticsData.memoryUsage} dataKey="count" nameKey="type" cx="50%" cy="50%" outerRadius={100} label>
-                {analyticsData.memoryUsage.map((_, index) => (<Cell key={\`cell-\${index}\`} fill={COLORS[index % COLORS.length]} />))}
+                {analyticsData.memoryUsage.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
               </Pie>
               <Tooltip />
               <Legend />
@@ -175,7 +173,7 @@ const StatCard: React.FC<StatCardProps> = ({ icon, title, value, change, positiv
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-2">
         <div className="text-gray-500 dark:text-gray-400">{icon}</div>
-        <span className={\`text-sm font-medium \${positive ? 'text-green-600' : 'text-red-600'}\`}>{change}</span>
+        <span className={`text-sm font-medium ${positive ? 'text-green-600' : 'text-red-600'}`}>{change}</span>
       </div>
       <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</h3>
       <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>

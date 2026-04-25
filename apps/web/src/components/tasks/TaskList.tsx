@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { CheckSquare, ListTodo } from 'lucide-react';
 import { getTasks, deleteTask } from '../../api/taskApi';
-import { Task } from '../../types/Task';
+import { Task } from '../../types/task';
 import { StatsCard } from '../dashboard/StatsCard';
 import { ErrorMessage } from '../common/ErrorMessage';
 
@@ -53,8 +54,8 @@ export const TaskList: React.FC = () => {
             key={status}
             title={status}
             value={tasks.filter(task => task.status === status.toLowerCase()).length}
-            color={status === "Completed" ? "green" : status === "Failed" ? "red" : "blue"}
-            icon={status === "Completed" ? "CheckSquare" : "ListTodo"}
+            color={status === "Completed" ? "green" : status === "Failed" ? "amber" : "blue"}
+            icon={status === "Completed" ? CheckSquare : ListTodo}
           />
         ))}
       </div>
