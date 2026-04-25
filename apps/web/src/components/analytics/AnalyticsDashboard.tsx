@@ -71,8 +71,8 @@ export const AnalyticsDashboard: React.FC = () => {
 
   const generateTaskProgressData = () => {
     const days = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : 30;
-    return Array.from({ length: days }, (_, _i) => ({
-      date: `Day ${_i + 1}`,
+    return Array.from({ length: days }, (_, i) => ({
+      date: `Day ${i + 1}`,
       completed: Math.floor(Math.random() * 50) + 20,
       pending: Math.floor(Math.random() * 20) + 5,
       failed: Math.floor(Math.random() * 5),
@@ -81,8 +81,8 @@ export const AnalyticsDashboard: React.FC = () => {
 
   const generatePerformanceData = () => {
     const points = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : 30;
-    return Array.from({ length: points }, (_, _i) => ({
-      timestamp: `T${_i + 1}`,
+    return Array.from({ length: points }, (_, i) => ({
+      timestamp: `T${i + 1}`,
       latency: Math.floor(Math.random() * 300) + 100,
       throughput: Math.floor(Math.random() * 1000) + 500,
     }));
