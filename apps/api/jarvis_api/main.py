@@ -1,12 +1,13 @@
 """FastAPI main application for JARVIS cognitive assistant."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal, Optional
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from jarvis_core.bridge.agent_bridge import (
     AmplifierBridge,
     ExecutorBridge,
@@ -36,24 +37,52 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 _tasks: dict[str, dict[str, Any]] = {}
 
+TaskStatus = Literal["todo", "in_progress", "done"]
+TaskPriority = Literal["low", "medium", "high", "critical"]
 
-def _make_task(data: dict[str, Any]) -> dict[str, Any]:
+
+class TaskCreate(BaseModel):
+    """Schema for creating a new task."""
+
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field("", max_length=2000)
+    status: TaskStatus = "todo"
+    priority: TaskPriority = "medium"
+    roi: float = Field(0.5, ge=0.0, le=1.0)
+    cognitive_load: int = Field(3, ge=1, le=10)
+    estimated_hours: float = Field(1.0, gt=0.0)
+    tags: list[str] = Field(default_factory=list)
+
+
+class TaskUpdate(BaseModel):
+    """Schema for updating an existing task (all fields optional)."""
+
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=2000)
+    status: Optional[TaskStatus] = None
+    priority: Optional[TaskPriority] = None
+    roi: Optional[float] = Field(None, ge=0.0, le=1.0)
+    cognitive_load: Optional[int] = Field(None, ge=1, le=10)
+    estimated_hours: Optional[float] = Field(None, gt=0.0)
+    tags: Optional[list[str]] = None
+
+
+def _make_task(data: TaskCreate) -> dict[str, Any]:
     """Create a new task dict with generated id and timestamps."""
     now = datetime.utcnow().isoformat() + "Z"
-    task: dict[str, Any] = {
+    return {
         "id": str(uuid4()),
-        "title": data.get("title", ""),
-        "description": data.get("description", ""),
-        "status": data.get("status", "todo"),
-        "priority": data.get("priority", "medium"),
-        "roi": float(data.get("roi", 0.5)),
-        "cognitive_load": int(data.get("cognitive_load", 3)),
-        "estimated_hours": float(data.get("estimated_hours", 1.0)),
-        "tags": data.get("tags", []),
+        "title": data.title,
+        "description": data.description,
+        "status": data.status,
+        "priority": data.priority,
+        "roi": data.roi,
+        "cognitive_load": data.cognitive_load,
+        "estimated_hours": data.estimated_hours,
+        "tags": data.tags,
         "created_at": now,
         "completed_at": None,
     }
-    return task
 
 
 @app.get("/")
@@ -198,25 +227,22 @@ async def list_tasks() -> list[dict[str, Any]]:
 
 
 @app.post("/api/tasks", status_code=201)
-async def create_task(data: dict[str, Any]) -> dict[str, Any]:
+async def create_task(data: TaskCreate) -> dict[str, Any]:
     """Create a new task."""
-    if not data.get("title"):
-        raise HTTPException(status_code=422, detail="title is required")
     task = _make_task(data)
     _tasks[task["id"]] = task
     return task
 
 
 @app.patch("/api/tasks/{task_id}")
-async def update_task(task_id: str, data: dict[str, Any]) -> dict[str, Any]:
+async def update_task(task_id: str, data: TaskUpdate) -> dict[str, Any]:
     """Update an existing task."""
     if task_id not in _tasks:
         raise HTTPException(status_code=404, detail="Task not found")
     task = _tasks[task_id]
-    for key, value in data.items():
-        if key not in ("id", "created_at"):
-            task[key] = value
-    if data.get("status") == "done" and task.get("completed_at") is None:
+    updates = data.model_dump(exclude_none=True)
+    task.update(updates)
+    if updates.get("status") == "done" and task.get("completed_at") is None:
         task["completed_at"] = datetime.utcnow().isoformat() + "Z"
     _tasks[task_id] = task
     return task
