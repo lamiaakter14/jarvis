@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Task } from '../types/Task';
+import { Task } from '../types/task';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/tasks`;
 
