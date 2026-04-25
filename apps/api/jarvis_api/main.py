@@ -1,6 +1,6 @@
 """FastAPI main application for JARVIS cognitive assistant."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Literal, Optional
 from uuid import uuid4
 
@@ -69,7 +69,7 @@ class TaskUpdate(BaseModel):
 
 def _make_task(data: TaskCreate) -> dict[str, Any]:
     """Create a new task dict with generated id and timestamps."""
-    now = datetime.utcnow().isoformat() + "Z"
+    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     return {
         "id": str(uuid4()),
         "title": data.title,
@@ -243,7 +243,7 @@ async def update_task(task_id: str, data: TaskUpdate) -> dict[str, Any]:
     updates = data.model_dump(exclude_none=True)
     task.update(updates)
     if updates.get("status") == "done" and task.get("completed_at") is None:
-        task["completed_at"] = datetime.utcnow().isoformat() + "Z"
+        task["completed_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     _tasks[task_id] = task
     return task
 
