@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0A0E14">
-    <title>JARVIS — Cognitive Operations System</title>
+    <title>JARVIS — Mahedi Muktadir</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -156,6 +156,7 @@
             text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; white-space: nowrap;
         }
         .cmd-btn:active { opacity: 0.8; }
+        .cmd-btn.loading { opacity: 0.6; pointer-events: none; }
         .chips { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
         .chips::-webkit-scrollbar { display: none; }
         .chip {
@@ -165,6 +166,21 @@
             background: var(--bg-primary);
         }
         .chip:active { border-color: var(--accent-blue); color: var(--text-primary); }
+
+        .toast {
+            position: fixed; top: 54px; left: 50%; transform: translateX(-50%);
+            background: var(--bg-card); border: 1px solid var(--accent-green);
+            border-radius: var(--radius); padding: 6px 12px;
+            font-size: 8px; color: var(--accent-green); z-index: 200;
+            animation: fadeInOut 2s ease;
+            pointer-events: none;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
     </style>
 </head>
 <body>
@@ -172,7 +188,7 @@
 <header class="topbar">
     <div class="top-left">
         <h1>JARVIS</h1>
-        <div class="sub">Cognitive System</div>
+        <div class="sub">Mahedi Muktadir</div>
     </div>
     <div class="top-right">
         <div class="dot"></div>
@@ -201,7 +217,7 @@
             <span class="cmd-pfx">&gt;</span>
             <input id="cmd" placeholder="Type a command..." onkeypress="if(event.key==='Enter')exec()" autocomplete="off">
         </div>
-        <button class="cmd-btn" onclick="exec()">RUN</button>
+        <button class="cmd-btn" id="run-btn" onclick="exec()">RUN</button>
     </div>
     <div class="chips">
         <span class="chip" onclick="sc('plan today')">plan today</span>
@@ -212,6 +228,11 @@
 </div>
 
 <script>
+// ===== CONFIG =====
+const API_BASE = 'http://localhost:8000';  // Change to your backend URL
+const OFFLINE_MODE = true;  // Set false when backend running
+
+// ===== DATA =====
 const agents = [
     {n:'STRATEGIST',s:'PLANNING',a:'Generating plan...',c:'#448AFF',d:'d-planning',l:'#448AFF'},
     {n:'EXECUTOR',s:'RUNNING',a:'TSK-023 (65%)',c:'#00E676',d:'d-running',l:'#00E676'},
@@ -234,9 +255,21 @@ const feedData = [
     {t:'10:32:58',a:'SYSTEM',m:'Cognitive loop iteration started.',g:'tg-r'},
 ];
 
+const commandMap = {
+    'strategist': 'tg-s',
+    'executor': 'tg-e',
+    'mentor': 'tg-m',
+    'innovator': 'tg-i',
+    'amplifier': 'tg-a',
+    'reflector': 'tg-r',
+    'orchestrator': 'tg-a',
+    'system': 'tg-r'
+};
+
 const tabs=['ALL','TASKS','GAPS','INNOVATIONS','SYSTEM'];
 let cur='ALL';
 
+// ===== RENDER =====
 document.getElementById('agent-scroll').innerHTML = agents.map(a=>
     `<div class="agent-card" style="border-left:3px solid ${a.l}">
         <div class="ac-top"><div class="ac-dot ${a.d}"></div><span class="ac-name">${a.n}</span></div>
@@ -277,12 +310,151 @@ document.getElementById('sys-panel').innerHTML = '<h3>SYSTEM STATUS</h3>'+
     .map(m=>`<div class="stat-row"><span class="stat-l">${m.l}</span><span class="stat-v">${m.v}</span></div>`).join('');
 
 function sc(c){ document.getElementById('cmd').value = c; document.getElementById('cmd').focus(); }
-function exec(){
-    const c = document.getElementById('cmd').value.trim();
-    if(c){ alert('▶ '+c); document.getElementById('cmd').value = ''; }
+
+// ===== PHASE 6.2: REAL COMMAND EXECUTION =====
+function showToast(msg, color) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    if (color) toast.style.color = color;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
 }
 
-rTabs(); rFeed();
+async function exec(){
+    const input = document.getElementById('cmd');
+    const btn = document.getElementById('run-btn');
+    const c = input.value.trim();
+    if(!c) return;
+
+    // Loading state
+    btn.textContent = '...';
+    btn.classList.add('loading');
+    input.disabled = true;
+
+    try {
+        let result;
+
+        if (!OFFLINE_MODE) {
+            // Real backend call
+            const response = await fetch(`${API_BASE}/command/execute`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: c })
+            });
+            result = await response.json();
+        } else {
+            // Offline simulation
+            result = simulateCommand(c);
+        }
+
+        // Add to feed
+        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+        const agent = result.response.agent || 'system';
+        const tagClass = commandMap[agent] || 'tg-r';
+
+        feedData.unshift({
+            t: now,
+            a: agent.toUpperCase(),
+            m: result.response.message || `Command executed: ${c}`,
+            g: tagClass
+        });
+
+        if (cur === 'ALL' || cur === 'SYSTEM') rFeed();
+
+        showToast('✅ ' + result.response.message, 'var(--accent-green)');
+
+    } catch(err) {
+        // Fallback offline
+        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+        feedData.unshift({
+            t: now,
+            a: 'SYSTEM',
+            m: `Offline command: ${c}`,
+            g: 'tg-r'
+        });
+        if (cur === 'ALL' || cur === 'SYSTEM') rFeed();
+        showToast('⚠ Offline: ' + c, 'var(--accent-orange)');
+    }
+
+    // Reset
+    input.value = '';
+    input.disabled = false;
+    btn.textContent = 'RUN';
+    btn.classList.remove('loading');
+    input.focus();
+}
+
+function simulateCommand(cmd) {
+    const c = cmd.toLowerCase().trim();
+    let response = {};
+
+    if (c.includes('plan')) {
+        response = {
+            agent: 'strategist',
+            action: 'create_plan',
+            status: 'executed',
+            message: `Plan generated: "${cmd}"`,
+            tasks_created: 5
+        };
+    } else if (c.includes('analyze')) {
+        response = {
+            agent: 'mentor',
+            action: 'analyze_gaps',
+            status: 'executed',
+            message: `Analysis completed: "${cmd}"`,
+            gaps_found: 3
+        };
+    } else if (c.includes('fix') || c.includes('gap')) {
+        response = {
+            agent: 'mentor',
+            action: 'resolve_gaps',
+            status: 'executed',
+            message: `Gap resolution initiated: "${cmd}"`,
+            gaps_resolved: 2
+        };
+    } else if (c.includes('loop') || c.includes('cycle')) {
+        response = {
+            agent: 'orchestrator',
+            action: 'run_cognitive_cycle',
+            status: 'executed',
+            message: 'Cognitive loop iteration started',
+            pipeline: ['perceive', 'reason', 'act', 'reflect']
+        };
+    } else if (c.includes('execute') || c.includes('task')) {
+        response = {
+            agent: 'executor',
+            action: 'execute_tasks',
+            status: 'executed',
+            message: `Task execution started: "${cmd}"`,
+            tasks_run: 3
+        };
+    } else if (c.includes('innov') || c.includes('idea')) {
+        response = {
+            agent: 'innovator',
+            action: 'generate_ideas',
+            status: 'executed',
+            message: `Innovation generated: "${cmd}"`,
+            ideas: 1
+        };
+    } else {
+        response = {
+            agent: 'system',
+            action: 'process',
+            status: 'received',
+            message: `Command received: "${cmd}"`
+        };
+    }
+
+    return { success: true, response };
+}
+
+// ===== INIT =====
+rTabs();
+rFeed();
+
+// Auto-focus command on load
+setTimeout(() => document.getElementById('cmd').focus(), 500);
 </script>
 </body>
 </html>
