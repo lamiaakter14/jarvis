@@ -1,6 +1,6 @@
 """
-JARVIS FastAPI Backend - Phase 3: Real Agent Wiring
-Bridge layer removed, real agents connected to endpoints.
+JARVIS FastAPI Backend - Phase 4: Cognitive Orchestration
+Bridge removed, Orchestrator + 3-Tier Memory System wired.
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,24 +10,18 @@ import uuid
 from datetime import datetime
 
 # ============================================================
-# Phase 3: Real Agent Imports
-# [Phase 2 TODO removed - agents wired]
+# Phase 4: Orchestrator Import
 # ============================================================
-from app.agents.strategist_agent import StrategistAgent
-from app.agents.amplifier_agent import AmplifierAgent  
-from app.agents.reflector_agent import ReflectorAgent
+from app.services.cognitive_orchestrator import CognitiveOrchestrator
 from app.services.task_repository import SqliteTaskRepository
 
 # ============================================================
-# Phase 3: Real Agent Initialization
-# [Phase 2 TODO removed - instances created]
+# Phase 4: Orchestrator Initialization (manages all agents + memory)
 # ============================================================
-strategist = StrategistAgent()
-amplifier = AmplifierAgent()
-reflector = ReflectorAgent()
+orchestrator = CognitiveOrchestrator()
 task_repo = SqliteTaskRepository()
 
-app = FastAPI(title="JARVIS Cognitive Assistant", version="3.0.0")
+app = FastAPI(title="JARVIS Cognitive Assistant", version="4.0.0")
 
 # CORS middleware
 app.add_middleware(
@@ -63,13 +57,14 @@ class TaskResponse(BaseModel):
 async def health_check():
     return {
         "status": "operational",
-        "version": "3.0.0",
-        "phase": "3 - Real Agent Wiring",
-        "active_agents": ["strategist", "amplifier", "reflector"]
+        "version": "4.0.0",
+        "phase": "4 - Cognitive Orchestration + Memory",
+        "active_components": ["orchestrator", "strategist", "amplifier", "reflector", "memory"],
+        "memory_tiers": ["episodic", "semantic", "strategic"]
     }
 
 # ============================================================
-# Task Endpoints
+# Task CRUD Endpoints
 # ============================================================
 @app.post("/tasks", response_model=TaskResponse)
 async def create_task(task: TaskCreate):
@@ -130,95 +125,69 @@ async def delete_task(task_id: str):
     return {"message": "Task deleted", "task_id": task_id}
 
 # ============================================================
-# Phase 3: Task Understanding - Strategist + Reflector
-# [Bridge: TaskUnderstandingBridge → REMOVED]
-# Wired: strategist.analyze_task() + reflector.reflect_on_task()
+# Phase 4: Orchestrated Task Understanding
+# Pipeline: Perceive → Reason → Act → Reflect with Memory
 # ============================================================
 @app.get("/tasks/{task_id}/understanding")
 async def get_task_understanding(task_id: str):
     """
-    Phase 3: Real agent analysis pipeline
-    Strategist analyzes → Reflector validates
+    Phase 4: Full cognitive pipeline
+    Memory context → Strategist → Amplifier → Reflector → Memory store
     """
     task = task_repo.get_by_id(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    # Real agent execution
-    analysis = await strategist.analyze_task(task)
-    reflection = await reflector.reflect_on_task(task, analysis)
-    
-    return {
-        "task_id": task_id,
-        "task_title": task["title"],
-        "analysis": analysis,
-        "reflection": reflection,
-        "agent_pipeline": ["strategist", "reflector"],
-        "phase": "3-real-agents"
-    }
+    return await orchestrator.process_task(task)
 
 # ============================================================
-# Phase 3: Perception Endpoints - Strategist + Amplifier
-# [Bridge: GeneralPerceptionBridge → REMOVED]
-# Wired: strategist.perceive_context(), strategist.recommend()
-#        amplifier.amplify(), amplifier.get_stats()
+# Phase 4: Orchestrated Perception Endpoints
+# Routed through orchestrator with memory recording
 # ============================================================
 
 @app.get("/perception/context")
 async def get_perception_context():
     """
-    Phase 3: Context-aware perception
-    Strategist agent analyzes environment holistically
+    Phase 4: Context perception via orchestrator
+    Strategist analysis + episodic memory recording
     """
-    result = await strategist.perceive_context()
-    return {
-        "perception_type": "context",
-        "result": result,
-        "agent": "strategist",
-        "phase": "3-real-agents"
-    }
+    return await orchestrator.perceive_environment("context")
 
 @app.get("/perception/aether")
 async def get_aether_perception():
     """
-    Phase 3: Creative signal amplification
-    Amplifier agent detects trends and amplifies signals
+    Phase 4: Creative amplification via orchestrator
+    Amplifier signals + memory storage
     """
-    result = await amplifier.amplify()
-    return {
-        "perception_type": "aether",
-        "result": result,
-        "agent": "amplifier",
-        "phase": "3-real-agents"
-    }
+    return await orchestrator.perceive_environment("aether")
 
 @app.get("/perception/stats")
 async def get_perception_stats():
     """
-    Phase 3: System statistics & metrics
-    Amplifier agent provides cognitive statistics
+    Phase 4: Statistics via orchestrator
+    Amplifier metrics + memory tracking
     """
-    result = await amplifier.get_stats()
-    return {
-        "perception_type": "stats",
-        "result": result,
-        "agent": "amplifier",
-        "phase": "3-real-agents"
-    }
+    return await orchestrator.perceive_environment("stats")
 
 @app.get("/perception/recommendation")
 async def get_recommendation():
     """
-    Phase 3: Strategic recommendations
-    Strategist agent generates action plan
+    Phase 4: Strategic recommendations via orchestrator
+    Strategist planning + strategy memory
     """
-    result = await strategist.recommend()
-    return {
-        "perception_type": "recommendation",
-        "result": result,
-        "agent": "strategist",
-        "phase": "3-real-agents"
-    }
+    return await orchestrator.perceive_environment("recommendation")
+
+# ============================================================
+# Phase 4: Memory System Endpoint
+# 3-Tier: Episodic | Semantic | Strategic
+# ============================================================
+@app.get("/memory/stats")
+async def get_memory_stats():
+    """
+    Phase 4: Memory system statistics
+    Shows all 3 memory tiers status
+    """
+    return orchestrator.get_memory_stats()
 
 # ============================================================
 # Startup
