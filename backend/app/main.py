@@ -177,7 +177,7 @@
     <div class="header-row">
         <div class="logo">
             <h1>JARVIS</h1>
-            <div class="sub">Cognitive Operations System</div>
+            <div class="sub">Mahedi Muktadir</div>
         </div>
         <div class="node">
             <div class="node-name"><span>Node:</span> Sakhipur</div>
