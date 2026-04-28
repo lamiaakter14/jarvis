@@ -56,7 +56,6 @@ class ITaskRepository(ABC):
         Raises:
             RepositoryError: If list operation fails
         """
-
     @abstractmethod
     async def delete(self, task_id: str) -> None:
         """Delete a task by its ID.
