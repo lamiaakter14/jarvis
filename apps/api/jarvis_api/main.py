@@ -9,6 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from jarvis_api.agent_setup import Agents, create_agents
+from jarvis_core.domain.entities.context import Context
+
 # Create FastAPI app
 app = FastAPI(
     title="JARVIS Cognitive Assistant API",
@@ -24,6 +27,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ---------------------------------------------------------------------------
+# Agent system – initialised once at startup
+# ---------------------------------------------------------------------------
+
+_agents: Agents | None = None
+
+
+@app.on_event("startup")
+async def _startup() -> None:
+    global _agents
+    _agents = create_agents()
+
+
+def _get_agents() -> Agents:
+    """Return the agent container, raising 503 if not yet initialised."""
+    if _agents is None:
+        raise HTTPException(status_code=503, detail="Agent system not initialised")
+    return _agents
 
 # ---------------------------------------------------------------------------
 # In-memory task store (no database required for development)
@@ -103,19 +125,33 @@ async def health_check():
 async def run_cognitive_loop() -> dict[str, Any]:
     """Execute the complete cognitive loop with all 5 agents."""
     try:
-        # TODO: Replace with real agent system
-        plan = {}
-        gaps = []
-        task_feedback = []
-        innovations = []
-        performance = {}
+        agents = _get_agents()
+        ctx = Context()
+
+        plan = await agents.strategist.execute(ctx)
+        mentor_result = await agents.mentor.execute(ctx)
+        innovations = await agents.innovator.execute(ctx)
+        performance = await agents.amplifier.execute(ctx)
+
+        plan_dict = {
+            "date": plan.date.isoformat(),
+            "total_hours": plan.total_hours,
+            "tasks": [t.title for t in plan.tasks],
+        }
+        innovations_list = [
+            {"title": inn.title, "category": inn.category, "impact_score": inn.impact_score}
+            for inn in innovations
+        ]
 
         return {
             "status": "success",
-            "strategist": {"plan": plan},
-            "mentor": {"gaps": gaps, "task_feedback": task_feedback},
+            "strategist": {"plan": plan_dict},
+            "mentor": {
+                "gaps": mentor_result.get("gaps", []),
+                "task_feedback": mentor_result.get("recommendations", []),
+            },
             "executor": {"status": "completed"},
-            "innovator": {"innovations": innovations},
+            "innovator": {"innovations": innovations_list},
             "amplifier": {"performance": performance},
         }
     except Exception as e:
@@ -131,9 +167,17 @@ async def run_cognitive_loop() -> dict[str, Any]:
 async def get_daily_plan() -> dict[str, Any]:
     """Get today's daily plan."""
     try:
-        # TODO: Replace with real agent system
-        plan = {}
-        return {"status": "success", "plan": plan}
+        agents = _get_agents()
+        ctx = Context()
+        plan = await agents.strategist.execute(ctx)
+        plan_dict = {
+            "date": plan.date.isoformat(),
+            "total_hours": plan.total_hours,
+            "tasks": [t.title for t in plan.tasks],
+        }
+        return {"status": "success", "plan": plan_dict}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate plan: {str(e)}")
 
@@ -142,9 +186,17 @@ async def get_daily_plan() -> dict[str, Any]:
 async def generate_plan() -> dict[str, Any]:
     """Generate a new daily plan."""
     try:
-        # TODO: Replace with real agent system
-        plan = {}
-        return {"status": "success", "plan": plan}
+        agents = _get_agents()
+        ctx = Context()
+        plan = await agents.strategist.execute(ctx)
+        plan_dict = {
+            "date": plan.date.isoformat(),
+            "total_hours": plan.total_hours,
+            "tasks": [t.title for t in plan.tasks],
+        }
+        return {"status": "success", "plan": plan_dict}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate plan: {str(e)}")
 
@@ -158,9 +210,11 @@ async def generate_plan() -> dict[str, Any]:
 async def get_knowledge_gaps() -> dict[str, Any]:
     """Get identified knowledge gaps."""
     try:
-        # TODO: Replace with real agent system
-        gaps = []
-        return {"status": "success", "gaps": gaps}
+        agents = _get_agents()
+        result = await agents.mentor.execute({})
+        return {"status": "success", "gaps": result.get("gaps", [])}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to analyze gaps: {str(e)}")
 
@@ -174,9 +228,16 @@ async def get_knowledge_gaps() -> dict[str, Any]:
 async def get_innovations() -> dict[str, Any]:
     """Get generated innovations."""
     try:
-        # TODO: Replace with real agent system
-        innovations = []
-        return {"status": "success", "innovations": innovations}
+        agents = _get_agents()
+        ctx = Context()
+        innovations = await agents.innovator.execute(ctx)
+        innovations_list = [
+            {"title": inn.title, "category": inn.category, "impact_score": inn.impact_score}
+            for inn in innovations
+        ]
+        return {"status": "success", "innovations": innovations_list}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create innovations: {str(e)}")
 
@@ -190,9 +251,11 @@ async def get_innovations() -> dict[str, Any]:
 async def get_performance_metrics() -> dict[str, Any]:
     """Get performance metrics and analytics."""
     try:
-        # TODO: Replace with real agent system
-        performance = {}
+        agents = _get_agents()
+        performance = await agents.amplifier.execute()
         return {"status": "success", "performance": performance}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to analyze performance: {str(e)}")
 
