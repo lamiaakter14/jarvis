@@ -56,6 +56,20 @@ class ITaskRepository(ABC):
         Raises:
             RepositoryError: If list operation fails
         """
+
+    @abstractmethod
+    async def list_all(self) -> builtins.list[Task]:
+        """Retrieve all tasks from the repository.
+
+        Returns all tasks ordered by priority_weight descending.
+
+        Returns:
+            List of all Task instances in the repository
+
+        Raises:
+            RepositoryError: If retrieval operation fails
+        """
+
     @abstractmethod
     async def delete(self, task_id: str) -> None:
         """Delete a task by its ID.
@@ -80,4 +94,14 @@ class ITaskRepository(ABC):
 
         Raises:
             RepositoryError: If retrieval operation fails
+        """
+
+    @abstractmethod
+    async def clear_all(self) -> None:
+        """Remove all tasks from the repository.
+
+        Primarily used for testing purposes to reset state.
+
+        Raises:
+            RepositoryError: If clear operation fails
         """
