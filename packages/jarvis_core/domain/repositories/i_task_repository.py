@@ -70,6 +70,17 @@ class ITaskRepository(ABC):
         """
 
     @abstractmethod
+    async def list_all(self) -> list[Task]:
+        """Retrieve all tasks without any filters.
+
+        Returns:
+            List of all Task instances
+
+        Raises:
+            RepositoryError: If retrieval operation fails
+        """
+
+    @abstractmethod
     async def get_by_status(self, status: TaskStatus) -> builtins.list[Task]:
         """Retrieve all tasks with a specific status.
 
