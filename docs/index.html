@@ -1,0 +1,287 @@
+<!-- docs/index.html - GitHub Pages entry point -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS | AI Cognitive Assistant</title>
+    <style>
+        /* Exact design system replication */
+        :root {
+            --bg-primary: #0A0E14;
+            --bg-secondary: #0F1419;
+            --bg-card: #151A22;
+            --border: #232A34;
+            --text-primary: #DDE4ED;
+            --text-secondary: #8899AA;
+            --text-muted: #4A5568;
+            --accent-green: #00E676;
+            --accent-blue: #448AFF;
+            --accent-orange: #FF9100;
+            --accent-purple: #B388FF;
+            --accent-cyan: #40C4FF;
+            --accent-pink: #FF80AB;
+            --radius: 4px;
+            --font: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font);
+            font-size: 13px;
+            line-height: 1.6;
+            min-height: 100vh;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        .header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            font-size: 11px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .section h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .agent-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+        }
+
+        .agent-card .name {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .agent-card .status {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-active { color: var(--accent-green); }
+        .status-stub { color: var(--accent-orange); }
+
+        .endpoint-list {
+            list-style: none;
+        }
+
+        .endpoint-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .endpoint-list li:last-child {
+            border-bottom: none;
+        }
+
+        .method {
+            padding: 2px 8px;
+            border-radius: var(--radius);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .method-post { background: var(--accent-blue); color: var(--bg-primary); }
+        .method-get { background: var(--accent-green); color: var(--bg-primary); }
+        .method-ws { background: var(--accent-purple); color: var(--bg-primary); }
+
+        .link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .link:hover {
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        @media (max-width: 375px) {
+            body {
+                padding: 16px 12px;
+            }
+            
+            .agent-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ JARVIS</h1>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            Phase 5.3 Operational
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔮 System Overview</h2>
+        <p style="color: var(--text-secondary);">
+            Modular AI Cognitive Assistant with multi-agent architecture, 
+            3-tier memory system, and mobile-first command center.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>🤖 Active Agents</h2>
+        <div class="agent-grid">
+            <div class="agent-card">
+                <div class="name" style="color: var(--accent-green);">Strategist</div>
+                <div class="status status-active">● Active</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Task decomposition + planning</div>
+            </div>
+            <div class="agent-card">
+                <div class="name" style="color: var(--accent-blue);">Executor</div>
+                <div class="status status-active">● Active</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Action execution engine</div>
+            </div>
+            <div class="agent-card">
+                <div class="name" style="color: var(--accent-purple);">Amplifier</div>
+                <div class="status status-active">● Active</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Response enhancement</div>
+            </div>
+            <div class="agent-card">
+                <div class="name" style="color: var(--accent-pink);">Reflector</div>
+                <div class="status status-active">● Active</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Outcome analysis</div>
+            </div>
+            <div class="agent-card">
+                <div class="name" style="color: var(--accent-orange);">Mentor</div>
+                <div class="status status-stub">⚠ Stub</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Guidance generation</div>
+            </div>
+            <div class="agent-card">
+                <div class="name" style="color: var(--accent-orange);">Innovator</div>
+                <div class="status status-stub">⚠ Stub</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Creative solutions</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔌 API Endpoints</h2>
+        <ul class="endpoint-list">
+            <li>
+                <span><span class="method method-post">POST</span> /api/task</span>
+                <span style="color: var(--text-secondary);">Create task</span>
+            </li>
+            <li>
+                <span><span class="method method-get">GET</span> /api/tasks</span>
+                <span style="color: var(--text-secondary);">List all tasks</span>
+            </li>
+            <li>
+                <span><span class="method method-get">GET</span> /api/reflect</span>
+                <span style="color: var(--text-secondary);">Cognitive reflection</span>
+            </li>
+            <li>
+                <span><span class="method method-get">GET</span> /api/strategize</span>
+                <span style="color: var(--text-secondary);">Strategy generation</span>
+            </li>
+            <li>
+                <span><span class="method method-get">GET</span> /api/amplify</span>
+                <span style="color: var(--text-secondary);">Content amplification</span>
+            </li>
+            <li>
+                <span><span class="method method-ws">WS</span> /ws/cognitive-loop</span>
+                <span style="color: var(--accent-purple);">Phase 6</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🧠 Memory Architecture</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <div style="color: var(--accent-green);">Episodic<br><span style="font-size: 10px; color: var(--text-muted);">Task execution logs</span></div>
+            <div style="color: var(--accent-blue);">Semantic<br><span style="font-size: 10px; color: var(--text-muted);">Knowledge graph</span></div>
+            <div style="color: var(--accent-purple);">Strategic<br><span style="font-size: 10px; color: var(--text-muted);">Long-term plans</span></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📱 Live Dashboard</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 12px;">
+            Mobile-first command center (375px optimized)
+        </p>
+        <a href="#" class="link">Launch Dashboard →</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px; padding: 16px; color: var(--text-muted); font-size: 11px;">
+        JARVIS Cognitive Assistant • Phase 6 Deployment • lamiaakter14/jarvis
+    </div>
+</body>
+</html>
