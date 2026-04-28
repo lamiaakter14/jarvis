@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS - Cognitive Operations System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
+        :root {
+            --bg-primary: #0A0E14;
+            --bg-secondary: #0F1419;
+            --bg-panel: #151A22;
+            --border: #232A34;
+            --text-primary: #DDE4ED;
+            --text-secondary: #8899AA;
+            --text-muted: #4A5568;
+            --accent-green: #00E676;
+            --accent-blue: #448AFF;
+            --accent-orange: #FF9100;
+            --accent-purple: #B388FF;
+            --accent-cyan: #40C4FF;
+            --accent-pink: #FF80AB;
+            --accent-red: #FF5252;
+            --radius: 4px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            overflow-x: hidden;
+        }
+        
+        /* TOP BAR */
+        .topbar {
+            height: 48px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+        
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-blue);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #FFF;
+        }
+        
+        .system-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .system-subtitle {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .topbar-center {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+        }
+        
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 11px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .label { color: var(--text-muted); font-size: 10px; }
+        
+        /* AGENT STRIP */
+        .agent-strip {
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px;
+            overflow-x: auto;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            margin-top: 48px;
+        }
+        
+        .agent-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            min-width: 140px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .agent-card-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .agent-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .agent-dot.active { background: var(--accent-green); }
+        .agent-dot.running { background: var(--accent-blue); animation: pulse 1.5s infinite; }
+        .agent-dot.analyzing { background: var(--accent-orange); animation: pulse 1.5s infinite; }
+        .agent-dot.idle { background: var(--text-muted); }
+        .agent-dot.measuring { background: var(--accent-cyan); }
+        .agent-dot.reflecting { background: var(--accent-purple); }
+        
+        .agent-name {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+        
+        .agent-status {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        
+        .agent-action {
+            font-size: 10px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            height: calc(100vh - 48px - 72px - 56px - 20px);
+        }
+        
+        /* LEFT PANEL - System Feed */
+        .feed-panel {
+            flex: 0.6;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .feed-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .feed-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feed-tab.active {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--accent-blue);
+            color: var(--text-primary);
+        }
+        
+        .feed-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .feed-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 6px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+        }
+        
+        .feed-time {
+            color: var(--text-muted);
+            font-size: 10px;
+            white-space: nowrap;
+            min-width: 65px;
+        }
+        
+        .feed-agent {
+            text-transform: uppercase;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 80px;
+            letter-spacing: 0.5px;
+        }
+        
+        .feed-message {
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        
+        .feed-status {
+            font-size: 9px;
+            text-transform: uppercase;
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 2px;
+            white-space: nowrap;
+        }
+        
+        /* RIGHT PANEL */
+        .right-panel {
+            flex: 0.4;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        
+        .card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+        }
+        
+        .card-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        /* Tasks */
+        .task-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+        }
+        
+        .task-id {
+            color: var(--accent-blue);
+            font-weight: bold;
+            min-width: 55px;
+        }
+        
+        .task-title {
+            flex: 1;
+            color: var(--text-primary);
+        }
+        
+        .progress-bar {
+            width: 60px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+        
+        .progress-fill.high { background: var(--accent-green); }
+        .progress-fill.medium { background: var(--accent-blue); }
+        .progress-fill.low { background: var(--accent-orange); }
+        
+        /* Gaps */
+        .gap-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            font-size: 10px;
+        }
+        
+        .gap-icon {
+            color: var(--accent-orange);
+            font-size: 14px;
+        }
+        
+        .gap-category {
+            font-size: 9px;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 2px;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+        }
+        
+        .gap-title {
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        
+        /* Innovations */
+        .innovation-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            font-size: 10px;
+        }
+        
+        .innovation-feasibility {
+            font-size: 9px;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+        
+        .feasibility-high { background: #1a3a2a; color: var(--accent-green); }
+        .feasibility-medium { background: #2a2a1a; color: var(--accent-orange); }
+        
+        /* Metrics */
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+        }
+        
+        .metric-name { color: var(--text-secondary); }
+        
+        .metric-value { font-weight: bold; }
+        
+        .metric-trend {
+            font-size: 9px;
+            min-width: 60px;
+            text-align: right;
+        }
+        
+        .trend-up { color: var(--accent-green); }
+        .trend-down { color: var(--accent-red); }
+        
+        /* COMMAND BAR */
+        .command-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 10px;
+        }
+        
+        .command-input {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0 12px;
+            height: 36px;
+        }
+        
+        .command-prefix {
+            color: var(--accent-blue);
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .command-input input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        .command-input input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .execute-btn {
+            background: var(--accent-blue);
+            color: #FFF;
+            border: none;
+            border-radius: var(--radius);
+            padding: 8px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        
+        .suggestions {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .suggestion-chip {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 4px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            font-size: 9px;
+            color: var(--text-muted);
+            position: fixed;
+            bottom: 56px;
+            left: 0;
+            right: 0;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="logo">J</div>
+            <div>
+                <div class="system-title">JARVIS</div>
+                <div class="system-subtitle">Cognitive Operations System</div>
+            </div>
+        </div>
+        <div class="topbar-center">COMMAND CENTER</div>
+        <div class="topbar-right">
+            <span class="label">NODE</span> <span>Sakhipur</span>
+            <span class="label">STATUS</span>
+            <div class="status-dot"></div> <span style="color: var(--accent-green);">ACTIVE</span>
+            <span class="label">UPTIME</span> <span style="color: var(--accent-cyan);">14h 32m 18s</span>
+            <span style="color: var(--text-muted);">10:33:42 AM</span>
+        </div>
+    </div>
+    
+    <!-- AGENT STRIP -->
+    <div class="agent-strip">
+        <div class="agent-card" style="border-left: 3px solid var(--accent-blue);">
+            <div class="agent-card-header">
+                <div class="agent-dot active"></div>
+                <span class="agent-name">STRATEGIST</span>
+            </div>
+            <div class="agent-status" style="color: var(--accent-green);">PLANNING</div>
+            <div class="agent-action">Generating plan & tasks...</div>
+        </div>
+        <div class="agent-card" style="border-left: 3px solid var(--accent-green);">
+            <div class="agent-card-header">
+                <div class="agent-dot running"></div>
+                <span class="agent-name">EXECUTOR</span>
+            </div>
+            <div class="agent-status" style="color: var(--accent-blue);">RUNNING</div>
+            <div class="agent-action">TSK-023 (65%)</div>
+        </div>
+        <div class="agent-card" style="border-left: 3px solid var(--accent-orange);">
+            <div class="agent-card-header">
+                <div class="agent-dot analyzing"></div>
+                <span class="agent-name">MENTOR</span>
+            </div>
+            <div class="agent-status" style="color: var(--accent-orange);">ANALYZING</div>
+            <div class="agent-action">Detecting knowledge gaps...</div>
+        </div>
+        <div class="agent-card" style="border-left: 3px solid var(--accent-purple);">
+            <div class="agent-card-header">
+                <div class="agent-dot idle"></div>
+                <span class="agent-name">INNOVATOR</span>
+            </div>
+            <div class="agent-status" style="color: var(--text-muted);">IDLE</div>
+            <div class="agent-action">Waiting for trigger...</div>
+        </div>
+        <div class="agent-card" style="border-left: 3px solid var(--accent-cyan);">
+            <div class="agent-card-header">
+                <div class="agent-dot measuring"></div>
+                <span class="agent-name">AMPLIFIER</span>
+            </div>
+            <div class="agent-status" style="color: var(--accent-cyan);">MEASURING</div>
+            <div class="agent-action">Performance metrics updated...</div>
+        </div>
+        <div class="agent-card" style="border-left: 3px solid var(--accent-pink);">
+            <div class="agent-card-header">
+                <div class="agent-dot reflecting"></div>
+                <span class="agent-name">REFLECTOR</span>
+            </div>
+            <div class="agent-status" style="color: var(--accent-purple);">REFLECTING</div>
+            <div class="agent-action">System reflection cycle...</div>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- LEFT: System Feed -->
+        <div class="feed-panel">
+            <div class="feed-tabs">
+                <button class="feed-tab active" onclick="filterFeed('ALL')">ALL</button>
+                <button class="feed-tab" onclick="filterFeed('TASKS')">TASKS</button>
+                <button class="feed-tab" onclick="filterFeed('GAPS')">GAPS</button>
+                <button class="feed-tab" onclick="filterFeed('INNOVATIONS')">INNOVATIONS</button>
+                <button class="feed-tab" onclick="filterFeed('SYSTEM')">SYSTEM</button>
+            </div>
+            <div class="feed-items" id="feed-items"></div>
+        </div>
+        
+        <!-- RIGHT: Panels -->
+        <div class="right-panel">
+            <!-- Active Tasks -->
+            <div class="card">
+                <div class="card-title">ACTIVE TASKS</div>
+                <div id="active-tasks"></div>
+            </div>
+            
+            <!-- Knowledge Gaps -->
+            <div class="card">
+                <div class="card-title">KNOWLEDGE GAPS</div>
+                <div id="knowledge-gaps"></div>
+            </div>
+            
+            <!-- Innovations -->
+            <div class="card">
+                <div class="card-title">INNOVATIONS</div>
+                <div id="innovations"></div>
+            </div>
+            
+            <!-- Performance Metrics -->
+            <div class="card">
+                <div class="card-title">METRICS</div>
+                <div id="metrics"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FOOTER -->
+    <div class="footer">
+        JARVIS Cognitive Operations System v1.0.0 &nbsp;|&nbsp; All systems operational &nbsp;|&nbsp; Last sync: <span id="sync-time">10:33:42 AM</span>
+    </div>
+    
+    <!-- COMMAND BAR -->
+    <div class="command-bar">
+        <div class="command-input">
+            <span class="command-prefix">&gt;</span>
+            <input type="text" id="command" placeholder="Type your command or request..." onkeypress="handleCommand(event)">
+        </div>
+        <button class="execute-btn" onclick="executeCommand()">EXECUTE</button>
+        <div class="suggestions">
+            <span class="suggestion-chip" onclick="setCommand('plan today')">plan today</span>
+            <span class="suggestion-chip" onclick="setCommand('analyze performance')">analyze performance</span>
+            <span class="suggestion-chip" onclick="setCommand('fix knowledge gaps')">fix knowledge gaps</span>
+            <span class="suggestion-chip" onclick="setCommand('generate innovations')">generate innovations</span>
+        </div>
+    </div>
+    
+    <script>
+        // Mock Data
+        const feedData = [
+            { time: '10:33:42', agent: 'AMPLIFIER', message: 'Performance metrics updated successfully.', category: 'SYSTEM', status: 'SYSTEM', color: '#40C4FF' },
+            { time: '10:33:38', agent: 'MENTOR', message: 'Knowledge gap detected: "Advanced Ad Copy Techniques".', category: 'GAPS', status: 'GAP', color: '#FF9100' },
+            { time: '10:33:34', agent: 'STRATEGIST', message: 'Plan updated: Weekly Growth Plan v2.1 generated.', category: 'TASKS', status: 'PLAN', color: '#448AFF' },
+            { time: '10:33:29', agent: 'EXECUTOR', message: 'Completed TSK-022: Content Research.', category: 'TASKS', status: 'COMPLETE', color: '#00E676' },
+            { time: '10:33:25', agent: 'EXECUTOR', message: 'Started TSK-023: Facebook Ad Campaign.', category: 'TASKS', status: 'RUNNING', color: '#00E676' },
+            { time: '10:33:20', agent: 'INNOVATOR', message: 'Generated idea: AI-Powered Ad Creative Generator.', category: 'INNOVATIONS', status: 'IDEA', color: '#B388FF' },
+            { time: '10:33:15', agent: 'MENTOR', message: 'Analyzing skill gap: Ad Copywriting.', category: 'GAPS', status: 'ANALYSIS', color: '#FF9100' },
+            { time: '10:33:10', agent: 'AMPLIFIER', message: 'Data collected from 12 sources.', category: 'SYSTEM', status: 'MEASURING', color: '#40C4FF' },
+            { time: '10:33:05', agent: 'STRATEGIST', message: 'Generated 5 tasks from objectives.', category: 'TASKS', status: 'PLAN', color: '#448AFF' },
+            { time: '10:32:58', agent: 'SYSTEM', message: 'Cognitive loop iteration started.', category: 'SYSTEM', status: 'SYSTEM', color: '#FF80AB' },
+        ];
+        
+        const tasks = [
+            { id: 'TSK-023', title: 'Facebook Ad Campaign', progress: 65, status: 'running' },
+            { id: 'TSK-024', title: 'Content Writing', progress: 28, status: 'running' },
+            { id: 'TSK-025', title: 'Competitor Analysis', progress: 0, status: 'pending' },
+        ];
+        
+        const gaps = [
+            { category: 'SKILL', title: 'Ad Copywriting Skill' },
+            { category: 'RESEARCH', title: 'Advanced Audience Research' },
+            { category: 'TOOL', title: 'AI Ad Creative Generator' },
+            { category: 'TOOL', title: 'Dynamic Budget Optimizer' },
+            { category: 'STRATEGY', title: 'Smart Audience Segmentation' },
+        ];
+        
+        const innovations = [
+            { title: 'AI Ad Creative Generator', feasibility: 'high' },
+            { title: 'Dynamic Budget Optimizer', feasibility: 'medium' },
+            { title: 'Smart Audience Segmentation', feasibility: 'medium' },
+        ];
+        
+        const metrics = [
+            { name: 'Plan Compliance', value: '85%', trend: 'up', change: '12%' },
+            { name: 'Tasks Completed Today', value: '12', trend: 'up', change: '28%' },
+            { name: 'Active Tasks', value: '3', trend: 'down', change: '-25%' },
+            { name: 'Knowledge Gaps', value: '2', trend: 'up', change: '33%' },
+            { name: 'Innovations Generated', value: '3', trend: 'up', change: '50%' },
+            { name: 'System Efficiency', value: '91%', trend: 'up', change: '8%' },
+        ];
+        
+        // Render Feed
+        function renderFeed(items) {
+            const container = document.getElementById('feed-items');
+            container.innerHTML = items.map(item => `
+                <div class="feed-item" style="border-left: 3px solid ${item.color};">
+                    <span class="feed-time">${item.time}</span>
+                    <span class="feed-agent" style="color: ${item.color};">${item.agent}</span>
+                    <span class="feed-message">${item.message}</span>
+                    <span class="feed-status" style="color: ${item.color};">${item.status}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Filter Feed
+        function filterFeed(category) {
+            document.querySelectorAll('.feed-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            const filtered = category === 'ALL' ? feedData : feedData.filter(item => item.category === category);
+            renderFeed(filtered);
+        }
+        
+        // Render Tasks
+        function renderTasks() {
+            const container = document.getElementById('active-tasks');
+            container.innerHTML = tasks.map(task => `
+                <div class="task-row">
+                    <span class="task-id">${task.id}</span>
+                    <span class="task-title">${task.title}</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${task.progress > 50 ? 'high' : task.progress > 25 ? 'medium' : 'low'}" style="width: ${task.progress}%;"></div>
+                    </div>
+                    <span style="color: var(--text-muted); min-width: 35px; text-align: right;">${task.progress}%</span>
+                </div>
+            `).join('');
+        }
+        
+        // Render Gaps
+        function renderGaps() {
+            const container = document.getElementById('knowledge-gaps');
+            container.innerHTML = gaps.map(gap => `
+                <div class="gap-row">
+                    <span class="gap-icon">⚠</span>
+                    <span class="gap-category">${gap.category}</span>
+                    <span class="gap-title">${gap.title}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Render Innovations
+        function renderInnovations() {
+            const container = document.getElementById('innovations');
+            container.innerHTML = innovations.map(idea => `
+                <div class="innovation-row">
+                    <span style="color: var(--accent-purple);">💡</span>
+                    <span style="color: var(--text-primary); flex: 1;">${idea.title}</span>
+                    <span class="innovation-feasibility feasibility-${idea.feasibility}">${idea.feasibility.toUpperCase()}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Render Metrics
+        function renderMetrics() {
+            const container = document.getElementById('metrics');
+            container.innerHTML = metrics.map(metric => `
+                <div class="metric-row">
+                    <span class="metric-name">${metric.name}</span>
+                    <span class="metric-value">${metric.value}</span>
+                    <span class="metric-trend trend-${metric.trend}">${metric.trend === 'up' ? '↑' : '↓'} ${metric.change} vs yesterday</span>
+                </div>
+            `).join('');
+        }
+        
+        // Command Functions
+        function setCommand(cmd) {
+            document.getElementById('command').value = cmd;
+        }
+        
+        function executeCommand() {
+            const cmd = document.getElementById('command').value.trim();
+            if (cmd) {
+                alert('Executing: ' + cmd);
+                document.getElementById('command').value = '';
+            }
+        }
+        
+        function handleCommand(event) {
+            if (event.key === 'Enter') {
+                executeCommand();
+            }
+        }
+        
+        // Initialize
+        renderFeed(feedData);
+        renderTasks();
+        renderGaps();
+        renderInnovations();
+        renderMetrics();
+        
+        // Update time
+        setInterval(() => {
+            document.getElementById('sync-time').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+    </script>
+</body>
+</html>
