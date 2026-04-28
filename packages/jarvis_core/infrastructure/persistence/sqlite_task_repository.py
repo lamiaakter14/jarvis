@@ -320,6 +320,26 @@ class SqliteTaskRepository(ITaskRepository):
         """
         return await self.list(filters={"status": status})
 
+    async def list_all(self) -> list[Task]:
+        """Retrieve all tasks ordered by priority weight descending.
+
+        Returns:
+            list[Task]: All tasks in the repository.
+
+        Raises:
+            RepositoryError: If retrieval operation fails.
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT * FROM tasks ORDER BY priority_weight DESC"
+                )
+                rows = cursor.fetchall()
+                return [self._row_to_task(row) for row in rows]
+        except Exception as e:
+            raise RepositoryError(f"Failed to list all tasks: {e}")
+
     async def clear_all(self) -> None:
         """Clear all tasks from database (useful for testing).
 
