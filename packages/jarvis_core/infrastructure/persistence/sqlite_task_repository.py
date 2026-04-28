@@ -41,7 +41,7 @@ class SqliteTaskRepository(ITaskRepository):
             SQLite connection
         """
         conn = sqlite3.connect(str(self.db_path))
-        conn.row_factory = sqlite3.Row  # Enable column access by name
+        conn.row_factory = sqlite3.Row
         return conn
 
     def _init_database(self) -> None:
@@ -68,7 +68,6 @@ class SqliteTaskRepository(ITaskRepository):
                     )
                 """)
 
-                # Create indexes for common queries
                 cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_status
                     ON tasks(status)
@@ -95,7 +94,6 @@ class SqliteTaskRepository(ITaskRepository):
         Returns:
             Tuple of values for insertion
         """
-        # Handle cognitive load level - can be enum or string
         cognitive_level = task.cognitive_load.level
         if hasattr(cognitive_level, "value"):
             cognitive_level_str = cognitive_level.value
@@ -130,7 +128,6 @@ class SqliteTaskRepository(ITaskRepository):
         """
         from jarvis_core.shared.constants import CognitiveLoadLevel
 
-        # Parse cognitive load level
         cognitive_level_str = row["cognitive_load_level"]
         cognitive_level = CognitiveLoadLevel(cognitive_level_str)
 
@@ -192,12 +189,10 @@ class SqliteTaskRepository(ITaskRepository):
             with self._get_connection() as conn:
                 cursor = conn.cursor()
 
-                # Check if task exists
                 cursor.execute("SELECT task_id FROM tasks WHERE task_id = ?", (task.task_id,))
                 exists = cursor.fetchone() is not None
 
                 if exists:
-                    # Update existing task
                     cursor.execute(
                         """
                         UPDATE tasks SET
@@ -232,7 +227,6 @@ class SqliteTaskRepository(ITaskRepository):
                         ),
                     )
                 else:
-                    # Insert new task
                     cursor.execute(
                         """
                         INSERT INTO tasks VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
