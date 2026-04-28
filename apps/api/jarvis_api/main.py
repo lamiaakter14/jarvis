@@ -8,13 +8,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from jarvis_core.bridge.agent_bridge import (
-    AmplifierBridge,
-    ExecutorBridge,
-    InnovatorBridge,
-    MentorBridge,
-    StrategistBridge,
-)
 
 # Create FastAPI app
 app = FastAPI(
@@ -110,23 +103,12 @@ async def health_check():
 async def run_cognitive_loop() -> dict[str, Any]:
     """Execute the complete cognitive loop with all 5 agents."""
     try:
-        strategist = StrategistBridge()
-        mentor = MentorBridge()
-        executor = ExecutorBridge()
-        innovator = InnovatorBridge()
-        amplifier = AmplifierBridge()
-
-        plan = strategist.generate_plan()
-        gaps = mentor.analyze_execution_logs()
-
+        # TODO: Replace with real agent system
+        plan = {}
+        gaps = []
         task_feedback = []
-        for task in plan.get("tasks", []):
-            feedback = mentor.mentor_task(task)
-            task_feedback.append(feedback)
-
-        executor.run_tasks()
-        innovations = innovator.create_innovations()
-        performance = amplifier.amplify()
+        innovations = []
+        performance = {}
 
         return {
             "status": "success",
@@ -149,8 +131,8 @@ async def run_cognitive_loop() -> dict[str, Any]:
 async def get_daily_plan() -> dict[str, Any]:
     """Get today's daily plan."""
     try:
-        strategist = StrategistBridge()
-        plan = strategist.generate_plan()
+        # TODO: Replace with real agent system
+        plan = {}
         return {"status": "success", "plan": plan}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate plan: {str(e)}")
@@ -160,8 +142,8 @@ async def get_daily_plan() -> dict[str, Any]:
 async def generate_plan() -> dict[str, Any]:
     """Generate a new daily plan."""
     try:
-        strategist = StrategistBridge()
-        plan = strategist.generate_plan()
+        # TODO: Replace with real agent system
+        plan = {}
         return {"status": "success", "plan": plan}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate plan: {str(e)}")
@@ -176,8 +158,8 @@ async def generate_plan() -> dict[str, Any]:
 async def get_knowledge_gaps() -> dict[str, Any]:
     """Get identified knowledge gaps."""
     try:
-        mentor = MentorBridge()
-        gaps = mentor.analyze_execution_logs()
+        # TODO: Replace with real agent system
+        gaps = []
         return {"status": "success", "gaps": gaps}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to analyze gaps: {str(e)}")
@@ -192,8 +174,8 @@ async def get_knowledge_gaps() -> dict[str, Any]:
 async def get_innovations() -> dict[str, Any]:
     """Get generated innovations."""
     try:
-        innovator = InnovatorBridge()
-        innovations = innovator.create_innovations()
+        # TODO: Replace with real agent system
+        innovations = []
         return {"status": "success", "innovations": innovations}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create innovations: {str(e)}")
@@ -208,8 +190,8 @@ async def get_innovations() -> dict[str, Any]:
 async def get_performance_metrics() -> dict[str, Any]:
     """Get performance metrics and analytics."""
     try:
-        amplifier = AmplifierBridge()
-        performance = amplifier.amplify()
+        # TODO: Replace with real agent system
+        performance = {}
         return {"status": "success", "performance": performance}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to analyze performance: {str(e)}")
