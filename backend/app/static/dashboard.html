@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0A0E14">
-    <title>JARVIS - Cognitive Operations System</title>
+    <title>JARVIS — Cognitive Operations System</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-        
+
         :root {
             --bg-primary: #0A0E14;
             --bg-secondary: #0F1419;
-            --bg-panel: #151A22;
+            --bg-card: #151A22;
             --border: #232A34;
             --text-primary: #DDE4ED;
             --text-secondary: #8899AA;
@@ -23,10 +23,12 @@
             --accent-cyan: #40C4FF;
             --accent-pink: #FF80AB;
             --radius: 4px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
-        
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+
         body {
             background: var(--bg-primary);
             color: var(--text-primary);
@@ -34,460 +36,268 @@
             font-size: 11px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-            padding: 0 0 60px 0;
+            padding-bottom: calc(56px + var(--safe-bottom));
+            max-width: 375px;
+            margin: 0 auto;
         }
-        
-        /* ===== HEADER ===== */
-        .header {
-            padding: 16px 12px 8px 12px;
+
+        /* ===== TOP BAR (48px sticky) ===== */
+        .topbar {
+            position: sticky; top: 0; z-index: 100;
+            height: 48px; background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
-            background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 12px;
         }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        .top-left h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.1; }
+        .top-left .sub { font-size: 7px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .top-right { display: flex; align-items: center; gap: 6px; font-size: 8px; }
+        .top-right .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent-green); animation: pulse 2s infinite;
         }
-        .logo-section h1 {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .logo-section .subtitle {
-            font-size: 9px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 2px;
-        }
-        .node-info {
-            text-align: right;
-            font-size: 9px;
-            color: var(--text-secondary);
-        }
-        .node-info .node-name {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-        .node-info .mode {
-            color: var(--accent-green);
-            text-transform: uppercase;
-            font-size: 8px;
-            letter-spacing: 1px;
-        }
-        
-        /* ===== AGENT LIST ===== */
-        .agent-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-            background: var(--border);
-            margin: 0;
-        }
-        .agent-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border);
-        }
-        .agent-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .agent-dot.planning { background: var(--accent-blue); animation: pulse 2s infinite; }
-        .agent-dot.running { background: var(--accent-green); animation: pulse 1.5s infinite; }
-        .agent-dot.analyzing { background: var(--accent-orange); animation: pulse 1.5s infinite; }
-        .agent-dot.idle { background: var(--text-muted); }
-        .agent-dot.measuring { background: var(--accent-cyan); animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        .agent-info {
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .agent-name {
-            font-size: 11px;
-            font-weight: 500;
-            text-transform: capitalize;
-        }
-        .agent-status {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
-        }
-        .agent-action {
-            font-size: 9px;
-            color: var(--text-muted);
-            text-align: right;
-            max-width: 140px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        /* ===== SECTION HEADERS ===== */
-        .section-header {
-            padding: 12px 12px 8px 12px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-secondary);
-        }
-        
-        /* ===== SYSTEM FEED ===== */
-        .feed-tabs {
-            display: flex;
-            overflow-x: auto;
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+        .top-right .node { color: var(--text-muted); }
+
+        /* ===== AGENT SCROLL (horizontal) ===== */
+        .agent-scroll {
+            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+            gap: 6px; padding: 8px 12px;
+            background: var(--bg-secondary); border-bottom: 1px solid var(--border);
             scrollbar-width: none;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-primary);
         }
-        .feed-tabs::-webkit-scrollbar { display: none; }
-        .feed-tab {
-            flex: none;
-            padding: 8px 12px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            white-space: nowrap;
+        .agent-scroll::-webkit-scrollbar { display: none; }
+        .agent-card {
+            flex-shrink: 0; width: 130px; scroll-snap-align: start;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 8px 10px;
+            display: flex; flex-direction: column; gap: 4px;
         }
-        .feed-tab.active {
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--accent-blue);
+        .agent-card .ac-top { display: flex; align-items: center; gap: 5px; }
+        .agent-card .ac-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .d-planning { background: var(--accent-blue); animation: pulse 1.8s infinite; }
+        .d-running { background: var(--accent-green); animation: pulse 1s infinite; }
+        .d-analyzing { background: var(--accent-orange); animation: pulse 1.2s infinite; }
+        .d-idle { background: var(--text-muted); }
+        .d-measuring { background: var(--accent-cyan); animation: pulse 2s infinite; }
+        .agent-card .ac-name { font-size: 8px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        .agent-card .ac-status { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+        .agent-card .ac-action { font-size: 7px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex; overflow-x: auto; scrollbar-width: none;
+            background: var(--bg-primary); border-bottom: 1px solid var(--border);
+            position: sticky; top: 48px; z-index: 50;
         }
-        
-        .feed-list {
-            max-height: 250px;
-            overflow-y: auto;
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab {
+            flex: none; padding: 8px 11px;
+            font-family: 'JetBrains Mono', monospace; font-size: 8px;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); background: transparent; border: none;
+            border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;
         }
+        .tab.on { color: var(--text-primary); border-bottom-color: var(--accent-blue); }
+
+        /* ===== FEED ===== */
+        .feed { max-height: 55vh; overflow-y: auto; }
         .feed-item {
-            display: flex;
-            gap: 8px;
-            padding: 7px 12px;
-            border-bottom: 1px solid var(--border);
-            font-size: 9px;
-            align-items: flex-start;
+            display: flex; gap: 7px; padding: 7px 12px;
+            border-bottom: 1px solid var(--border); font-size: 9px; align-items: flex-start;
         }
-        .feed-time {
-            color: var(--text-muted);
-            font-size: 8px;
-            white-space: nowrap;
-            min-width: 50px;
-        }
+        .feed-tm { color: var(--text-muted); font-size: 7px; min-width: 46px; white-space: nowrap; }
         .feed-tag {
-            font-size: 8px;
-            text-transform: uppercase;
-            font-weight: 700;
-            padding: 1px 5px;
-            border-radius: 2px;
-            white-space: nowrap;
-            letter-spacing: 0.5px;
+            font-size: 7px; font-weight: 700; text-transform: uppercase;
+            padding: 1px 4px; border-radius: 2px; white-space: nowrap; letter-spacing: 0.2px;
         }
-        .tag-strategist { background: #1a2a3a; color: var(--accent-blue); }
-        .tag-executor { background: #1a2a1a; color: var(--accent-green); }
-        .tag-mentor { background: #2a1a0a; color: var(--accent-orange); }
-        .tag-innovator { background: #1a0a2a; color: var(--accent-purple); }
-        .tag-amplifier { background: #0a1a2a; color: var(--accent-cyan); }
-        .tag-reflector { background: #2a0a1a; color: var(--accent-pink); }
-        .feed-msg {
-            color: var(--text-secondary);
-            flex: 1;
-            line-height: 1.3;
+        .tg-s { background: #1a2a3a; color: var(--accent-blue); }
+        .tg-e { background: #1a2a1a; color: var(--accent-green); }
+        .tg-m { background: #2a1a0a; color: var(--accent-orange); }
+        .tg-i { background: #1a0a2a; color: var(--accent-purple); }
+        .tg-a { background: #0a1a2a; color: var(--accent-cyan); }
+        .tg-r { background: #2a0a1a; color: var(--accent-pink); }
+        .feed-msg { color: var(--text-secondary); flex: 1; }
+        .feed-more { text-align: center; padding: 10px; font-size: 7px; color: var(--text-muted); opacity: 0.5; font-style: italic; }
+
+        /* ===== PANELS ===== */
+        .panels { background: var(--border); }
+        .panel {
+            background: var(--bg-primary); padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
         }
-        .feed-load-more {
-            text-align: center;
-            padding: 10px;
-            font-size: 8px;
-            color: var(--text-muted);
-            opacity: 0.6;
-            font-style: italic;
+        .panel h3 {
+            font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--text-secondary); margin-bottom: 6px; font-weight: 700;
         }
-        
-        /* ===== STATS PANELS ===== */
-        .stats-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-            background: var(--border);
-        }
-        .stat-panel {
-            background: var(--bg-primary);
-            padding: 12px;
-        }
-        .stat-panel h3 {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        .stat-empty {
-            font-size: 9px;
-            color: var(--text-muted);
-            opacity: 0.7;
-        }
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 9px;
-        }
-        .stat-label { color: var(--text-muted); }
-        .stat-value { color: var(--text-secondary); }
-        
-        /* ===== COMMAND BAR ===== */
-        .command-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
-            padding: 8px 12px;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
+        .panel .empty { font-size: 8px; color: var(--text-muted); opacity: 0.7; }
+        .stat-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 8px; }
+        .stat-l { color: var(--text-muted); }
+        .stat-v { color: var(--text-secondary); }
+
+        /* ===== COMMAND BAR (56px fixed) ===== */
+        .cmd-bar {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 375px;
+            background: var(--bg-secondary); border-top: 1px solid var(--border);
+            padding: 8px 12px; padding-bottom: max(8px, var(--safe-bottom));
             z-index: 100;
         }
-        .command-input-wrap {
-            display: flex;
-            align-items: center;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 0 10px;
-            height: 34px;
-            margin-bottom: 8px;
+        .cmd-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .cmd-wrap {
+            flex: 1; display: flex; align-items: center;
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 0 8px; height: 32px;
         }
-        .command-prefix {
-            color: var(--accent-blue);
-            font-weight: 700;
-            font-size: 13px;
-            margin-right: 8px;
+        .cmd-pfx { color: var(--accent-blue); font-weight: 700; font-size: 11px; margin-right: 6px; }
+        .cmd-wrap input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 9px;
         }
-        .command-input-wrap input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
+        .cmd-wrap input::placeholder { color: var(--text-muted); opacity: 0.5; }
+        .cmd-btn {
+            background: var(--accent-blue); color: #FFF; border: none;
+            border-radius: var(--radius); padding: 6px 14px;
+            font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; white-space: nowrap;
         }
-        .command-input-wrap input::placeholder {
-            color: var(--text-muted);
-            opacity: 0.5;
-        }
-        .command-chips {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .command-chips::-webkit-scrollbar { display: none; }
+        .cmd-btn:active { opacity: 0.8; }
+        .chips { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+        .chips::-webkit-scrollbar { display: none; }
         .chip {
-            flex: none;
-            padding: 6px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 8px;
-            color: var(--text-muted);
-            cursor: pointer;
-            white-space: nowrap;
+            flex: none; padding: 4px 8px; border: 1px solid var(--border);
+            border-radius: var(--radius); font-family: 'JetBrains Mono', monospace;
+            font-size: 7px; color: var(--text-muted); cursor: pointer; white-space: nowrap;
             background: var(--bg-primary);
-            text-transform: lowercase;
         }
         .chip:active { border-color: var(--accent-blue); color: var(--text-primary); }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div class="header-top">
-            <div class="logo-section">
-                <h1>JARVIS</h1>
-                <div class="subtitle">Cognitive Operations System</div>
-            </div>
-            <div class="node-info">
-                <div>Node: <span class="node-name">Sakhipur</span></div>
-                <div class="mode">Autonomous</div>
-            </div>
-        </div>
+
+<!-- TOP BAR -->
+<header class="topbar">
+    <div class="top-left">
+        <h1>JARVIS</h1>
+        <div class="sub">Cognitive System</div>
     </div>
-    
-    <!-- AGENT LIST -->
-    <div class="section-header">Agents</div>
-    <div class="agent-list" id="agent-list"></div>
-    
-    <!-- SYSTEM FEED -->
-    <div class="section-header">System Feed</div>
-    <div class="feed-tabs" id="feed-tabs"></div>
-    <div class="feed-list" id="feed-list"></div>
-    
-    <!-- STATS -->
-    <div class="stats-grid">
-        <div class="stat-panel">
-            <h3>Active Tasks</h3>
-            <div id="active-tasks-panel"></div>
-        </div>
-        <div class="stat-panel">
-            <h3>Knowledge Gaps</h3>
-            <div id="gaps-panel"></div>
-        </div>
-        <div class="stat-panel">
-            <h3>Innovations</h3>
-            <div id="innovations-panel"></div>
-        </div>
-        <div class="stat-panel">
-            <h3>Performance Metrics</h3>
-            <div id="metrics-panel"></div>
-        </div>
-        <div class="stat-panel">
-            <h3>System Status</h3>
-            <div id="system-status-panel"></div>
-        </div>
+    <div class="top-right">
+        <div class="dot"></div>
+        <span style="color:var(--accent-green)">ACTIVE</span>
+        <span class="node">— Sakhipur</span>
     </div>
-    
-    <!-- COMMAND BAR -->
-    <div class="command-bar">
-        <div class="command-input-wrap">
-            <span class="command-prefix">&gt;</span>
-            <input type="text" id="command" placeholder="Type a command for JARVIS..." onkeypress="handleCommand(event)" autocomplete="off">
+</header>
+
+<!-- AGENTS -->
+<div class="agent-scroll" id="agent-scroll"></div>
+
+<!-- TABS -->
+<nav class="tabs" id="tabs"></nav>
+
+<!-- FEED -->
+<div class="feed" id="feed"></div>
+
+<!-- PANELS -->
+<div class="panels">
+    <div class="panel"><h3>ACTIVE TASKS</h3><div class="empty">No active tasks</div></div>
+    <div class="panel"><h3>KNOWLEDGE GAPS</h3><div class="empty">No gaps identified</div></div>
+    <div class="panel"><h3>INNOVATIONS</h3><div class="empty">No innovations generated</div></div>
+    <div class="panel" id="metrics-panel"><h3>PERFORMANCE METRICS</h3></div>
+    <div class="panel" id="sys-panel"><h3>SYSTEM STATUS</h3></div>
+</div>
+
+<!-- COMMAND -->
+<div class="cmd-bar">
+    <div class="cmd-row">
+        <div class="cmd-wrap">
+            <span class="cmd-pfx">&gt;</span>
+            <input id="cmd" placeholder="Type a command..." onkeypress="if(event.key==='Enter')exec()" autocomplete="off">
         </div>
-        <div class="command-chips">
-            <span class="chip" onclick="setCommand('plan next 7 days')">plan next 7 days</span>
-            <span class="chip" onclick="setCommand('analyze performance')">analyze performance</span>
-            <span class="chip" onclick="setCommand('fix knowledge gaps')">fix knowledge gaps</span>
-            <span class="chip" onclick="setCommand('generate innovations')">generate innovations</span>
-        </div>
+        <button class="cmd-btn" onclick="exec()">RUN</button>
     </div>
-    
-    <script>
-        // ===== DATA =====
-        const agents = [
-            { name: 'Strategist', status: 'PLANNING', action: 'Generating 5 tasks...', color: '#448AFF', dotClass: 'planning' },
-            { name: 'Executor', status: 'RUNNING', action: 'TSK-001', progress: 65, color: '#00E676', dotClass: 'running' },
-            { name: 'Mentor', status: 'ANALYZING', action: 'Detecting gaps...', color: '#FF9100', dotClass: 'analyzing' },
-            { name: 'Innovator', status: 'IDLE', action: 'Waiting for trigger...', color: '#B388FF', dotClass: 'idle' },
-            { name: 'Amplifier', status: 'MEASURING', action: 'Updating metrics...', color: '#40C4FF', dotClass: 'measuring' },
-            { name: 'Reflector', status: 'IDLE', action: 'System reflection...', color: '#FF80AB', dotClass: 'idle' },
-        ];
-        
-        const feedData = [
-            { time: '10:32:14', agent: 'STRATEGIST', msg: 'Plan generated: "Sakhipur Growth Plan Q2"', tagClass: 'tag-strategist' },
-            { time: '10:32:18', agent: 'EXECUTOR', msg: 'Started task TSK-001: Market Research', tagClass: 'tag-executor' },
-            { time: '10:32:45', agent: 'EXECUTOR', msg: 'Task TSK-001 progress: 65%', tagClass: 'tag-executor' },
-            { time: '10:33:01', agent: 'MENTOR', msg: 'Knowledge gap detected: Ad Copywriting Skill', tagClass: 'tag-mentor' },
-            { time: '10:33:05', agent: 'MENTOR', msg: 'Knowledge gap detected: Funnel Optimization', tagClass: 'tag-mentor' },
-            { time: '10:33:22', agent: 'INNOVATOR', msg: 'Generated idea: Content Repurposing Engine', tagClass: 'tag-innovator' },
-            { time: '10:33:40', agent: 'AMPLIFIER', msg: 'Performance metrics updated', tagClass: 'tag-amplifier' },
-            { time: '10:34:02', agent: 'REFLECTOR', msg: 'System reflection cycle completed', tagClass: 'tag-reflector' },
-        ];
-        
-        const feedTabs = ['ALL', 'TASKS', 'GAPS', 'INNOVATIONS', 'SYSTEM'];
-        let activeTab = 'ALL';
-        
-        // ===== RENDER AGENTS =====
-        function renderAgents() {
-            const container = document.getElementById('agent-list');
-            container.innerHTML = agents.map(a => `
-                <div class="agent-row">
-                    <div class="agent-dot ${a.dotClass}"></div>
-                    <div class="agent-info">
-                        <span class="agent-name">${a.name}</span>
-                        <span class="agent-status" style="color: ${a.color};">${a.status}</span>
-                    </div>
-                    <div class="agent-action">${a.progress ? a.action + ' ' + a.progress + '%' : a.action}</div>
-                </div>
-            `).join('');
-        }
-        
-        // ===== RENDER FEED TABS =====
-        function renderFeedTabs() {
-            const container = document.getElementById('feed-tabs');
-            container.innerHTML = feedTabs.map(tab => `
-                <button class="feed-tab ${tab === activeTab ? 'active' : ''}" onclick="setFeedTab('${tab}')">${tab}</button>
-            `).join('');
-        }
-        
-        function setFeedTab(tab) {
-            activeTab = tab;
-            renderFeedTabs();
-            renderFeed();
-        }
-        
-        // ===== RENDER FEED =====
-        function renderFeed() {
-            const container = document.getElementById('feed-list');
-            const items = activeTab === 'ALL' ? feedData : feedData.filter(i => {
-                if (activeTab === 'SYSTEM') return i.agent === 'AMPLIFIER' || i.agent === 'REFLECTOR';
-                return i.agent === activeTab.slice(0, -1).toUpperCase();
-            });
-            container.innerHTML = items.map(item => `
-                <div class="feed-item">
-                    <span class="feed-time">${item.time}</span>
-                    <span class="feed-tag ${item.tagClass}">${item.agent}</span>
-                    <span class="feed-msg">${item.msg}</span>
-                </div>
-            `).join('') + '<div class="feed-load-more">Swipe up to load more</div>';
-        }
-        
-        // ===== RENDER PANELS =====
-        function renderPanels() {
-            document.getElementById('active-tasks-panel').innerHTML = '<div class="stat-empty">No active tasks</div>';
-            document.getElementById('gaps-panel').innerHTML = '<div class="stat-empty">No gaps identified</div>';
-            document.getElementById('innovations-panel').innerHTML = '<div class="stat-empty">No innovations generated</div>';
-            
-            document.getElementById('metrics-panel').innerHTML = `
-                <div class="stat-row"><span class="stat-label">Plan Compliance</span><span class="stat-value">—%</span></div>
-                <div class="stat-row"><span class="stat-label">Tasks Today</span><span class="stat-value">—</span></div>
-                <div class="stat-row"><span class="stat-label">Task Success Rate</span><span class="stat-value">—%</span></div>
-                <div class="stat-row"><span class="stat-label">System Efficiency</span><span class="stat-value">—%</span></div>
-            `;
-            
-            document.getElementById('system-status-panel').innerHTML = `
-                <div class="stat-row"><span class="stat-label">Overall Health</span><span class="stat-value">—</span></div>
-                <div class="stat-row"><span class="stat-label">Active Agents</span><span class="stat-value">—/6</span></div>
-                <div class="stat-row"><span class="stat-label">Queue Length</span><span class="stat-value">—</span></div>
-                <div class="stat-row"><span class="stat-label">Last Cycle</span><span class="stat-value">—</span></div>
-            `;
-        }
-        
-        // ===== COMMAND =====
-        function setCommand(cmd) { document.getElementById('command').value = cmd; document.getElementById('command').focus(); }
-        function executeCommand() {
-            const cmd = document.getElementById('command').value.trim();
-            if (cmd) {
-                alert('Executing: ' + cmd);
-                document.getElementById('command').value = '';
-            }
-        }
-        function handleCommand(e) { if (e.key === 'Enter') executeCommand(); }
-        
-        // ===== INIT =====
-        renderAgents();
-        renderFeedTabs();
-        renderFeed();
-        renderPanels();
-    </script>
+    <div class="chips">
+        <span class="chip" onclick="sc('plan today')">plan today</span>
+        <span class="chip" onclick="sc('analyze')">analyze</span>
+        <span class="chip" onclick="sc('fix gaps')">fix gaps</span>
+        <span class="chip" onclick="sc('run loop')">run loop</span>
+    </div>
+</div>
+
+<script>
+const agents = [
+    {n:'STRATEGIST',s:'PLANNING',a:'Generating plan...',c:'#448AFF',d:'d-planning',l:'#448AFF'},
+    {n:'EXECUTOR',s:'RUNNING',a:'TSK-023 (65%)',c:'#00E676',d:'d-running',l:'#00E676'},
+    {n:'MENTOR',s:'ANALYZING',a:'Detecting gaps...',c:'#FF9100',d:'d-analyzing',l:'#FF9100'},
+    {n:'INNOVATOR',s:'IDLE',a:'Awaiting trigger...',c:'#B388FF',d:'d-idle',l:'#B388FF'},
+    {n:'AMPLIFIER',s:'MEASURING',a:'Collecting data...',c:'#40C4FF',d:'d-measuring',l:'#40C4FF'},
+    {n:'REFLECTOR',s:'IDLE',a:'Cycle pending...',c:'#FF80AB',d:'d-idle',l:'#FF80AB'},
+];
+
+const feedData = [
+    {t:'10:33:42',a:'AMPLIFIER',m:'Performance metrics updated successfully.',g:'tg-a'},
+    {t:'10:33:38',a:'MENTOR',m:'Knowledge gap: "Advanced Ad Copy Techniques".',g:'tg-m'},
+    {t:'10:33:34',a:'STRATEGIST',m:'Plan updated: Weekly Growth Plan v2.1.',g:'tg-s'},
+    {t:'10:33:29',a:'EXECUTOR',m:'Completed TSK-022: Content Research.',g:'tg-e'},
+    {t:'10:33:25',a:'EXECUTOR',m:'Started TSK-023: Facebook Ad Campaign.',g:'tg-e'},
+    {t:'10:33:20',a:'INNOVATOR',m:'Idea: AI-Powered Ad Creative Generator.',g:'tg-i'},
+    {t:'10:33:15',a:'MENTOR',m:'Analyzing: Ad Copywriting skill gap.',g:'tg-m'},
+    {t:'10:33:10',a:'AMPLIFIER',m:'Data from 12 sources collected.',g:'tg-a'},
+    {t:'10:33:05',a:'STRATEGIST',m:'Generated 5 tasks from objectives.',g:'tg-s'},
+    {t:'10:32:58',a:'SYSTEM',m:'Cognitive loop iteration started.',g:'tg-r'},
+];
+
+const tabs=['ALL','TASKS','GAPS','INNOVATIONS','SYSTEM'];
+let cur='ALL';
+
+// Render agents
+document.getElementById('agent-scroll').innerHTML = agents.map(a=>
+    `<div class="agent-card" style="border-left:3px solid ${a.l}">
+        <div class="ac-top"><div class="ac-dot ${a.d}"></div><span class="ac-name">${a.n}</span></div>
+        <div class="ac-status" style="color:${a.c}">${a.s}</div>
+        <div class="ac-action">${a.a}</div>
+    </div>`
+).join('');
+
+// Render tabs
+function rTabs(){
+    document.getElementById('tabs').innerHTML = tabs.map(t=>
+        `<button class="tab${t===cur?' on':''}" onclick="sw('${t}')">${t}</button>`
+    ).join('');
+}
+function sw(t){cur=t;rTabs();rFeed();}
+function rFeed(){
+    const f = cur==='ALL' ? feedData : feedData.filter(i=>{
+        if(cur==='SYSTEM') return i.a==='AMPLIFIER'||i.a==='REFLECTOR'||i.a==='SYSTEM';
+        if(cur==='TASKS') return i.a==='STRATEGIST'||i.a==='EXECUTOR';
+        if(cur==='GAPS') return i.a==='MENTOR';
+        if(cur==='INNOVATIONS') return i.a==='INNOVATOR';
+        return false;
+    });
+    document.getElementById('feed').innerHTML = f.map(i=>
+        `<div class="feed-item" style="border-left:3px solid ${i.a==='EXECUTOR'||i.a==='AMPLIFIER'?'var(--accent-green)':i.a==='MENTOR'?'var(--accent-orange)':i.a==='STRATEGIST'?'var(--accent-blue)':i.a==='INNOVATOR'?'var(--accent-purple)':'var(--accent-pink)'}">
+            <span class="feed-tm">${i.t}</span>
+            <span class="feed-tag ${i.g}">${i.a}</span>
+            <span class="feed-msg">${i.m}</span>
+        </div>`
+    ).join('') + '<div class="feed-more">Swipe up to load more</div>';
+}
+
+// Panels
+document.getElementById('metrics-panel').innerHTML = '<h3>PERFORMANCE METRICS</h3>'+
+    [{l:'Plan Compliance',v:'—%'},{l:'Tasks Today',v:'—'},{l:'Task Success Rate',v:'—%'},{l:'System Efficiency',v:'—%'}]
+    .map(m=>`<div class="stat-row"><span class="stat-l">${m.l}</span><span class="stat-v">${m.v}</span></div>`).join('');
+
+document.getElementById('sys-panel').innerHTML = '<h3>SYSTEM STATUS</h3>'+
+    [{l:'Overall Health',v:'—'},{l:'Active Agents',v:'— / 6'},{l:'Queue Length',v:'—'},{l:'Last Cycle',v:'—'}]
+    .map(m=>`<div class="stat-row"><span class="stat-l">${m.l}</span><span class="stat-v">${m.v}</span></div>`).join('');
+
+function sc(c){ document.getElementById('cmd').value = c; document.getElementById('cmd').focus(); }
+function exec(){
+    const c = document.getElementById('cmd').value.trim();
+    if(c){ alert('▶ '+c); document.getElementById('cmd').value = ''; }
+}
+
+rTabs(); rFeed();
+</script>
 </body>
 </html>
