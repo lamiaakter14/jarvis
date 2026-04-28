@@ -154,16 +154,17 @@
             border-radius: var(--radius); padding: 6px 14px;
             font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; white-space: nowrap;
+            transition: opacity 0.2s;
         }
-        .cmd-btn:active { opacity: 0.8; }
-        .cmd-btn.loading { opacity: 0.6; pointer-events: none; }
+        .cmd-btn:active { opacity: 0.8; transform: scale(0.96); }
+        .cmd-btn.loading { opacity: 0.5; pointer-events: none; }
         .chips { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
         .chips::-webkit-scrollbar { display: none; }
         .chip {
             flex: none; padding: 4px 8px; border: 1px solid var(--border);
             border-radius: var(--radius); font-family: 'JetBrains Mono', monospace;
             font-size: 7px; color: var(--text-muted); cursor: pointer; white-space: nowrap;
-            background: var(--bg-primary);
+            background: var(--bg-primary); transition: border-color 0.15s;
         }
         .chip:active { border-color: var(--accent-blue); color: var(--text-primary); }
 
@@ -172,14 +173,14 @@
             background: var(--bg-card); border: 1px solid var(--accent-green);
             border-radius: var(--radius); padding: 6px 12px;
             font-size: 8px; color: var(--accent-green); z-index: 200;
-            animation: fadeInOut 2s ease;
-            pointer-events: none;
+            animation: toastIn 2s ease forwards; pointer-events: none;
+            white-space: nowrap;
         }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
@@ -204,9 +205,9 @@
 <div class="feed" id="feed"></div>
 
 <div class="panels">
-    <div class="panel"><h3>ACTIVE TASKS</h3><div class="empty">No active tasks</div></div>
-    <div class="panel"><h3>KNOWLEDGE GAPS</h3><div class="empty">No gaps identified</div></div>
-    <div class="panel"><h3>INNOVATIONS</h3><div class="empty">No innovations generated</div></div>
+    <div class="panel"><h3>ACTIVE TASKS</h3><div id="tasks-panel" class="empty">No active tasks</div></div>
+    <div class="panel"><h3>KNOWLEDGE GAPS</h3><div id="gaps-panel" class="empty">No gaps identified</div></div>
+    <div class="panel"><h3>INNOVATIONS</h3><div id="innovations-panel" class="empty">No innovations generated</div></div>
     <div class="panel" id="metrics-panel"><h3>PERFORMANCE METRICS</h3></div>
     <div class="panel" id="sys-panel"><h3>SYSTEM STATUS</h3></div>
 </div>
@@ -228,10 +229,6 @@
 </div>
 
 <script>
-// ===== CONFIG =====
-const API_BASE = 'http://localhost:8000';  // Change to your backend URL
-const OFFLINE_MODE = true;  // Set false when backend running
-
 // ===== DATA =====
 const agents = [
     {n:'STRATEGIST',s:'PLANNING',a:'Generating plan...',c:'#448AFF',d:'d-planning',l:'#448AFF'},
@@ -242,32 +239,37 @@ const agents = [
     {n:'REFLECTOR',s:'IDLE',a:'Cycle pending...',c:'#FF80AB',d:'d-idle',l:'#FF80AB'},
 ];
 
-const feedData = [
-    {t:'10:33:42',a:'AMPLIFIER',m:'Performance metrics updated successfully.',g:'tg-a'},
-    {t:'10:33:38',a:'MENTOR',m:'Knowledge gap: "Advanced Ad Copy Techniques".',g:'tg-m'},
-    {t:'10:33:34',a:'STRATEGIST',m:'Plan updated: Weekly Growth Plan v2.1.',g:'tg-s'},
-    {t:'10:33:29',a:'EXECUTOR',m:'Completed TSK-022: Content Research.',g:'tg-e'},
-    {t:'10:33:25',a:'EXECUTOR',m:'Started TSK-023: Facebook Ad Campaign.',g:'tg-e'},
-    {t:'10:33:20',a:'INNOVATOR',m:'Idea: AI-Powered Ad Creative Generator.',g:'tg-i'},
-    {t:'10:33:15',a:'MENTOR',m:'Analyzing: Ad Copywriting skill gap.',g:'tg-m'},
-    {t:'10:33:10',a:'AMPLIFIER',m:'Data from 12 sources collected.',g:'tg-a'},
-    {t:'10:33:05',a:'STRATEGIST',m:'Generated 5 tasks from objectives.',g:'tg-s'},
-    {t:'10:32:58',a:'SYSTEM',m:'Cognitive loop iteration started.',g:'tg-r'},
+let feedData = [
+    {t:'10:33:42',a:'AMPLIFIER',m:'Performance metrics updated successfully.',g:'tg-a',cat:'SYSTEM'},
+    {t:'10:33:38',a:'MENTOR',m:'Knowledge gap: "Advanced Ad Copy Techniques".',g:'tg-m',cat:'GAPS'},
+    {t:'10:33:34',a:'STRATEGIST',m:'Plan updated: Weekly Growth Plan v2.1.',g:'tg-s',cat:'TASKS'},
+    {t:'10:33:29',a:'EXECUTOR',m:'Completed TSK-022: Content Research.',g:'tg-e',cat:'TASKS'},
+    {t:'10:33:25',a:'EXECUTOR',m:'Started TSK-023: Facebook Ad Campaign.',g:'tg-e',cat:'TASKS'},
+    {t:'10:33:20',a:'INNOVATOR',m:'Idea: AI-Powered Ad Creative Generator.',g:'tg-i',cat:'INNOVATIONS'},
+    {t:'10:33:15',a:'MENTOR',m:'Analyzing: Ad Copywriting skill gap.',g:'tg-m',cat:'GAPS'},
+    {t:'10:33:10',a:'AMPLIFIER',m:'Data from 12 sources collected.',g:'tg-a',cat:'SYSTEM'},
+    {t:'10:33:05',a:'STRATEGIST',m:'Generated 5 tasks from objectives.',g:'tg-s',cat:'TASKS'},
+    {t:'10:32:58',a:'SYSTEM',m:'Cognitive loop iteration started.',g:'tg-r',cat:'SYSTEM'},
 ];
 
-const commandMap = {
-    'strategist': 'tg-s',
-    'executor': 'tg-e',
-    'mentor': 'tg-m',
-    'innovator': 'tg-i',
-    'amplifier': 'tg-a',
-    'reflector': 'tg-r',
-    'orchestrator': 'tg-a',
-    'system': 'tg-r'
-};
+let activeTasks = [];
+let knowledgeGaps = [];
+let innovations = [];
+let runCount = 0;
 
 const tabs=['ALL','TASKS','GAPS','INNOVATIONS','SYSTEM'];
 let cur='ALL';
+
+const agentColors = {
+    'STRATEGIST': 'var(--accent-green)',
+    'EXECUTOR': 'var(--accent-green)',
+    'MENTOR': 'var(--accent-orange)',
+    'INNOVATOR': 'var(--accent-purple)',
+    'AMPLIFIER': 'var(--accent-green)',
+    'REFLECTOR': 'var(--accent-pink)',
+    'SYSTEM': 'var(--accent-pink)',
+    'ORCHESTRATOR': 'var(--accent-cyan)'
+};
 
 // ===== RENDER =====
 document.getElementById('agent-scroll').innerHTML = agents.map(a=>
@@ -285,99 +287,72 @@ function rTabs(){
 }
 function sw(t){cur=t;rTabs();rFeed();}
 function rFeed(){
-    const f = cur==='ALL' ? feedData : feedData.filter(i=>{
-        if(cur==='SYSTEM') return i.a==='AMPLIFIER'||i.a==='REFLECTOR'||i.a==='SYSTEM';
-        if(cur==='TASKS') return i.a==='STRATEGIST'||i.a==='EXECUTOR';
-        if(cur==='GAPS') return i.a==='MENTOR';
-        if(cur==='INNOVATIONS') return i.a==='INNOVATOR';
-        return false;
-    });
-    document.getElementById('feed').innerHTML = f.map(i=>
-        `<div class="feed-item" style="border-left:3px solid ${i.a==='EXECUTOR'||i.a==='AMPLIFIER'?'var(--accent-green)':i.a==='MENTOR'?'var(--accent-orange)':i.a==='STRATEGIST'?'var(--accent-blue)':i.a==='INNOVATOR'?'var(--accent-purple)':'var(--accent-pink)'}">
+    const f = cur==='ALL' ? feedData : feedData.filter(i=> i.cat === cur);
+    document.getElementById('feed').innerHTML = (f.length ? f.map(i=>
+        `<div class="feed-item" style="border-left:3px solid ${agentColors[i.a]||'var(--accent-pink)'}">
             <span class="feed-tm">${i.t}</span>
             <span class="feed-tag ${i.g}">${i.a}</span>
             <span class="feed-msg">${i.m}</span>
         </div>`
-    ).join('') + '<div class="feed-more">Swipe up to load more</div>';
+    ).join('') : '<div class="feed-more">No entries</div>') + '<div class="feed-more">Swipe up to load more</div>';
 }
 
-document.getElementById('metrics-panel').innerHTML = '<h3>PERFORMANCE METRICS</h3>'+
-    [{l:'Plan Compliance',v:'—%'},{l:'Tasks Today',v:'—'},{l:'Task Success Rate',v:'—%'},{l:'System Efficiency',v:'—%'}]
-    .map(m=>`<div class="stat-row"><span class="stat-l">${m.l}</span><span class="stat-v">${m.v}</span></div>`).join('');
-
-document.getElementById('sys-panel').innerHTML = '<h3>SYSTEM STATUS</h3>'+
-    [{l:'Overall Health',v:'—'},{l:'Active Agents',v:'— / 6'},{l:'Queue Length',v:'—'},{l:'Last Cycle',v:'—'}]
-    .map(m=>`<div class="stat-row"><span class="stat-l">${m.l}</span><span class="stat-v">${m.v}</span></div>`).join('');
+function renderMetrics(){
+    document.getElementById('metrics-panel').innerHTML = '<h3>PERFORMANCE METRICS</h3>'+
+        [{l:'Plan Compliance',v:runCount>0?Math.min(100,85+runCount)+'%':'—%'},
+         {l:'Tasks Today',v:activeTasks.length||'—'},
+         {l:'Task Success Rate',v:runCount>0?Math.min(100,90+runCount)+'%':'—%'},
+         {l:'System Efficiency',v:runCount>0?Math.min(100,88+runCount*2)+'%':'—%'}]
+        .map(m=>`<div class="stat-row"><span class="stat-l">${m.l}</span><span class="stat-v">${m.v}</span></div>`).join('');
+    document.getElementById('sys-panel').innerHTML = '<h3>SYSTEM STATUS</h3>'+
+        [{l:'Overall Health',v:runCount>0?'NOMINAL':'—'},
+         {l:'Active Agents',v:'6 / 6'},
+         {l:'Queue Length',v:activeTasks.length||'—'},
+         {l:'Last Cycle',v:runCount>0?new Date().toLocaleTimeString('en-US',{hour12:false}):'—'}]
+        .map(m=>`<div class="stat-row"><span class="stat-l">${m.l}</span><span class="stat-v">${m.v}</span></div>`).join('');
+}
 
 function sc(c){ document.getElementById('cmd').value = c; document.getElementById('cmd').focus(); }
 
-// ===== PHASE 6.2: REAL COMMAND EXECUTION =====
+// ===== TOAST =====
 function showToast(msg, color) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = msg;
-    if (color) toast.style.color = color;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    if(color) t.style.color = color;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 2200);
 }
 
-async function exec(){
+// ===== COMMAND EXECUTION =====
+function exec(){
     const input = document.getElementById('cmd');
     const btn = document.getElementById('run-btn');
     const c = input.value.trim();
     if(!c) return;
 
-    // Loading state
     btn.textContent = '...';
     btn.classList.add('loading');
     input.disabled = true;
 
-    try {
-        let result;
+    const result = simulateCommand(c);
+    runCount++;
 
-        if (!OFFLINE_MODE) {
-            // Real backend call
-            const response = await fetch(`${API_BASE}/command/execute`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ command: c })
-            });
-            result = await response.json();
-        } else {
-            // Offline simulation
-            result = simulateCommand(c);
-        }
+    const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+    feedData.unshift({
+        t: now,
+        a: result.agent.toUpperCase(),
+        m: result.message,
+        g: result.tagClass,
+        cat: result.category
+    });
 
-        // Add to feed
-        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
-        const agent = result.response.agent || 'system';
-        const tagClass = commandMap[agent] || 'tg-r';
+    if (cur==='ALL'||cur===result.category) rFeed();
+    updatePanels(result);
+    renderMetrics();
 
-        feedData.unshift({
-            t: now,
-            a: agent.toUpperCase(),
-            m: result.response.message || `Command executed: ${c}`,
-            g: tagClass
-        });
+    showToast('✅ '+result.message, 'var(--accent-green)');
 
-        if (cur === 'ALL' || cur === 'SYSTEM') rFeed();
-
-        showToast('✅ ' + result.response.message, 'var(--accent-green)');
-
-    } catch(err) {
-        // Fallback offline
-        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
-        feedData.unshift({
-            t: now,
-            a: 'SYSTEM',
-            m: `Offline command: ${c}`,
-            g: 'tg-r'
-        });
-        if (cur === 'ALL' || cur === 'SYSTEM') rFeed();
-        showToast('⚠ Offline: ' + c, 'var(--accent-orange)');
-    }
-
-    // Reset
     input.value = '';
     input.disabled = false;
     btn.textContent = 'RUN';
@@ -385,76 +360,78 @@ async function exec(){
     input.focus();
 }
 
-function simulateCommand(cmd) {
+function simulateCommand(cmd){
     const c = cmd.toLowerCase().trim();
-    let response = {};
+    let r = {};
 
-    if (c.includes('plan')) {
-        response = {
-            agent: 'strategist',
-            action: 'create_plan',
-            status: 'executed',
-            message: `Plan generated: "${cmd}"`,
-            tasks_created: 5
-        };
-    } else if (c.includes('analyze')) {
-        response = {
-            agent: 'mentor',
-            action: 'analyze_gaps',
-            status: 'executed',
-            message: `Analysis completed: "${cmd}"`,
-            gaps_found: 3
-        };
-    } else if (c.includes('fix') || c.includes('gap')) {
-        response = {
-            agent: 'mentor',
-            action: 'resolve_gaps',
-            status: 'executed',
-            message: `Gap resolution initiated: "${cmd}"`,
-            gaps_resolved: 2
-        };
-    } else if (c.includes('loop') || c.includes('cycle')) {
-        response = {
-            agent: 'orchestrator',
-            action: 'run_cognitive_cycle',
-            status: 'executed',
-            message: 'Cognitive loop iteration started',
-            pipeline: ['perceive', 'reason', 'act', 'reflect']
-        };
-    } else if (c.includes('execute') || c.includes('task')) {
-        response = {
-            agent: 'executor',
-            action: 'execute_tasks',
-            status: 'executed',
-            message: `Task execution started: "${cmd}"`,
-            tasks_run: 3
-        };
-    } else if (c.includes('innov') || c.includes('idea')) {
-        response = {
-            agent: 'innovator',
-            action: 'generate_ideas',
-            status: 'executed',
-            message: `Innovation generated: "${cmd}"`,
-            ideas: 1
-        };
-    } else {
-        response = {
-            agent: 'system',
-            action: 'process',
-            status: 'received',
-            message: `Command received: "${cmd}"`
-        };
+    if(c.includes('plan')){
+        const taskId = 'TSK-'+String(activeTasks.length+24).padStart(3,'0');
+        activeTasks.push({id:taskId,title:cmd,progress:0});
+        r = {agent:'strategist',tagClass:'tg-s',category:'TASKS',
+             message:`Plan generated: "${cmd}" → ${taskId}`};
+    }else if(c.includes('loop')||c.includes('cycle')){
+        r = {agent:'orchestrator',tagClass:'tg-a',category:'SYSTEM',
+             message:'Cognitive loop: Perceive→Reason→Act→Reflect completed'};
+    }else if(c.includes('analyze')){
+        const gap = cmd.replace(/analyze\s*/i,'')||'System Performance';
+        knowledgeGaps.push(gap);
+        r = {agent:'mentor',tagClass:'tg-m',category:'GAPS',
+             message:`Analysis done. Gap found: "${gap}"`};
+    }else if(c.includes('fix')||c.includes('gap')){
+        if(knowledgeGaps.length){
+            const resolved = knowledgeGaps.pop();
+            r = {agent:'mentor',tagClass:'tg-m',category:'GAPS',
+                 message:`Gap resolved: "${resolved}"`};
+        }else{
+            r = {agent:'mentor',tagClass:'tg-m',category:'GAPS',
+                 message:'No gaps to fix. System nominal.'};
+        }
+    }else if(c.includes('innov')||c.includes('idea')){
+        const idea = cmd.replace(/(generate|create)\s*/i,'')||'New Innovation';
+        innovations.push({title:idea,feasibility:'medium'});
+        r = {agent:'innovator',tagClass:'tg-i',category:'INNOVATIONS',
+             message:`Innovation generated: "${idea}"`};
+    }else if(c.includes('exec')||c.includes('task')){
+        if(activeTasks.length){
+            const t = activeTasks[0];
+            t.progress = Math.min(100,t.progress+25);
+            r = {agent:'executor',tagClass:'tg-e',category:'TASKS',
+                 message:`Executing ${t.id}: ${t.title} (${t.progress}%)`};
+            if(t.progress>=100) activeTasks.shift();
+        }else{
+            r = {agent:'executor',tagClass:'tg-e',category:'TASKS',
+                 message:'No tasks in queue'};
+        }
+    }else{
+        r = {agent:'system',tagClass:'tg-r',category:'SYSTEM',
+             message:`Command received: "${cmd}"`};
     }
-
-    return { success: true, response };
+    return r;
 }
 
-// ===== INIT =====
-rTabs();
-rFeed();
+function updatePanels(result){
+    if(activeTasks.length){
+        document.getElementById('tasks-panel').innerHTML = activeTasks.map(t=>
+            `<div class="stat-row"><span class="stat-l">${t.id}</span><span class="stat-v">${t.title} (${t.progress}%)</span></div>`
+        ).join('');
+        document.getElementById('tasks-panel').classList.remove('empty');
+    }
+    if(knowledgeGaps.length){
+        document.getElementById('gaps-panel').innerHTML = knowledgeGaps.map(g=>
+            `<div class="stat-row"><span class="stat-l">⚠</span><span class="stat-v">${g}</span></div>`
+        ).join('');
+        document.getElementById('gaps-panel').classList.remove('empty');
+    }
+    if(innovations.length){
+        document.getElementById('innovations-panel').innerHTML = innovations.map(i=>
+            `<div class="stat-row"><span class="stat-l">💡</span><span class="stat-v">${i.title} [${i.feasibility}]</span></div>`
+        ).join('');
+        document.getElementById('innovations-panel').classList.remove('empty');
+    }
+}
 
-// Auto-focus command on load
-setTimeout(() => document.getElementById('cmd').focus(), 500);
+rTabs();rFeed();renderMetrics();
+setTimeout(()=>document.getElementById('cmd').focus(),500);
 </script>
 </body>
 </html>
