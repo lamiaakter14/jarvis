@@ -53,6 +53,10 @@ export const MasterChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [activeAgent, setActiveAgent] = useState('PLANNER');
 
+  const completedCount = todaysPlan.filter((i) => i.done).length;
+  const progressPercent = Math.round((completedCount / todaysPlan.length) * 100);
+  const circumference = 2 * Math.PI * 26;
+
   const messages: Message[] = [
     {
       id: '1',
@@ -101,13 +105,13 @@ export const MasterChat: React.FC = () => {
                     fill="none"
                     stroke="#00d4ff"
                     strokeWidth="6"
-                    strokeDasharray={`${2 * Math.PI * 26}`}
-                    strokeDashoffset={`${2 * Math.PI * 26 * (1 - 0.66)}`}
+                    strokeDasharray={`${circumference}`}
+                    strokeDashoffset={`${circumference * (1 - progressPercent / 100)}`}
                     strokeLinecap="round"
                     transform="rotate(-90 32 32)"
                   />
                   <text x="32" y="33" textAnchor="middle" dominantBaseline="middle" fill="#e2e8f0" fontSize="12" fontWeight="bold">
-                    66%
+                    {progressPercent}%
                   </text>
                   <text x="32" y="44" textAnchor="middle" dominantBaseline="middle" fill="#64748b" fontSize="7">
                     COMPLETE

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 interface SparklineChartProps {
   data: number[];
@@ -18,9 +18,6 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({ data, color }) =
             <stop offset="95%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <Tooltip
-          content={() => null}
-        />
         <Area
           type="monotone"
           dataKey="value"

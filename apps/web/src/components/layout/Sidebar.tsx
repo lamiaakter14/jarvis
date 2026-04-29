@@ -155,7 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <Brain className="w-4 h-4 text-jarvis-cyan" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-jarvis-text truncate">J.A.R.V.I.S. <span className="text-jarvis-muted font-normal">CORE</span></p>
+                <p className="text-xs font-bold text-jarvis-text truncate">J.A.R.V.I.S.<span className="text-jarvis-muted font-normal"> CORE</span></p>
               </div>
             </div>
             <div className="space-y-0.5 ml-1">

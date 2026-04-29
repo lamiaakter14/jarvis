@@ -117,11 +117,7 @@ const typeConfig: Record<ActivityItem['type'], {
 
 const tabs: TabType[] = ['ALL', 'TASKS', 'GAPS', 'INNOVATIONS', 'SYSTEM'];
 
-interface ActivityFeedProps {
-  activities?: ActivityItem[];
-}
-
-export const ActivityFeed: React.FC<ActivityFeedProps> = () => {
+export const ActivityFeed: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
 
   const filtered =
