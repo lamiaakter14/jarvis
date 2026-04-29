@@ -1,62 +1,105 @@
-import React from 'react';
-import { Menu, Moon, Sun, Bell } from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
+import React, { useState } from 'react';
+import { Menu, Bell, Search, ChevronDown, Hexagon } from 'lucide-react';
+import { cn } from '../../utils/cn';
+
+type Mode = 'MANUAL' | 'ASSISTED' | 'AUTONOMOUS';
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
-  const { theme, toggleTheme } = useTheme();
+  const [mode, setMode] = useState<Mode>('ASSISTED');
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8">
-      <div className="h-full flex items-center justify-between">
-        {/* Left: Menu button (mobile) */}
+    <header className="h-14 bg-jarvis-surface border-b border-jarvis-border px-4 flex items-center justify-between gap-3 flex-shrink-0">
+      {/* Left: Logo + mobile menu */}
+      <div className="flex items-center gap-3 flex-shrink-0">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="lg:hidden p-1.5 rounded text-jarvis-muted hover:text-jarvis-text"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
-
-        {/* Middle: Search (placeholder) */}
-        <div className="flex-1 max-w-2xl mx-4 hidden sm:block">
-          <input
-            type="search"
-            placeholder="Search tasks, plans, gaps..."
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2">
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light' ? (
-              <Moon className="w-5 h-5" />
-            ) : (
-              <Sun className="w-5 h-5" />
-            )}
-          </button>
-
-          {/* Notifications */}
-          <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-
-          {/* User menu */}
-          <div className="hidden sm:flex items-center ml-2">
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-              J
+        <div className="hidden lg:flex items-center gap-2">
+          <div className="relative">
+            <Hexagon className="w-8 h-8 text-jarvis-cyan" strokeWidth={1.5} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-jarvis-cyan" />
             </div>
           </div>
+          <div className="leading-tight">
+            <p className="text-sm font-bold text-jarvis-text tracking-wide">JARVIS</p>
+            <p className="text-[9px] text-jarvis-muted tracking-widest uppercase">Personal AI Operating System</p>
+          </div>
         </div>
+      </div>
+
+      {/* Center: Mode switcher */}
+      <div className="flex items-center gap-1 bg-jarvis-bg border border-jarvis-border rounded-lg p-1 flex-shrink-0">
+        <span className="text-[10px] text-jarvis-muted px-1 mr-1 tracking-widest">MODE</span>
+        {(['MANUAL', 'ASSISTED', 'AUTONOMOUS'] as Mode[]).map((m) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            className={cn(
+              'px-3 py-1 rounded text-xs font-semibold tracking-wider transition-all',
+              mode === m
+                ? 'bg-jarvis-cyan/20 text-jarvis-cyan border border-jarvis-cyan/50'
+                : 'text-jarvis-muted hover:text-jarvis-text'
+            )}
+          >
+            {m === 'ASSISTED' && mode === m ? (
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-jarvis-cyan inline-block" />
+                {m}
+              </span>
+            ) : m}
+          </button>
+        ))}
+      </div>
+
+      {/* Right: dropdowns + icons */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Active Project */}
+        <div className="hidden md:flex flex-col items-start border border-jarvis-border rounded-lg px-3 py-1 cursor-pointer hover:border-jarvis-cyan/40 transition-colors">
+          <span className="text-[9px] text-jarvis-muted tracking-widest uppercase">Active Project</span>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-jarvis-text font-medium">Quantum Website Redesign</span>
+            <ChevronDown className="w-3 h-3 text-jarvis-muted" />
+          </div>
+        </div>
+
+        {/* Active Agent */}
+        <div className="hidden md:flex flex-col items-start border border-jarvis-border rounded-lg px-3 py-1 cursor-pointer hover:border-jarvis-cyan/40 transition-colors">
+          <span className="text-[9px] text-jarvis-muted tracking-widest uppercase">Active Agent</span>
+          <div className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-jarvis-green inline-block" />
+            <span className="text-xs text-jarvis-text font-medium">Planner</span>
+            <ChevronDown className="w-3 h-3 text-jarvis-muted" />
+          </div>
+        </div>
+
+        {/* Search */}
+        <button className="p-2 rounded-lg text-jarvis-muted hover:text-jarvis-text hover:bg-white/5 transition-colors">
+          <Search className="w-4 h-4" />
+        </button>
+
+        {/* Notifications */}
+        <button className="relative p-2 rounded-lg text-jarvis-muted hover:text-jarvis-text hover:bg-white/5 transition-colors">
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-1 right-1 w-4 h-4 bg-jarvis-cyan text-jarvis-bg text-[9px] font-bold rounded-full flex items-center justify-center">
+            3
+          </span>
+        </button>
+
+        {/* User avatar */}
+        <div className="w-8 h-8 rounded-full overflow-hidden border border-jarvis-border">
+          <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+            T
+          </div>
+        </div>
+        <ChevronDown className="w-3 h-3 text-jarvis-muted" />
       </div>
     </header>
   );

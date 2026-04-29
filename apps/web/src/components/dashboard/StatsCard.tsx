@@ -1,39 +1,79 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
-import { Card } from '../common/Card';
+import { LucideIcon, TrendingUp } from 'lucide-react';
+import { SparklineChart } from '../common/SparklineChart';
 
 interface StatsCardProps {
   title: string;
   value: string | number;
   change?: number;
   icon: LucideIcon;
-  color: 'blue' | 'green' | 'purple' | 'amber';
+  color: 'cyan' | 'blue' | 'purple' | 'orange';
+  sparklineData: number[];
 }
 
-export const StatsCard: React.FC<StatsCardProps> = ({ title, value, change, icon: Icon, color }) => {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-    green: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
-    purple: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
-    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
-  };
+const colorMap = {
+  cyan: {
+    icon: 'text-jarvis-cyan',
+    border: 'border-jarvis-cyan/20',
+    glow: 'shadow-[0_0_20px_rgba(0,212,255,0.08)]',
+    change: 'text-jarvis-cyan',
+    hex: '#00d4ff',
+  },
+  blue: {
+    icon: 'text-blue-400',
+    border: 'border-blue-500/20',
+    glow: 'shadow-[0_0_20px_rgba(59,130,246,0.08)]',
+    change: 'text-blue-400',
+    hex: '#60a5fa',
+  },
+  purple: {
+    icon: 'text-jarvis-purple',
+    border: 'border-purple-500/20',
+    glow: 'shadow-[0_0_20px_rgba(139,92,246,0.08)]',
+    change: 'text-jarvis-purple',
+    hex: '#8b5cf6',
+  },
+  orange: {
+    icon: 'text-jarvis-orange',
+    border: 'border-orange-500/20',
+    glow: 'shadow-[0_0_20px_rgba(249,115,22,0.08)]',
+    change: 'text-jarvis-orange',
+    hex: '#f97316',
+  },
+};
+
+export const StatsCard: React.FC<StatsCardProps> = ({
+  title,
+  value,
+  change,
+  icon: Icon,
+  color,
+  sparklineData,
+}) => {
+  const colors = colorMap[color];
 
   return (
-    <Card>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
+    <div
+      className={`bg-jarvis-card border ${colors.border} ${colors.glow} rounded-xl p-4 flex flex-col gap-2`}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-semibold tracking-widest text-jarvis-muted uppercase mb-1">
+            {title}
+          </p>
+          <p className="text-2xl font-bold text-jarvis-text leading-none">{value}</p>
           {change !== undefined && (
-            <p className={`text-sm mt-1 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {change >= 0 ? '+' : ''}{change}% from last week
-            </p>
+            <div className={`flex items-center gap-1 mt-1.5 text-xs font-semibold ${colors.change}`}>
+              <TrendingUp className="w-3 h-3" />
+              <span>{change >= 0 ? '+' : ''}{change}%</span>
+            </div>
           )}
         </div>
-        <div className={`p-3 rounded-full ${colorClasses[color]}`}>
-          <Icon className="w-6 h-6" />
-        </div>
+        <Icon className={`w-5 h-5 flex-shrink-0 ml-2 ${colors.icon}`} />
       </div>
-    </Card>
+      <div className="mt-1">
+        <SparklineChart data={sparklineData} color={colors.hex} />
+      </div>
+    </div>
   );
 };

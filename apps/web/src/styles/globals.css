@@ -4,23 +4,38 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%;
     --secondary: 262.1 83.3% 57.8%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  html {
+    /* Dark mode is applied via ThemeContext which sets the 'dark' class on <html> */
   }
 
   * {
-    @apply border-gray-200 dark:border-gray-700;
+    @apply border-jarvis-border;
   }
 
   body {
-    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    @apply bg-jarvis-bg text-jarvis-text;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #080c14;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1a2740;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00d4ff44;
   }
 }
 
@@ -30,14 +45,31 @@
   }
 
   .btn-primary {
-    @apply bg-primary text-white hover:bg-blue-600;
+    @apply bg-blue-600 text-white hover:bg-blue-500;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200;
+    @apply bg-jarvis-surface text-jarvis-text border border-jarvis-border hover:border-jarvis-cyan/40;
   }
 
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700;
+    @apply bg-jarvis-card rounded-xl border border-jarvis-border;
+  }
+
+  .jarvis-glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  }
+
+  .jarvis-glow-green {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+  }
+}
+
+@layer utilities {
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, #00d4ff, #0080ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
