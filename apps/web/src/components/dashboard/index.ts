@@ -1,7 +1,9 @@
 export { ActivityFeed } from './ActivityFeed';
 export { QuickActions } from './QuickActions';
+export { QuickCommands } from './QuickCommands';
 export { StatsCard } from './StatsCard';
 export { SystemStatus } from './SystemStatus';
+export { MasterChat } from './MasterChat';
 export { StrategicAlignmentPanel } from './StrategicAlignmentPanel';
 export { MomentumIndexPanel } from './MomentumIndexPanel';
 export { SkillGraphProgressPanel } from './SkillGraphProgressPanel';
