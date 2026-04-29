@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { CheckSquare, ListTodo, AlertCircle, Lightbulb } from 'lucide-react';
 import { StatsCard } from '../components/dashboard/StatsCard';
 import { ActivityFeed } from '../components/dashboard/ActivityFeed';
+import { AgentStatusStrip } from '../components/dashboard/AgentStatusStrip';
 import { QuickActions } from '../components/dashboard/QuickActions';
-import { SystemStatus } from '../components/dashboard/SystemStatus';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorMessage } from '../components/common/ErrorMessage';
 import { healthApi } from '../api/health';
@@ -11,7 +11,13 @@ import { healthApi } from '../api/health';
 export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [healthData, setHealthData] = useState<any>(null);
+  const [stats, setStats] = useState({
+    totalTasks: 0,
+    completedTasks: 0,
+    knowledgeGaps: 0,
+    innovations: 0,
+  });
+  const [activities, setActivities] = useState<any[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -21,8 +27,19 @@ export const Dashboard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const health = await healthApi.checkHealth();
-      setHealthData(health);
+      
+      await healthApi.checkHealth();
+      
+      // TODO Phase 5: Replace with real API calls
+      
+      setStats({
+        totalTasks: 0,
+        completedTasks: 0,
+        knowledgeGaps: 0,
+        innovations: 0,
+      });
+      setActivities([]);
+      
     } catch (err: any) {
       setError(err.message || 'Failed to load dashboard data');
     } finally {
@@ -32,81 +49,70 @@ export const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64 bg-[#0A0E14]">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={fetchDashboardData} />;
+    return (
+      <div className="bg-[#0A0E14] min-h-screen">
+        <ErrorMessage message={error} onRetry={fetchDashboardData} />
+      </div>
+    );
   }
 
-  // Mock data for demonstration
-  const agents = [
-    { name: 'Strategist', status: 'idle' as const },
-    { name: 'Mentor', status: 'idle' as const },
-    { name: 'Executor', status: 'idle' as const },
-    { name: 'Innovator', status: 'idle' as const },
-    { name: 'Amplifier', status: 'idle' as const },
-  ];
-
-  const activities = [
-    { id: '1', type: 'task' as const, title: 'Completed task: Review code', time: '2 hours ago' },
-    { id: '2', type: 'plan' as const, title: 'Generated daily plan', time: '5 hours ago' },
-    { id: '3', type: 'innovation' as const, title: 'New innovation idea added', time: '1 day ago' },
-  ];
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Welcome to JARVIS - Your AI Cognitive Assistant
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#0A0E14] text-[#E0E6ED]">
+      <AgentStatusStrip />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          title="Total Tasks"
-          value={24}
-          change={12}
-          icon={CheckSquare}
-          color="blue"
-        />
-        <StatsCard
-          title="Completed Today"
-          value={8}
-          change={20}
-          icon={ListTodo}
-          color="green"
-        />
-        <StatsCard
-          title="Knowledge Gaps"
-          value={5}
-          change={-15}
-          icon={AlertCircle}
-          color="amber"
-        />
-        <StatsCard
-          title="Innovations"
-          value={12}
-          change={33}
-          icon={Lightbulb}
-          color="purple"
-        />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <ActivityFeed activities={activities} />
+      <div className="p-4 sm:p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold font-mono">Dashboard</h1>
+          <p className="text-[#8899AA] text-sm mt-1">
+            System overview and agent activity monitor
+          </p>
         </div>
-        
-        <div className="space-y-6">
-          <SystemStatus agents={agents} isHealthy={healthData?.status === 'healthy'} />
-          <QuickActions />
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatsCard
+            title="Total Tasks"
+            value={stats.totalTasks}
+            change={0}
+            icon={CheckSquare}
+            color="blue"
+          />
+          <StatsCard
+            title="Completed"
+            value={stats.completedTasks}
+            change={0}
+            icon={ListTodo}
+            color="green"
+          />
+          <StatsCard
+            title="Knowledge Gaps"
+            value={stats.knowledgeGaps}
+            change={0}
+            icon={AlertCircle}
+            color="amber"
+          />
+          <StatsCard
+            title="Innovations"
+            value={stats.innovations}
+            change={0}
+            icon={Lightbulb}
+            color="purple"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ActivityFeed activities={activities} />
+          </div>
+          <div>
+            <QuickActions />
+          </div>
         </div>
       </div>
     </div>

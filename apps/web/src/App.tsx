@@ -11,6 +11,7 @@ import { Gaps } from './pages/Gaps';
 import { Innovations } from './pages/Innovations';
 import { Performance } from './pages/Performance';
 import { Settings } from './pages/Settings';
+import CommandCenter from './pages/CommandCenter';
 import './styles/globals.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="cognitive-loop" element={<CognitiveLoop />} />
+              <Route path="command-center" element={<CommandCenter />} />
               <Route path="plans" element={<Plans />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="gaps" element={<Gaps />} />
