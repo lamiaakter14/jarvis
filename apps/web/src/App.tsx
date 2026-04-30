@@ -11,6 +11,7 @@ import { Gaps } from './pages/Gaps';
 import { Innovations } from './pages/Innovations';
 import { Performance } from './pages/Performance';
 import { Settings } from './pages/Settings';
+import { Diary } from './pages/Diary';
 import './styles/globals.css';
 
 function App() {
@@ -28,6 +29,8 @@ function App() {
               <Route path="innovations" element={<Innovations />} />
               <Route path="performance" element={<Performance />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="diary" element={<Diary />} />
+              <Route path="diary" element={<Diary />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

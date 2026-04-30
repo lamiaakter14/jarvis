@@ -1,262 +1,132 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { BookOpen, Send, Mic, Image, Paperclip, X, Play, FileText } from 'lucide-react';
 
-interface DiaryEntry {
-  id: string;
-  date: string;
-  timestamp: string;
-  original_filename: string;
-  file_type: string;
-  file_size: number;
-  file_path: string;
-  created_at: string;
-}
-
-const Diary: React.FC = () => {
-  const [entries, setEntries] = useState<DiaryEntry[]>([]);
+export const Diary: React.FC = () => {
+  const [text, setText] = useState('');
+  const [entries, setEntries] = useState<any[]>([]);
   const [dates, setDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const [files, setFiles] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  // Fetch entries
-  const fetchEntries = async (date?: string) => {
-    setLoading(true);
-    try {
-      const url = date ? `http://localhost:8000/api/diary?date=${date}` : 'http://localhost:8000/api/diary';
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.success) {
-        setEntries(data.entries);
-        setDates(data.dates);
-      }
-    } catch (error) {
-      console.error('Error fetching entries:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchEntries(selectedDate || undefined);
+    fetch('/api/diary').then(r => r.json()).then(data => {
+      setEntries(data.entries || []);
+      setDates(data.dates || []);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetch(`/api/diary/files/${selectedDate}`).then(r => r.json()).then(data => setFiles(data.files || [])).catch(() => {});
+    }
   }, [selectedDate]);
 
-  // Handle file upload
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+  const handleSave = async () => {
+    if (!text.trim()) return;
+    try {
+      const res = await fetch('/api/diary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      setEntries(prev => [data.entry, ...prev]);
+      setText('');
+    } catch { alert('Backend not reachable'); }
+  };
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setUploading(true);
     const formData = new FormData();
-    formData.append('file', selectedFile);
-    
-    // Detect file type
-    let fileType = 'other';
-    if (selectedFile.type.startsWith('image/')) fileType = 'image';
-    else if (selectedFile.type.startsWith('video/')) fileType = 'video';
-    else if (selectedFile.type.startsWith('audio/')) fileType = 'audio';
-    else if (selectedFile.type === 'application/pdf') fileType = 'pdf';
-    else if (selectedFile.type.startsWith('text/') || selectedFile.name.endsWith('.txt')) fileType = 'text';
-    
-    formData.append('file_type', fileType);
-
+    formData.append('file', file);
     try {
-      const response = await fetch('http://localhost:8000/api/diary/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      if (data.success) {
-        alert('✅ Entry uploaded successfully!');
-        setSelectedFile(null);
-        // Clear file input
-        const fileInput = document.getElementById('file-input') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-        fetchEntries(selectedDate || undefined);
-      } else {
-        alert('❌ Upload failed');
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('❌ Upload failed');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Handle delete
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this entry?')) return;
-    
-    try {
-      const response = await fetch(`http://localhost:8000/api/diary/${id}`, {
-        method: 'DELETE',
-      });
-      const data = await response.json();
-      if (data.success) {
-        fetchEntries(selectedDate || undefined);
-      } else {
-        alert('❌ Delete failed');
-      }
-    } catch (error) {
-      console.error('Delete error:', error);
-      alert('❌ Delete failed');
-    }
-  };
-
-  // Handle file download/view
-  const handleViewFile = async (entryId: string, filename: string) => {
-    window.open(`http://localhost:8000/api/diary/file/${entryId}`, '_blank');
-  };
-
-  // Format file size
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
-  // Get emoji for file type
-  const getFileEmoji = (type: string) => {
-    const emojis: Record<string, string> = {
-      image: '🖼️',
-      video: '🎥',
-      audio: '🎵',
-      pdf: '📄',
-      text: '📝',
-      other: '📎'
-    };
-    return emojis[type] || emojis.other;
+      const res = await fetch('/api/diary/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (selectedDate === data.date) setFiles(prev => [...prev, data.filename]);
+      else { setSelectedDate(data.date); }
+    } catch { alert('Upload failed'); }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-          📔 Digital Diary
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Your personal memory vault — store text, images, videos, audio, and PDFs
-        </p>
-      </div>
-
-      {/* Upload Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          📤 Upload New Entry
-        </h2>
-        <div className="flex gap-4 items-end">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Choose File
-            </label>
-            <input
-              id="file-input"
-              type="file"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              accept="image/*,video/*,audio/*,.pdf,.txt"
-            />
-          </div>
-          <button
-            onClick={handleUpload}
-            disabled={!selectedFile || uploading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {uploading ? 'Uploading...' : 'Upload'}
-          </button>
+    <div className="flex h-full bg-[#0A0E14] text-white">
+      <div className="flex-1 flex flex-col max-w-2xl mx-auto p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <BookOpen className="w-6 h-6 text-purple-400" />
+          <h1 className="text-xl font-bold text-purple-400">Digital Diary</h1>
         </div>
-        {selectedFile && (
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
-          </p>
-        )}
-      </div>
 
-      {/* Date Filter */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          📅 Filter by Date
-        </h2>
-        <div className="flex gap-4">
-          <select
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="">All Dates</option>
-            {dates.map(date => (
-              <option key={date} value={date}>{date}</option>
+        {/* Input */}
+        <div className="bg-[#151A22] border border-[#232A34] rounded-xl p-4 mb-6">
+          <textarea value={text} onChange={e => setText(e.target.value)}
+            placeholder="What's on your mind today?"
+            className="w-full bg-transparent text-sm text-white placeholder-gray-500 outline-none resize-none h-24 mb-3" />
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
+              <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-400 hover:bg-purple-600/30" title="Upload image">
+                <Image className="w-4 h-4" />
+              </button>
+              <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-400 hover:bg-purple-600/30" title="Upload file">
+                <Paperclip className="w-4 h-4" />
+              </button>
+              <button className="p-2 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-400 hover:bg-purple-600/30" title="Voice note">
+                <Mic className="w-4 h-4" />
+              </button>
+              <input ref={fileRef} type="file" onChange={handleUpload} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx" />
+            </div>
+            <div className="flex items-center gap-2">
+              {uploading && <span className="text-[10px] text-yellow-400 animate-pulse">Uploading...</span>}
+              <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold hover:bg-purple-500">
+                <Send className="w-4 h-4" />Save
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Date filter */}
+        {dates.length > 0 && (
+          <div className="flex gap-2 mb-4 overflow-x-auto">
+            {dates.map(d => (
+              <button key={d} onClick={() => setSelectedDate(d)}
+                className={`px-3 py-1 rounded-lg text-xs border transition-all whitespace-nowrap ${selectedDate === d ? 'bg-purple-600/30 border-purple-500/40 text-purple-400' : 'border-[#232A34] text-gray-400 hover:border-purple-500/30'}`}>{d}</button>
             ))}
-          </select>
-          {selectedDate && (
-            <button
-              onClick={() => setSelectedDate('')}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Entries List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          📋 Diary Entries ({entries.length})
-        </h2>
-        
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
-        ) : entries.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No entries found. Upload your first memory! 📔
           </div>
-        ) : (
-          <div className="space-y-3">
-            {entries.map((entry) => (
-              <div
-                key={entry.id}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">{getFileEmoji(entry.file_type)}</span>
-                      <h3 className="font-semibold text-gray-800 dark:text-white">
-                        {entry.original_filename}
-                      </h3>
-                      <span className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded-full">
-                        {entry.file_type}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      <p>📅 Date: {entry.date}</p>
-                      <p>📏 Size: {formatFileSize(entry.file_size)}</p>
-                      <p>🕐 Uploaded: {new Date(entry.created_at).toLocaleString()}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleViewFile(entry.id, entry.original_filename)}
-                      className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => handleDelete(entry.id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+        )}
+
+        {/* Files */}
+        {files.length > 0 && (
+          <div className="mb-4">
+            <p className="text-[10px] text-gray-400 uppercase mb-2">Files ({files.length})</p>
+            <div className="flex flex-wrap gap-2">
+              {files.map((f: string) => (
+                <a key={f} href={`/api/diary/file/${selectedDate}/${f}`} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#151A22] border border-[#232A34] rounded-lg text-xs text-gray-300 hover:border-purple-500/30 transition-all">
+                  {f.match(/\.(jpg|png|gif|webp)$/i) ? <Image className="w-3 h-3" /> : f.match(/\.(mp4|mov)$/i) ? <Play className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                  {f.substring(7, 30)}...
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Entries */}
+        <div className="space-y-3">
+          {entries.length === 0 && <p className="text-gray-500 text-sm text-center py-8">No entries yet. Start writing!</p>}
+          {entries.map((entry, i) => (
+            <div key={i} className="bg-[#151A22] border border-[#232A34] rounded-xl p-4 hover:border-purple-500/30 transition-all">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-purple-400 font-mono">{entry.date} {entry.time}</span>
               </div>
-            ))}
-          </div>
-        )}
+              <p className="text-sm text-gray-300">{entry.text}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 };
-
-export default Diary;
