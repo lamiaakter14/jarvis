@@ -1,49 +1,33 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AppProvider } from './contexts/AppContext';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Dashboard } from './pages/Dashboard';
-import { CognitiveLoop } from './pages/CognitiveLoop';
-import { Plans } from './pages/Plans';
-import { Tasks } from './pages/Tasks';
-import { Gaps } from './pages/Gaps';
-import { Innovations } from './pages/Innovations';
-import { Performance } from './pages/Performance';
-import { Settings } from './pages/Settings';
-import './styles/globals.css';
+import Diary from './pages/Diary';
+
+// Placeholder components for other routes
+const MasterChat = () => <div className="p-6">Master Chat Page</div>;
+const Knowledge = () => <div className="p-6">Knowledge Base Page</div>;
+const Projects = () => <div className="p-6">Projects Page</div>;
+const Analytics = () => <div className="p-6">Analytics Page</div>;
+const Settings = () => <div className="p-6">Settings Page</div>;
+const Help = () => <div className="p-6">Help Page</div>;
 
 function App() {
   return (
-    <ThemeProvider>
-      <AppProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="cognitive-loop" element={<CognitiveLoop />} />
-              <Route path="plans" element={<Plans />} />
-              <Route path="tasks" element={<Tasks />} />
-              <Route path="gaps" element={<Gaps />} />
-              <Route path="innovations" element={<Innovations />} />
-              <Route path="performance" element={<Performance />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-          </Routes>
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: '#333',
-                color: '#fff',
-              },
-            }}
-          />
-        </BrowserRouter>
-      </AppProvider>
-    </ThemeProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="chat" element={<MasterChat />} />
+          <Route path="diary" element={<Diary />} />
+          <Route path="knowledge" element={<Knowledge />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="help" element={<Help />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 

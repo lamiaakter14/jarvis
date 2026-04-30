@@ -1,175 +1,262 @@
 """
-Diary Service for JARVIS OS
-Manages digital diary entries with date-wise folder structure
+Digital Diary Service for Jarvis OS
+Manages daily journal entries with file attachments
 """
 
 import os
+import json
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
-import json
+from typing import List, Dict, Optional, Any
+from dataclasses import dataclass, asdict
+from uuid import uuid4
+
+# Storage paths
+BASE_DIR = Path("/Users/mahedihasanmuktadir/jarvis")
+DIARY_ROOT = BASE_DIR / "memory" / "diary"
+
+# Supported file types
+ALLOWED_EXTENSIONS = {
+    'image': ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+    'video': ['.mp4', '.mov', '.avi', '.mkv'],
+    'audio': ['.mp3', '.wav', '.m4a', '.ogg'],
+    'document': ['.pdf', '.txt', '.md']
+}
+
+MAX_FILE_SIZE = {
+    'image': 50 * 1024 * 1024,  # 50MB
+    'video': 200 * 1024 * 1024,  # 200MB
+    'audio': 100 * 1024 * 1024,  # 100MB
+    'document': 50 * 1024 * 1024  # 50MB
+}
+
+
+@dataclass
+class DiaryEntry:
+    """Represents a diary entry"""
+    id: str
+    date: str  # YYYY-MM-DD
+    content: str
+    attachments: List[Dict[str, str]]  # [{filename: str, path: str, type: str, size: int}]
+    tags: List[str]
+    mood: Optional[str] = None
+    created_at: str = None
+    updated_at: str = None
+    
+    def __post_init__(self):
+        if not self.created_at:
+            self.created_at = datetime.now().isoformat()
+        if not self.updated_at:
+            self.updated_at = datetime.now().isoformat()
 
 
 class DiaryService:
-    """Service for managing diary entries (text, images, videos, audio, PDF)"""
+    """Service for managing diary entries"""
     
-    def __init__(self, base_path: str = None):
-        if base_path is None:
-            base_path = os.path.expanduser("~/jarvis/memory/diary")
-        self.base_path = Path(base_path)
-        self.base_path.mkdir(parents=True, exist_ok=True)
+    def __init__(self):
+        """Initialize diary service and ensure storage directory exists"""
+        self.diary_root = DIARY_ROOT
+        self.diary_root.mkdir(parents=True, exist_ok=True)
+        self.entries_cache = {}
+    
+    def _get_date_path(self, date: str) -> Path:
+        """Get directory path for a specific date"""
+        return self.diary_root / date
+    
+    def _get_entry_file_path(self, date: str, entry_id: str) -> Path:
+        """Get file path for entry metadata"""
+        return self._get_date_path(date) / f"{entry_id}.json"
+    
+    def _get_attachment_path(self, date: str, entry_id: str, filename: str) -> Path:
+        """Get path for an attachment"""
+        return self._get_date_path(date) / "attachments" / entry_id / filename
+    
+    def save_entry(self, date: str, content: str, tags: List[str] = None, 
+                   mood: str = None, attachments: List[Dict] = None) -> DiaryEntry:
+        """Save or update a diary entry"""
+        # Check if entry already exists for this date
+        existing = self.get_entry_by_date(date)
         
-        # Metadata file path
-        self.metadata_file = self.base_path / "metadata.json"
-        self._load_metadata()
-    
-    def _load_metadata(self):
-        """Load metadata from JSON file"""
-        if self.metadata_file.exists():
-            with open(self.metadata_file, 'r') as f:
-                self.metadata = json.load(f)
+        if existing:
+            # Update existing entry
+            entry = existing
+            entry.content = content
+            entry.tags = tags or entry.tags
+            entry.mood = mood or entry.mood
+            entry.updated_at = datetime.now().isoformat()
+            if attachments:
+                entry.attachments.extend(attachments)
         else:
-            self.metadata = {"entries": []}
-    
-    def _save_metadata(self):
-        """Save metadata to JSON file"""
-        with open(self.metadata_file, 'w') as f:
-            json.dump(self.metadata, f, indent=2)
-    
-    def _get_date_folder(self, date_str: str = None) -> Path:
-        """Get folder path for a specific date (YYYY-MM-DD)"""
-        if date_str is None:
-            date_str = datetime.now().strftime("%Y-%m-%d")
+            # Create new entry
+            entry = DiaryEntry(
+                id=str(uuid4()),
+                date=date,
+                content=content,
+                attachments=attachments or [],
+                tags=tags or [],
+                mood=mood
+            )
         
-        date_folder = self.base_path / date_str
-        date_folder.mkdir(parents=True, exist_ok=True)
-        return date_folder
-    
-    def save_entry(
-        self,
-        file_content: bytes,
-        original_filename: str,
-        file_type: str,
-        date_str: str = None
-    ) -> Dict:
-        """
-        Save a diary entry
+        # Save to disk
+        date_path = self._get_date_path(date)
+        date_path.mkdir(parents=True, exist_ok=True)
         
-        Args:
-            file_content: Binary content of the file
-            original_filename: Original name of the file
-            file_type: Type of file (text, image, video, audio, pdf)
-            date_str: Date string (YYYY-MM-DD) - defaults to today
+        entry_file = self._get_entry_file_path(date, entry.id)
+        with open(entry_file, 'w', encoding='utf-8') as f:
+            json.dump(asdict(entry), f, indent=2, ensure_ascii=False)
         
-        Returns:
-            Dict with entry metadata
-        """
-        if date_str is None:
-            date_str = datetime.now().strftime("%Y-%m-%d")
-        
-        # Create date folder
-        date_folder = self._get_date_folder(date_str)
-        
-        # Generate unique filename with timestamp
-        timestamp = datetime.now().strftime("%H%M%S")
-        name_parts = original_filename.rsplit('.', 1)
-        if len(name_parts) > 1:
-            base_name, ext = name_parts
-            new_filename = f"{base_name}_{timestamp}.{ext}"
-        else:
-            new_filename = f"{original_filename}_{timestamp}"
-        
-        file_path = date_folder / new_filename
-        
-        # Save file
-        with open(file_path, 'wb') as f:
-            f.write(file_content)
-        
-        # Create entry metadata
-        entry = {
-            "id": f"{date_str}_{timestamp}",
-            "date": date_str,
-            "timestamp": f"{date_str}T{timestamp}",
-            "original_filename": original_filename,
-            "saved_filename": new_filename,
-            "file_type": file_type,
-            "file_size": len(file_content),
-            "file_path": str(file_path.relative_to(self.base_path)),
-            "created_at": datetime.now().isoformat()
-        }
-        
-        # Add to metadata
-        self.metadata["entries"].append(entry)
-        self._save_metadata()
+        # Update cache
+        self.entries_cache[date] = entry
         
         return entry
     
-    def get_entries(self, date_str: str = None) -> List[Dict]:
-        """
-        Get diary entries
+    def get_entry_by_date(self, date: str) -> Optional[DiaryEntry]:
+        """Get entry for a specific date"""
+        # Check cache first
+        if date in self.entries_cache:
+            return self.entries_cache[date]
         
-        Args:
-            date_str: Optional date filter (YYYY-MM-DD)
+        # Try to load from disk
+        date_path = self._get_date_path(date)
+        if not date_path.exists():
+            return None
         
-        Returns:
-            List of entries sorted by date (newest first)
-        """
-        entries = self.metadata.get("entries", [])
+        # Find JSON file in this date directory
+        json_files = list(date_path.glob("*.json"))
+        if not json_files:
+            return None
         
-        if date_str:
-            entries = [e for e in entries if e["date"] == date_str]
-        
-        # Sort by date descending
-        entries.sort(key=lambda x: x["date"] + x["timestamp"], reverse=True)
-        
-        return entries
-    
-    def get_entry_by_id(self, entry_id: str) -> Optional[Dict]:
-        """Get a specific entry by ID"""
-        for entry in self.metadata.get("entries", []):
-            if entry["id"] == entry_id:
+        entry_file = json_files[0]
+        try:
+            with open(entry_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                entry = DiaryEntry(**data)
+                self.entries_cache[date] = entry
                 return entry
-        return None
+        except Exception as e:
+            print(f"Error loading entry for {date}: {e}")
+            return None
     
-    def get_file_path(self, entry: Dict) -> Path:
-        """Get full file path for an entry"""
-        return self.base_path / entry["file_path"]
+    def get_all_entries(self, limit: int = 50, offset: int = 0) -> List[DiaryEntry]:
+        """Get all diary entries sorted by date (newest first)"""
+        entries = []
+        
+        # Iterate through date directories
+        date_dirs = sorted([d for d in self.diary_root.iterdir() if d.is_dir()], reverse=True)
+        
+        for date_dir in date_dirs:
+            date = date_dir.name
+            entry = self.get_entry_by_date(date)
+            if entry:
+                entries.append(entry)
+        
+        # Apply pagination
+        return entries[offset:offset + limit]
     
-    def delete_entry(self, entry_id: str) -> bool:
-        """Delete an entry and its file"""
-        entry = self.get_entry_by_id(entry_id)
+    def search_entries(self, query: str) -> List[DiaryEntry]:
+        """Search entries by content or tags"""
+        results = []
+        all_entries = self.get_all_entries(limit=1000)  # Get all for search
+        
+        query_lower = query.lower()
+        for entry in all_entries:
+            if query_lower in entry.content.lower():
+                results.append(entry)
+            elif any(query_lower in tag.lower() for tag in entry.tags):
+                results.append(entry)
+        
+        return results
+    
+    def save_attachment(self, date: str, entry_id: str, filename: str, 
+                        file_content: bytes, file_type: str) -> Dict[str, str]:
+        """Save an attachment for an entry"""
+        # Validate file size
+        file_size = len(file_content)
+        max_size = MAX_FILE_SIZE.get(file_type, 50 * 1024 * 1024)
+        
+        if file_size > max_size:
+            raise ValueError(f"File too large. Max {max_size // (1024*1024)}MB for {file_type}")
+        
+        # Validate extension
+        ext = Path(filename).suffix.lower()
+        allowed_exts = ALLOWED_EXTENSIONS.get(file_type, [])
+        
+        if allowed_exts and ext not in allowed_exts:
+            raise ValueError(f"File type {ext} not allowed for {file_type}")
+        
+        # Create attachment directory
+        attachment_dir = self._get_attachment_path(date, entry_id, "")
+        attachment_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Generate unique filename to avoid collisions
+        unique_filename = f"{datetime.now().strftime('%H%M%S')}_{filename}"
+        attachment_path = attachment_dir / unique_filename
+        
+        # Save file
+        with open(attachment_path, 'wb') as f:
+            f.write(file_content)
+        
+        return {
+            'filename': filename,
+            'saved_as': unique_filename,
+            'path': str(attachment_path.relative_to(BASE_DIR)),
+            'type': file_type,
+            'size': file_size
+        }
+    
+    def delete_entry(self, date: str) -> bool:
+        """Delete an entire diary entry and its attachments"""
+        entry = self.get_entry_by_date(date)
         if not entry:
             return False
         
-        # Delete the file
-        file_path = self.get_file_path(entry)
-        if file_path.exists():
-            file_path.unlink()
+        # Delete entry directory
+        date_path = self._get_date_path(date)
+        if date_path.exists():
+            shutil.rmtree(date_path)
         
-        # Remove from metadata
-        self.metadata["entries"] = [
-            e for e in self.metadata["entries"]
-            if e["id"] != entry_id
-        ]
-        self._save_metadata()
+        # Remove from cache
+        if date in self.entries_cache:
+            del self.entries_cache[date]
         
         return True
     
-    def get_dates_with_entries(self) -> List[str]:
-        """Get list of dates that have entries"""
-        dates = set()
-        for entry in self.metadata.get("entries", []):
-            dates.add(entry["date"])
-        return sorted(dates, reverse=True)
-
-
-# Global instance for easy import
-_diary_service = None
-
-def get_diary_service() -> DiaryService:
-    """Get global diary service instance"""
-    global _diary_service
-    if _diary_service is None:
-        _diary_service = DiaryService()
-    return _diary_service
+    def get_entry_summary(self, date: str) -> Dict[str, Any]:
+        """Get summary statistics for an entry"""
+        entry = self.get_entry_by_date(date)
+        if not entry:
+            return {'exists': False}
+        
+        return {
+            'exists': True,
+            'date': date,
+            'word_count': len(entry.content.split()),
+            'char_count': len(entry.content),
+            'attachment_count': len(entry.attachments),
+            'tags': entry.tags,
+            'mood': entry.mood
+        }
+    
+    def get_storage_stats(self) -> Dict[str, Any]:
+        """Get storage statistics for diary"""
+        total_size = 0
+        total_entries = 0
+        total_attachments = 0
+        
+        for date_dir in self.diary_root.iterdir():
+            if date_dir.is_dir():
+                total_entries += 1
+                # Calculate size
+                for file in date_dir.rglob('*'):
+                    if file.is_file():
+                        total_size += file.stat().st_size
+                        if 'attachments' in str(file):
+                            total_attachments += 1
+        
+        return {
+            'total_entries': total_entries,
+            'total_attachments': total_attachments,
+            'total_size_mb': round(total_size / (1024 * 1024), 2),
+            'storage_path': str(self.diary_root)
+        }
