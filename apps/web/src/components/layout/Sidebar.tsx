@@ -16,6 +16,7 @@ const sections = [
     { name: 'Task Queue', href: '/tasks', icon: CheckSquare },
     { name: 'Projects', href: '/projects', icon: FolderOpen },
     { name: 'Money Mode', href: '/money', icon: DollarSign },
+      { name: 'Cognitive Loop', href: '/cognitive', icon: Brain },
     { name: 'Cognitive Loop', href: '/cognitive-loop', icon: RefreshCw },
   ]},
   { label: 'INTELLIGENCE', items: [
