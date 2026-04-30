@@ -1,182 +1,313 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Settings2, Send, Mic, ChevronDown, Brain } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Settings2,
+  Send,
+  Paperclip,
+  Mic,
+  ChevronDown,
+  Edit3,
+  Check,
+  Brain,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { sendMessage } from '../../api/chatApi';
-import { detectIntent } from '../IntentDetector';
 
-// ============================================================
-// 2-Agent Architecture: PLANNER + EXECUTOR
-// ============================================================
 const agentColors: Record<string, string> = {
-  PLANNER: 'bg-purple-500/20 text-purple-400 border border-purple-500/40',
-  EXECUTOR: 'bg-blue-500/20 text-blue-400 border border-blue-500/40',
+  PLANNER: 'bg-blue-500/20 text-blue-400 border border-blue-500/40',
+  EXECUTOR: 'bg-green-500/20 text-green-400 border border-green-500/40',
+  AMPLIFIER: 'bg-purple-500/20 text-purple-400 border border-purple-500/40',
+  REFLECTOR: 'bg-orange-500/20 text-orange-400 border border-orange-500/40',
 };
 
+const agentIcons: Record<string, string> = {
+  PLANNER: '#1e3a8a',
+  EXECUTOR: '#064e3b',
+  AMPLIFIER: '#3b0764',
+  REFLECTOR: '#7c2d12',
+};
+
+const todaysPlan = [
+  { text: 'Finalize homepage design', done: true },
+  { text: 'Review API integration', done: true },
+  { text: 'Optimize performance', done: false },
+  { text: 'Client feedback call', done: false },
+];
+
 const agentSelectors = [
-  { role: 'PLANNER', subtitle: 'Strategist + Mentor + Innovator' },
-  { role: 'EXECUTOR', subtitle: 'Doer + Amplifier + Reflector' },
+  { role: 'PLANNER', subtitle: 'Strategist' },
+  { role: 'EXECUTOR', subtitle: 'Doer' },
+  { role: 'AMPLIFIER', subtitle: 'Optimizer' },
+  { role: 'REFLECTOR', subtitle: 'Analyst' },
 ];
 
 interface Message {
   id: string;
-  from: 'jarvis' | 'user' | 'system';
+  from: 'jarvis' | 'user';
   agent?: string;
   time: string;
-  content: string;
-  meta?: any;
+  content: React.ReactNode;
+  typing?: boolean;
 }
 
 export const MasterChat: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', from: 'system', time: new Date().toLocaleTimeString(), content: 'JARVIS OS ready. Type your idea or command.' }
-  ]);
+  const [showActions, setShowActions] = useState(false);
   const [input, setInput] = useState('');
-  const [mode, setMode] = useState<'chat' | 'planner' | 'execution'>('chat');
-  const [showPlan, setShowPlan] = useState(false);
-  const [showApproval, setShowApproval] = useState(false);
-  const [projectData, setProjectData] = useState<any>(null);
-  const [projectName, setProjectName] = useState<string>();
-  const [taskCount, setTaskCount] = useState(0);
-  const [executing, setExecuting] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [activeAgent, setActiveAgent] = useState('PLANNER');
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  const completedCount = todaysPlan.filter((i) => i.done).length;
+  const progressPercent = Math.round((completedCount / todaysPlan.length) * 100);
+  const circumference = 2 * Math.PI * 26;
 
-  const addMessage = (from: Message['from'], content: string, agent?: string, meta?: any) => {
-    setMessages(prev => [...prev, { id: Date.now().toString(), from, time: new Date().toLocaleTimeString(), content, agent, meta }]);
-  };
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMsg = input.trim();
-    addMessage('user', userMsg);
-    setInput('');
-
-    try {
-      const result = await sendMessage(userMsg);
-      setMode(result.mode as any);
-      addMessage('jarvis', result.response, result.mode === 'planner' ? 'PLANNER' : 'EXECUTOR');
-
-      if (result.meta?.project) {
-        const p = result.meta.project;
-        setProjectData(p);
-        setProjectName(p.title);
-        setTaskCount(p.tasks?.length || 0);
-        addMessage('system', `📁 Project: ${p.id} — ${p.phases?.length || 0} phases, ${p.tasks?.length || 0} tasks`);
-        setShowPlan(true);
-      }
-
-      if (result.meta?.questions) {
-        addMessage('system', '📋 Planner Questions:');
-        result.meta.questions.forEach((q: string, i: number) => addMessage('system', `  ${i + 1}. ${q}`));
-      }
-
-      if (result.intent === 'planner') setShowPlan(true);
-    } catch {
-      const intent = detectIntent(userMsg);
-      setMode(intent.mode as any);
-      addMessage('jarvis', '⚠️ Offline mode. Backend not reachable.', intent.mode === 'planner' ? 'PLANNER' : 'EXECUTOR');
-    }
-  };
-
-  const handleApprove = async () => {
-    setMode('execution');
-    setShowApproval(false);
-    setShowPlan(false);
-    setExecuting(true);
-    addMessage('system', '✅ Plan approved. Queuing tasks...');
-    try {
-      await fetch('/api/execute/queue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project: projectData }) });
-      const execRes = await fetch('/api/execute/start', { method: 'POST' });
-      const execData = await execRes.json();
-      addMessage('system', `⚡ ${execData.tasks_executed} tasks executed successfully!`);
-    } catch {
-      addMessage('system', '📋 Tasks queued. Backend offline — local mode.');
-    }
-    setExecuting(false);
-  };
+  const messages: Message[] = [
+    {
+      id: '1',
+      from: 'jarvis',
+      agent: 'PLANNER',
+      time: '10:32 AM',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-jarvis-text leading-relaxed">
+            Good morning, Tony. I've analyzed your schedule and priorities.
+            Here's what I recommend we focus on today.
+          </p>
+          {/* Today's Plan card */}
+          <div className="bg-jarvis-bg border border-jarvis-border rounded-lg p-3">
+            <p className="text-[10px] font-semibold tracking-widest text-jarvis-muted uppercase mb-3">
+              Today's Plan
+            </p>
+            <div className="flex items-start gap-4">
+              <div className="flex-1 space-y-2">
+                {todaysPlan.map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div
+                      className={cn(
+                        'w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                        item.done
+                          ? 'border-jarvis-green bg-jarvis-green/20'
+                          : 'border-jarvis-border'
+                      )}
+                    >
+                      {item.done && <Check className="w-2.5 h-2.5 text-jarvis-green" />}
+                    </div>
+                    <span className={cn('text-xs', item.done ? 'text-jarvis-muted line-through' : 'text-jarvis-text')}>
+                      {item.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {/* Progress circle */}
+              <div className="flex-shrink-0 flex flex-col items-center">
+                <svg width="64" height="64" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="26" fill="none" stroke="#1a2740" strokeWidth="6" />
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="26"
+                    fill="none"
+                    stroke="#00d4ff"
+                    strokeWidth="6"
+                    strokeDasharray={`${circumference}`}
+                    strokeDashoffset={`${circumference * (1 - progressPercent / 100)}`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 32 32)"
+                  />
+                  <text x="32" y="33" textAnchor="middle" dominantBaseline="middle" fill="#e2e8f0" fontSize="12" fontWeight="bold">
+                    {progressPercent}%
+                  </text>
+                  <text x="32" y="44" textAnchor="middle" dominantBaseline="middle" fill="#64748b" fontSize="7">
+                    COMPLETE
+                  </text>
+                </svg>
+              </div>
+            </div>
+            {/* Plan action buttons */}
+            <div className="flex gap-2 mt-3">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-jarvis-border rounded-lg text-jarvis-muted hover:text-jarvis-text hover:border-jarvis-cyan/40 transition-colors">
+                <Edit3 className="w-3 h-3" />
+                Edit Plan
+              </button>
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-jarvis-green/20 border border-jarvis-green/40 rounded-lg text-jarvis-green hover:bg-jarvis-green/30 transition-colors">
+                <Check className="w-3 h-3" />
+                Approve Plan
+              </button>
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-blue-600/20 border border-blue-500/40 rounded-lg text-blue-400 hover:bg-blue-600/30 transition-colors">
+                <Send className="w-3 h-3" />
+                Send to Executor
+              </button>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: '2',
+      from: 'user',
+      time: '10:33 AM',
+      content: (
+        <p className="text-sm text-jarvis-text leading-relaxed">
+          Looks good. Prioritize performance optimization and prepare the client call notes.
+        </p>
+      ),
+    },
+    {
+      id: '3',
+      from: 'jarvis',
+      agent: 'EXECUTOR',
+      time: '10:33 AM',
+      content: (
+        <div className="space-y-2">
+          <p className="text-sm text-jarvis-text leading-relaxed">
+            Understood. Updating priorities and executing tasks.
+          </p>
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="w-2 h-2 rounded-full bg-jarvis-green"
+                style={{ animationDelay: `${i * 0.2}s`, animation: 'pulse 1.4s ease-in-out infinite' }}
+              />
+            ))}
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="bg-jarvis-card border border-jarvis-border rounded-xl flex flex-col h-full overflow-hidden">
-      {/* Header */}
+      {/* Chat header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-jarvis-border flex-shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-sm font-bold text-jarvis-text tracking-wider">MASTER CHAT</span>
           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-jarvis-green/10 border border-jarvis-green/30 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-jarvis-green animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-jarvis-green animate-pulse-slow" />
             <span className="text-[10px] font-semibold text-jarvis-green tracking-wider">AI BRAIN · ONLINE</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-            mode === 'planner' ? 'bg-purple-500/20 text-purple-400' : mode === 'execution' ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400'
-          }`}>
-            {mode}
-          </span>
-          <button className="p-1.5 rounded text-jarvis-muted hover:text-jarvis-text"><Settings2 className="w-4 h-4" /></button>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-jarvis-muted">Show Actions</span>
+            <button
+              onClick={() => setShowActions(!showActions)}
+              className={cn(
+                'w-8 h-4 rounded-full border transition-all relative',
+                showActions
+                  ? 'bg-jarvis-cyan/30 border-jarvis-cyan/60'
+                  : 'bg-jarvis-border border-jarvis-border'
+              )}
+            >
+              <span
+                className={cn(
+                  'absolute top-0.5 w-3 h-3 rounded-full transition-all',
+                  showActions ? 'right-0.5 bg-jarvis-cyan' : 'left-0.5 bg-jarvis-muted'
+                )}
+              />
+            </button>
+          </div>
+          <button className="p-1.5 rounded text-jarvis-muted hover:text-jarvis-text hover:bg-white/5 transition-colors">
+            <Settings2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map(msg => (
-          <div key={msg.id} className={cn('flex gap-2', msg.from === 'user' && 'flex-row-reverse')}>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg) => (
+          <div key={msg.id} className={cn('flex gap-3', msg.from === 'user' && 'flex-row-reverse')}>
+            {/* Avatar */}
             {msg.from === 'jarvis' ? (
-              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: 'linear-gradient(135deg, #0f2a4a, #0a1628)', border: '1px solid rgba(0,212,255,0.3)' }}>
-                <Brain className="w-3.5 h-3.5 text-jarvis-cyan" />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 border border-jarvis-cyan/30"
+                style={{ background: 'linear-gradient(135deg, #0f2a4a, #0a1628)' }}
+              >
+                <Brain className="w-4 h-4 text-jarvis-cyan" />
               </div>
-            ) : msg.from === 'user' ? (
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-1">M</div>
-            ) : null}
-            <div className={cn('max-w-[80%]', msg.from === 'user' && 'flex flex-col items-end')}>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-bold text-jarvis-text">{msg.from === 'jarvis' ? 'JARVIS' : msg.from === 'user' ? 'YOU' : 'SYSTEM'}</span>
-                {msg.agent && <span className={cn('text-[8px] font-bold px-1.5 py-0.5 rounded', agentColors[msg.agent])}>{msg.agent}</span>}
-                <span className="text-[9px] text-jarvis-muted">{msg.time}</span>
+            ) : (
+              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-1 border border-jarvis-border">
+                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                  T
+                </div>
               </div>
-              <div className={cn('rounded-xl px-4 py-2.5 text-sm', 
-                msg.from === 'jarvis' ? 'bg-jarvis-surface border border-jarvis-border text-jarvis-text' :
-                msg.from === 'user' ? 'bg-blue-600/20 border border-blue-500/30 text-blue-100' :
-                'bg-gray-700/20 border border-gray-600/20 text-gray-400 text-xs text-center'
-              )}>
+            )}
+
+            {/* Bubble */}
+            <div className={cn('flex-1 max-w-[85%]', msg.from === 'user' && 'flex flex-col items-end')}>
+              {/* Name + agent tag */}
+              <div className={cn('flex items-center gap-2 mb-1', msg.from === 'user' && 'flex-row-reverse')}>
+                {msg.from === 'jarvis' ? (
+                  <>
+                    <span className="text-xs font-bold text-jarvis-text">JARVIS</span>
+                    {msg.agent && (
+                      <span className={cn('text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider', agentColors[msg.agent])}>
+                        {msg.agent}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-jarvis-muted">{msg.time}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-xs font-bold text-jarvis-text">YOU</span>
+                    <span className="text-[10px] text-jarvis-muted">{msg.time}</span>
+                    <Check className="w-3 h-3 text-jarvis-cyan" />
+                  </>
+                )}
+              </div>
+              <div
+                className={cn(
+                  'rounded-xl px-4 py-3',
+                  msg.from === 'jarvis'
+                    ? 'bg-jarvis-surface border border-jarvis-border'
+                    : 'bg-blue-600/20 border border-blue-500/30'
+                )}
+              >
                 {msg.content}
               </div>
             </div>
           </div>
         ))}
-
-        {/* Approval Buttons */}
-        {showPlan && projectData && (
-          <div className="flex gap-2 justify-center mt-3">
-            <button onClick={() => { setShowApproval(true); addMessage('system', '📋 Review plan before approving.'); }} className="px-4 py-2 bg-purple-600/20 border border-purple-500/40 rounded-lg text-purple-400 text-xs font-bold hover:bg-purple-600/30">📋 Review Plan</button>
-          </div>
-        )}
-        {showApproval && (
-          <div className="flex gap-2 justify-center mt-2">
-            <button onClick={handleApprove} className="px-4 py-2 bg-green-600/20 border border-green-500/40 rounded-lg text-green-400 text-xs font-bold hover:bg-green-600/30">✅ Approve & Execute</button>
-            <button onClick={() => { setShowApproval(false); setShowPlan(false); addMessage('system', '❌ Plan rejected.'); }} className="px-4 py-2 bg-red-600/20 border border-red-500/40 rounded-lg text-red-400 text-xs font-bold hover:bg-red-600/30">❌ Reject</button>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Agent Selector */}
-      <div className="px-4 py-2 border-t border-jarvis-border flex items-center gap-2 flex-shrink-0">
-        {agentSelectors.map(agent => (
-          <button key={agent.role} className={cn('flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-semibold tracking-wider transition-all', agentColors[agent.role])}>
-            {agent.role}
+      {/* Agent selectors */}
+      <div className="px-4 py-2 border-t border-jarvis-border flex items-center gap-2 flex-shrink-0 overflow-x-auto">
+        {agentSelectors.map((agent) => (
+          <button
+            key={agent.role}
+            onClick={() => setActiveAgent(agent.role)}
+            className={cn(
+              'flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs transition-all flex-shrink-0',
+              activeAgent === agent.role
+                ? agentColors[agent.role]
+                : 'border-jarvis-border text-jarvis-muted hover:border-jarvis-cyan/30'
+            )}
+          >
+            <span className="font-semibold text-[10px] tracking-wider">{agent.role}</span>
             <ChevronDown className="w-2.5 h-2.5" />
+            <span className="text-[10px] text-jarvis-muted">{agent.subtitle}</span>
           </button>
         ))}
       </div>
 
-      {/* Input */}
+      {/* Input bar */}
       <div className="px-3 py-3 border-t border-jarvis-border flex items-center gap-2 flex-shrink-0">
-        <button className="p-2 rounded-lg bg-jarvis-green/20 border border-jarvis-green/40 text-jarvis-green"><Mic className="w-4 h-4" /></button>
-        <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSend()}
-          placeholder="Ask anything or give a command..." className="flex-1 bg-transparent text-sm text-jarvis-text placeholder-jarvis-muted outline-none" />
-        <button onClick={handleSend} className="flex items-center gap-2 px-4 py-2 bg-jarvis-cyan text-jarvis-bg text-xs font-bold rounded-lg hover:bg-jarvis-cyan/80">
-          <Send className="w-3.5 h-3.5" />EXECUTE
+        <button className="p-2 rounded-lg bg-jarvis-green/20 border border-jarvis-green/40 text-jarvis-green hover:bg-jarvis-green/30 transition-colors flex-shrink-0">
+          <Mic className="w-4 h-4" />
+        </button>
+        <button className="p-2 rounded-lg text-jarvis-muted hover:text-jarvis-text hover:bg-white/5 transition-colors flex-shrink-0">
+          <Paperclip className="w-4 h-4" />
+        </button>
+        <button className="p-2 rounded-lg text-jarvis-muted hover:text-jarvis-text hover:bg-white/5 transition-colors flex-shrink-0">
+          <Settings2 className="w-4 h-4" />
+        </button>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask anything or give a command..."
+          className="flex-1 bg-transparent text-sm text-jarvis-text placeholder-jarvis-muted outline-none min-w-0"
+        />
+        <button className="flex items-center gap-2 px-4 py-2 bg-jarvis-cyan text-jarvis-bg text-xs font-bold rounded-lg hover:bg-jarvis-cyan/80 transition-colors flex-shrink-0">
+          <Send className="w-3.5 h-3.5" />
+          EXECUTE
+          <ChevronDown className="w-3 h-3" />
         </button>
       </div>
     </div>
