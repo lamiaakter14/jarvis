@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { DollarSign, LayoutDashboard, Brain, Zap, CheckSquare, FolderOpen, Target, BookOpen, TrendingUp, RefreshCw, Settings, ChevronLeft, ChevronRight, Menu, X, MessageSquare } from 'lucide-react';
+import { DollarSign, MapPin, LayoutDashboard, Brain, Zap, CheckSquare, FolderOpen, Target, BookOpen, TrendingUp, RefreshCw, Settings, ChevronLeft, ChevronRight, Menu, X, MessageSquare } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const sections = [
@@ -16,8 +16,7 @@ const sections = [
     { name: 'Task Queue', href: '/tasks', icon: CheckSquare },
     { name: 'Projects', href: '/projects', icon: FolderOpen },
     { name: 'Money Mode', href: '/money', icon: DollarSign },
-      { name: 'Cognitive Loop', href: '/cognitive', icon: Brain },
-    { name: 'Cognitive Loop', href: '/cognitive-loop', icon: RefreshCw },
+    { name: 'Cognitive Loop', href: '/cognitive', icon: RefreshCw },
   ]},
   { label: 'INTELLIGENCE', items: [
     { name: 'Innovations', href: '/innovations', icon: TrendingUp },
@@ -25,6 +24,7 @@ const sections = [
   ]},
   { label: 'MEMORY', items: [
     { name: 'Diary', href: '/diary', icon: BookOpen },
+    { name: 'Local Context', href: '/context', icon: MapPin },
   ]},
   { label: 'SYSTEM', items: [
     { name: 'Settings', href: '/settings', icon: Settings },
@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-jarvis-cyan/30 to-blue-600/30 border border-jarvis-cyan/40 flex items-center justify-center"><Brain className="w-4 h-4 text-jarvis-cyan" /></div>
               <div><p className="text-xs font-bold text-jarvis-text">JARVIS OS</p><p className="text-[9px] text-jarvis-muted">Mahedi Muktadir</p></div>
             </div>
-            <p className="text-[10px] text-jarvis-muted text-center">v5.0.0 • Sakhipur</p>
+            <p className="text-[10px] text-jarvis-muted text-center">v5.3.0 • Sakhipur</p>
           </div>
         )}
       </aside>

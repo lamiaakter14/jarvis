@@ -5,6 +5,7 @@ import { AppProvider } from './contexts/AppContext';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Dashboard } from './pages/Dashboard';
 import { CognitiveLoop } from './pages/CognitiveLoop';
+import { ContextEngine } from './pages/ContextEngine';
 import { Plans } from './pages/Plans';
 import { Tasks } from './pages/Tasks';
 import { Gaps } from './pages/Gaps';
@@ -31,7 +32,7 @@ function App() {
               <Route path="performance" element={<Performance />} />
               <Route path="settings" element={<Settings />} />
               <Route path="money" element={<MoneyMode />} />
-              <Route path="diary" element={<Diary />} />
+              <Route path="context" element={<ContextEngine />} />
               <Route path="diary" element={<Diary />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

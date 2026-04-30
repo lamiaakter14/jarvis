@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from jarvis_core.engine.intent_engine import detect_intent, generate_response
 from jarvis_core.agents.planner_agent import PlannerAgent
 from jarvis_core.agents.money_agent import money_agent
+from jarvis_core.memory.context_store import context_store
 
 from jarvis_core.bridge.agent_bridge import (
     AmplifierBridge, ExecutorBridge, InnovatorBridge, MentorBridge, StrategistBridge,
@@ -163,6 +164,7 @@ async def money_progress_endpoint(current: float, target: float):
 # Phase 6: Money Mode API
 # ============================================================
 from jarvis_core.agents.money_agent import money_agent
+from jarvis_core.memory.context_store import context_store
 
 @app.post("/api/money/plan")
 async def money_plan(request: dict):
@@ -177,12 +179,64 @@ async def money_progress(current: int = 0, target: int = 10000):
 @app.get("/api/money/plan")
 async def money_plan_get(target_amount: int = 10000, days: int = 7, skills: str = "graphic_design"):
     """GET version for browser testing"""
+async def money_plan_get(target_amount: int = 10000, days: int = 7, skills: str = "graphic_design"):
+    """GET version for browser testing"""
     skills_list = [s.strip() for s in skills.split(",")]
     from jarvis_core.agents.money_agent import money_agent
+    from jarvis_core.memory.context_store import context_store
     result = money_agent.plan(
         target_amount=target_amount,
         days=days,
         skills=skills_list
     )
     return {"status": "success", "plan": result}
+# ========== Local Context Engine API ==========
 
+@app.get("/api/context")
+async def get_contexts(category: str = None, keyword: str = None):
+    """Get all contexts or search by category/keyword"""
+    if keyword:
+        return context_store.get_by_keyword(keyword)
+    return context_store.get_all(category)
+
+@app.post("/api/context")
+async def add_context(request: dict):
+    """Add new context"""
+    return context_store.add(
+        key=request.get("key"),
+        value=request.get("value"),
+        category=request.get("category", "general"),
+        location=request.get("location", "Sakhipur")
+    )
+
+@app.put("/api/context/{context_id}")
+async def update_context(context_id: str, request: dict):
+    """Update existing context"""
+    result = context_store.update(context_id, request)
+    if result:
+        return result
+    return {"error": "Context not found"}
+
+@app.delete("/api/context/{context_id}")
+async def delete_context(context_id: str):
+    """Delete context"""
+    success = context_store.delete(context_id)
+    if success:
+        return {"status": "deleted", "id": context_id}
+    return {"error": "Context not found"}
+
+@app.get("/api/context/categories")
+async def get_categories():
+    """Get all categories"""
+    return {"categories": context_store.get_categories()}
+
+@app.post("/api/context/planner")
+async def get_for_planner(request: dict):
+    """Get contexts relevant for planner"""
+    return context_store.get_for_planner(request.get("keywords", []))
+
+@app.get("/api/money/plan")
+async def money_get(target_amount: int = 10000, days: int = 7, skills: str = ""):
+    skills_list = [s.strip() for s in skills.split(",")] if skills else []
+    result = money_agent.plan(target_amount, days, skills_list)
+    return {"status": "success", "plan": result}
