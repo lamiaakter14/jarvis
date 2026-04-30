@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Brain, Zap, CheckSquare, FolderOpen, Target, BookOpen, TrendingUp, RefreshCw, Settings, ChevronLeft, ChevronRight, Menu, X, MessageSquare } from 'lucide-react';
+import { DollarSign, LayoutDashboard, Brain, Zap, CheckSquare, FolderOpen, Target, BookOpen, TrendingUp, RefreshCw, Settings, ChevronLeft, ChevronRight, Menu, X, MessageSquare } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const sections = [
@@ -15,6 +15,7 @@ const sections = [
   { label: 'EXECUTION', items: [
     { name: 'Task Queue', href: '/tasks', icon: CheckSquare },
     { name: 'Projects', href: '/projects', icon: FolderOpen },
+    { name: 'Money Mode', href: '/money', icon: DollarSign },
     { name: 'Cognitive Loop', href: '/cognitive-loop', icon: RefreshCw },
   ]},
   { label: 'INTELLIGENCE', items: [

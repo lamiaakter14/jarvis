@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from jarvis_core.engine.intent_engine import detect_intent, generate_response
 from jarvis_core.agents.planner_agent import PlannerAgent
+from jarvis_core.agents.money_agent import money_agent
 
 from jarvis_core.bridge.agent_bridge import (
     AmplifierBridge, ExecutorBridge, InnovatorBridge, MentorBridge, StrategistBridge,
@@ -148,3 +149,27 @@ async def get_file(date: str, filename: str):
     if os.path.exists(filepath):
         return FileResponse(filepath)
     return JSONResponse(status_code=404, content={"error": "File not found"})
+
+@app.get("/api/money/progress")
+async def money_progress_endpoint(current: float, target: float):
+    """Track income progress"""
+    try:
+        result = money_agent.track_progress(current, target)
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+# ============================================================
+# Phase 6: Money Mode API
+# ============================================================
+from jarvis_core.agents.money_agent import money_agent
+
+@app.post("/api/money/plan")
+async def money_plan(request: dict):
+    result = money_agent.plan(request.get("target_amount", 10000), request.get("days", 7), request.get("skills", []))
+    return {"status": "success", "plan": result}
+
+@app.get("/api/money/progress")
+async def money_progress(current: int = 0, target: int = 10000):
+    result = money_agent.track_progress(current, target)
+    return {"status": "success", "progress": result}
