@@ -156,3 +156,38 @@ async def interactive_chat(request: PlannerAnswerRequest):
             response_text = "✅ All questions answered! Review your plan below."
     
     return {"intent": r["intent"], "mode": r["mode"], "response": response_text, "confidence": r["confidence"], "meta": meta}
+
+# ============================================================
+# Phase 4: Execution API
+# ============================================================
+
+async def queue_project(data: dict = None):
+    if data and "project" in data:
+        tasks = executor.queue_tasks(data["project"])
+        return {"status": "queued", "tasks_queued": len(tasks)}
+    return {"status": "ready", "message": "Send project data"}
+
+async def start_execution():
+    results = executor.run_all()
+
+async def get_execution_status():
+    return executor.get_queue_status()
+
+from jarvis_core.agents.executor_agent import ExecutorAgent
+executor = ExecutorAgent()
+
+@app.post("/api/execute/queue")
+async def exec_queue(data: dict = None):
+    if data and "project" in data:
+        executor.queue_tasks(data["project"])
+        return {"status": "queued"}
+    return {"status": "ready"}
+
+@app.post("/api/execute/start")
+async def exec_start():
+    results = executor.run_all()
+    return {"status": "success", "tasks_executed": len(results)}
+
+@app.get("/api/execute/status")
+async def exec_status():
+    return executor.get_queue_status()
