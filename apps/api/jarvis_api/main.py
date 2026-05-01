@@ -266,3 +266,49 @@ async def chat_v2(request: ChatRequest):
             meta["planner_error"] = str(e)
     
     return OutputBuilder.build(r["intent"], r["mode"], generate_response(r["intent"], request.message), meta)
+
+# ============================================================
+# Phase 11: AI OS Pipeline - Full structured output
+# ============================================================
+from jarvis_core.engine.intent_engine_v2 import IntentEngineV2
+from jarvis_core.agents.strategist import StrategistAgent
+from jarvis_core.agents.validator import ValidatorAgent
+from jarvis_core.engine.output_composer import OutputComposer
+
+intent_v2 = IntentEngineV2()
+strategist = StrategistAgent()
+validator = ValidatorAgent()
+
+@app.post("/api/os/process")
+async def os_process(request: ChatRequest):
+    """Full AI OS pipeline: Intent → Strategy → Validation → Output."""
+    
+    # Step 1: Detect intent
+    intent = intent_v2.detect(request.message)
+    
+    # Step 2: Generate strategy
+    strategy = strategist.generate_plan(request.message, intent["domain"], intent.get("entities"))
+    
+    # Step 3: Validate
+    validation = validator.validate(strategy, intent)
+    
+    # Step 4: Compose output
+    memory_updates = [f"Intent: {intent['type']}", f"Strategy: {strategy['project_id']}", f"Validation: {validation['recommendation']}"]
+    
+    return OutputComposer.compose(intent, strategy, validation, memory=memory_updates)
+
+
+@app.get("/api/os/agents")
+async def get_agent_status():
+    """Get live agent status."""
+    return {
+        "agents": [
+            {"name": "Strategist", "status": "ready", "version": strategist.version},
+            {"name": "Validator", "status": "ready", "version": validator.version},
+            {"name": "Executor", "status": "ready", "version": "1.0.0"},
+            {"name": "Memory Engine", "status": "active", "version": "1.0.0"},
+            {"name": "Communicator", "status": "online", "version": "1.0.0"}
+        ],
+        "system": "JARVIS OS v11.0.0",
+        "pipeline": "Intent → Strategy → Validation → Approval → Execution → Memory"
+    }
