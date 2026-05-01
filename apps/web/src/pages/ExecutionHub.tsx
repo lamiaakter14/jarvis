@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, FileText, GitBranch, Download, Check, X, AlertTriangle } from 'lucide-react';
+import { Zap, FileText, GitBranch, Download } from 'lucide-react';
 
 export const ExecutionHub: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'files' | 'github' | 'pdf'>('files');

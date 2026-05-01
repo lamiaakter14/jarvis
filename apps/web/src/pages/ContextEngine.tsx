@@ -71,7 +71,6 @@ export const ContextEngine: React.FC = () => {
     setFormValue('');
     setFormCategory('market_price');
     setFormLocation('Sakhipur');
-    setEditingContext(null);
   };
 
   const categoryColors: Record<string, string> = {

@@ -80,9 +80,7 @@ export const MasterChat: React.FC = () => {
   };
 
   const handleSend = async () => {
-    if (showQuestions && answerIndex < currentQuestions.length) {
       // Save answer
-      const newAnswers = { ...answers, [currentQuestions[answerIndex]]: input };
       setAnswers(newAnswers);
       
       // Add answer to chat
@@ -96,11 +94,9 @@ export const MasterChat: React.FC = () => {
       
       // Move to next question or finish
       const nextIndex = answerIndex + 1;
-      if (nextIndex < currentQuestions.length) {
         setAnswerIndex(nextIndex);
         const nextQuestion: Message = {
           id: (Date.now() + 1).toString(),
-          text: `❓ ${currentQuestions[nextIndex]}`,
           isUser: false,
           timestamp: new Date()
         };
@@ -114,7 +110,6 @@ export const MasterChat: React.FC = () => {
           const planResponse = await fetch('/api/planner/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ answers: newAnswers, questions: currentQuestions })
           });
           const planData = await planResponse.json();
           
