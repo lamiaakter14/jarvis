@@ -5,8 +5,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AppProvider } from './contexts/AppContext';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Dashboard } from './pages/Dashboard';
-import { CognitiveLoop } from './pages/CognitiveLoop';
-import { ContextEngine } from './pages/ContextEngine';
 import { LifeSystem } from './pages/LifeSystem';
 import { ExecutionHub } from './pages/ExecutionHub';
 import { Plans } from './pages/Plans';
@@ -27,7 +25,6 @@ function App() {
           <Routes>
             <Route path="/" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
-              <Route path="cognitive-loop" element={<CognitiveLoop />} />
               <Route path="plans" element={<Plans />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="gaps" element={<Gaps />} />
@@ -36,7 +33,6 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="money" element={<MoneyMode />} />
-              <Route path="context" element={<ContextEngine />} />
               <Route path="life" element={<LifeSystem />} />
               <Route path="execute" element={<ExecutionHub />} />
               <Route path="diary" element={<Diary />} />

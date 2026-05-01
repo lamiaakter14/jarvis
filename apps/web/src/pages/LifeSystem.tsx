@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Target, TrendingUp, Users, BookOpen, Check } from 'lucide-react';
 
 export const LifeSystem: React.FC = () => {
