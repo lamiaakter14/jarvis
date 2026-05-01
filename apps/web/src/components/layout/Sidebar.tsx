@@ -11,6 +11,7 @@ const sections = [
   { label: 'PLANNING', items: [
     { name: 'Plans', href: '/plans', icon: Brain },
     { name: 'Goals', href: '/goals', icon: Target },
+      { name: 'Life System', href: '/life', icon: Target },
   ]},
   { label: 'EXECUTION', items: [
     { name: 'Task Queue', href: '/tasks', icon: CheckSquare },

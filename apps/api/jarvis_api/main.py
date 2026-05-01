@@ -14,6 +14,8 @@ import shutil
 from jarvis_core.engine.intent_engine import detect_intent, generate_response
 from jarvis_core.agents.planner_agent import PlannerAgent
 from jarvis_core.agents.money_agent import money_agent
+from jarvis_core.agents.executor_agent import ExecutorAgent
+from jarvis_core.agents.life_agent import life_agent
 from jarvis_core.memory.diary_service import DiaryService
 from jarvis_core.memory.context_store import context_store
 
@@ -22,6 +24,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 
 planner = PlannerAgent()
 diary = DiaryService()
+executor = ExecutorAgent()
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
@@ -57,7 +60,8 @@ async def create_diary(entry: DiaryEntry):
 
 @app.get("/api/diary")
 async def list_diary(date: str = None):
-    return {"dates": diary.list_dates(), "entries": diary.get_entries(date), "total": len(diary.get_entries(date))}
+    entries = diary.get_entries(date)
+    return {"dates": diary.list_dates(), "entries": entries, "total": len(entries)}
 
 @app.post("/api/diary/upload")
 async def upload_diary_file(file: UploadFile = File(...)):
@@ -110,72 +114,7 @@ async def delete_context(context_id: str):
 async def get_categories():
     return {"categories": context_store.get_categories()}
 
-@app.exception_handler(404)
-async def nf(request, exc): return JSONResponse(status_code=404, content={"error": "Not Found"})
-@app.exception_handler(500)
-async def se(request, exc): return JSONResponse(status_code=500, content={"error": "Error", "detail": str(exc)})
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-# ============================================================
-# Phase 7: Interactive Planner Q&A
-# ============================================================
-from pydantic import BaseModel
-
-class PlannerAnswerRequest(BaseModel):
-    message: str
-    answers: dict = {}
-    question_index: int = 0
-
-@app.post("/api/chat/interactive")
-async def interactive_chat(request: PlannerAnswerRequest):
-    r = detect_intent(request.message)
-    meta = {}
-    response_text = generate_response(r["intent"], request.message)
-    
-    if r["intent"] == "planner":
-        plan_result = planner.plan(request.message, request.answers)
-        questions = plan_result["questions"]
-        current_q = questions[request.question_index] if request.question_index < len(questions) else None
-        
-        meta = {
-            "project_type": plan_result["type"],
-            "total_questions": len(questions),
-            "current_question": request.question_index + 1,
-            "question": current_q,
-            "all_questions": questions,
-            "is_complete": request.question_index >= len(questions) - 1,
-            "project": plan_result["project"] if request.question_index >= len(questions) - 1 else None
-        }
-        
-        if current_q:
-            response_text = f"❓ Question {request.question_index + 1}/{len(questions)}: {current_q}"
-        else:
-            response_text = "✅ All questions answered! Review your plan below."
-    
-    return {"intent": r["intent"], "mode": r["mode"], "response": response_text, "confidence": r["confidence"], "meta": meta}
-
-# ============================================================
-# Phase 4: Execution API
-# ============================================================
-
-async def queue_project(data: dict = None):
-    if data and "project" in data:
-        tasks = executor.queue_tasks(data["project"])
-        return {"status": "queued", "tasks_queued": len(tasks)}
-    return {"status": "ready", "message": "Send project data"}
-
-async def start_execution():
-    results = executor.run_all()
-
-async def get_execution_status():
-    return executor.get_queue_status()
-
-from jarvis_core.agents.executor_agent import ExecutorAgent
-executor = ExecutorAgent()
-
+# Execution
 @app.post("/api/execute/queue")
 async def exec_queue(data: dict = None):
     if data and "project" in data:
@@ -191,3 +130,122 @@ async def exec_start():
 @app.get("/api/execute/status")
 async def exec_status():
     return executor.get_queue_status()
+
+# Life System
+@app.get("/api/life/dashboard")
+async def life_dashboard():
+    """Get complete life dashboard data"""
+    return life_agent.get_dashboard()
+
+@app.post("/api/life/skill")
+async def life_update_skill(request: dict):
+    """Update skill progress"""
+    return life_agent.update_skill(
+        skill_name=request.get("skill_name"),
+        current_level=request.get("current_level")
+    )
+
+@app.post("/api/life/prayer")
+async def life_update_prayer(request: dict):
+    """Update daily prayer status"""
+    return life_agent.update_prayer(
+        prayer_name=request.get("prayer_name"),
+        completed=request.get("completed")
+    )
+
+@app.post("/api/life/quran")
+async def life_update_quran(request: dict):
+    """Update Quran reading progress"""
+    return life_agent.update_quran(pages=request.get("pages", 0))
+
+@app.post("/api/life/contact")
+async def life_add_contact(request: dict):
+    """Add network contact"""
+    return life_agent.add_contact(
+        category=request.get("category"),
+        name=request.get("name"),
+        role=request.get("role")
+    )
+
+@app.post("/api/life/accountability")
+async def life_add_accountability(request: dict):
+    """Add daily accountability entry"""
+    return life_agent.add_accountability(task=request.get("task"))
+
+@app.post("/api/life/milestone")
+async def life_update_milestone(request: dict):
+    """Update milestone completion"""
+    return life_agent.update_milestone(
+        milestone_index=request.get("milestone_index"),
+        completed=request.get("completed")
+    )
+
+# Financial API for Life System
+@app.get("/api/life/financial")
+async def life_get_financial():
+    """Get financial goals for MP election"""
+    return life_agent.get_financial_goals()
+
+@app.post("/api/life/savings")
+async def life_update_savings(request: dict):
+    """Update current savings"""
+    return life_agent.update_savings(amount=request.get("amount", 0))
+
+@app.post("/api/life/funding")
+async def life_add_funding(request: dict):
+    """Add funding from source"""
+    return life_agent.add_funding_source(
+        source=request.get("source"),
+        amount=request.get("amount", 0)
+    )
+
+@app.exception_handler(404)
+async def nf(request, exc): return JSONResponse(status_code=404, content={"error": "Not Found"})
+@app.exception_handler(500)
+async def se(request, exc): return JSONResponse(status_code=500, content={"error": "Error", "detail": str(exc)})
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# ============================================================
+# Phase 9: Real-world Execution API
+# ============================================================
+from jarvis_core.agents.real_executor import RealExecutor
+real_executor = RealExecutor()
+
+@app.get("/api/execute/permission/{action}")
+async def check_perm(action: str):
+    return real_executor.check_permission(action)
+
+@app.get("/api/execute/file/read")
+async def file_read(path: str = ""):
+    return real_executor.read_file(path)
+
+@app.post("/api/execute/file/create")
+async def file_create(data: dict):
+    return real_executor.create_file(data.get("path", ""), data.get("content", ""))
+
+@app.delete("/api/execute/file/delete")
+async def file_delete(path: str = "", confirmation: str = ""):
+    return real_executor.delete_file(path, confirmation)
+
+@app.get("/api/execute/github/status")
+async def github_status():
+    return real_executor.git_status()
+
+@app.post("/api/execute/github/commit")
+async def github_commit(data: dict):
+    return real_executor.git_commit(data.get("message", "JARVIS auto-commit"))
+
+@app.post("/api/execute/github/push")
+async def github_push(data: dict):
+    return real_executor.git_push(data.get("confirmation", ""))
+
+@app.post("/api/execute/pdf/generate")
+async def pdf_generate(data: dict):
+    return real_executor.generate_pdf(data.get("template", "document"), data.get("data", {}))
+
+@app.get("/api/execute/queue")
+async def execution_queue():
+    return {"queue": real_executor.get_queue(), "log": real_executor.get_log()}

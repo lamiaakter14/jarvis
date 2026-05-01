@@ -7,6 +7,8 @@ import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Dashboard } from './pages/Dashboard';
 import { CognitiveLoop } from './pages/CognitiveLoop';
 import { ContextEngine } from './pages/ContextEngine';
+import { LifeSystem } from './pages/LifeSystem';
+import { ExecutionHub } from './pages/ExecutionHub';
 import { Plans } from './pages/Plans';
 import { Tasks } from './pages/Tasks';
 import { Gaps } from './pages/Gaps';
@@ -35,6 +37,8 @@ function App() {
               <Route path="chat" element={<ChatPage />} />
               <Route path="money" element={<MoneyMode />} />
               <Route path="context" element={<ContextEngine />} />
+              <Route path="life" element={<LifeSystem />} />
+              <Route path="execute" element={<ExecutionHub />} />
               <Route path="diary" element={<Diary />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
