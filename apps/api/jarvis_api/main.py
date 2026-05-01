@@ -118,3 +118,41 @@ async def se(request, exc): return JSONResponse(status_code=500, content={"error
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# ============================================================
+# Phase 7: Interactive Planner Q&A
+# ============================================================
+from pydantic import BaseModel
+
+class PlannerAnswerRequest(BaseModel):
+    message: str
+    answers: dict = {}
+    question_index: int = 0
+
+@app.post("/api/chat/interactive")
+async def interactive_chat(request: PlannerAnswerRequest):
+    r = detect_intent(request.message)
+    meta = {}
+    response_text = generate_response(r["intent"], request.message)
+    
+    if r["intent"] == "planner":
+        plan_result = planner.plan(request.message, request.answers)
+        questions = plan_result["questions"]
+        current_q = questions[request.question_index] if request.question_index < len(questions) else None
+        
+        meta = {
+            "project_type": plan_result["type"],
+            "total_questions": len(questions),
+            "current_question": request.question_index + 1,
+            "question": current_q,
+            "all_questions": questions,
+            "is_complete": request.question_index >= len(questions) - 1,
+            "project": plan_result["project"] if request.question_index >= len(questions) - 1 else None
+        }
+        
+        if current_q:
+            response_text = f"❓ Question {request.question_index + 1}/{len(questions)}: {current_q}"
+        else:
+            response_text = "✅ All questions answered! Review your plan below."
+    
+    return {"intent": r["intent"], "mode": r["mode"], "response": response_text, "confidence": r["confidence"], "meta": meta}

@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, TrendingUp, TrendingDown, Lightbulb, AlertCircle, CheckCircle } from 'lucide-react';
+import { Brain, TrendingUp, Lightbulb, AlertCircle } from 'lucide-react';
 
 export const CognitiveLoop: React.FC = () => {
   const [insights, setInsights] = useState<any>(null);
   const [dailyData, setDailyData] = useState<number[]>([]);
-  const [target, setTarget] = useState(10000);
   const [daysLeft, setDaysLeft] = useState(5);
 
   useEffect(() => {
     // Load progress from localStorage
     const saved = localStorage.getItem('moneyMode_progress');
     if (saved) {
-      const data = JSON.parse(saved);
       // For demo, create sample data
       setDailyData([500, 800, 1200, 1500, 2000]);
     }

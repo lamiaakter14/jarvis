@@ -26,7 +26,7 @@ interface Message {
 export const ChatPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialMessage = searchParams.get('message') || '';
-  
+
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', from: 'system', time: new Date().toLocaleTimeString(), content: 'Master Chat ready. Type your idea or upload files.' }
   ]);
@@ -41,8 +41,18 @@ export const ChatPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Q&A State Machine
+  const [qaActive, setQaActive] = useState(false);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [allQuestions, setAllQuestions] = useState<string[]>([]);
+  const [originalMessage, setOriginalMessage] = useState('');
+
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
-  useEffect(() => { if (initialMessage) handleSendMessage(initialMessage); }, [initialMessage]);
+
+  useEffect(() => {
+    if (initialMessage) handleSendMessage(initialMessage);
+  }, [initialMessage]);
 
   const addMessage = (from: Message['from'], content: string, agent?: string) => {
     setMessages(prev => [...prev, { id: Date.now().toString(), from, time: new Date().toLocaleTimeString(), content, agent }]);
@@ -50,18 +60,14 @@ export const ChatPage: React.FC = () => {
 
   const loadLocalContext = async (message: string) => {
     try {
-      const lower = message.toLowerCase();
+      const words = message.split(' ').filter(w => w.length > 3);
       const res = await fetch('/api/context');
       const data = await res.json();
-      const isProject = /start|plan|create|build|open|launch|business|shop|store|project/ig.test(message);
-      const relevant = (data || []).filter((c: any) => {
-        if (isProject) return true;
-        const key = (c.key || '').toLowerCase();
-        const cat = (c.category || '').toLowerCase();
-        return lower.includes(key) || key.includes(lower) || lower.includes(cat);
-      });
+      const relevant = (data || []).filter((c: any) =>
+        words.some((w: string) => (c.key || '').toLowerCase().includes(w.toLowerCase()))
+      );
       if (relevant.length > 0) {
-        addMessage('system', `📍 Loaded ${relevant.length} local contexts:`);
+        addMessage('system', `📍 Local Context (${relevant.length}):`);
         relevant.slice(0, 5).forEach((c: any) => addMessage('system', `  • ${c.key}: ${c.value}`));
       }
     } catch {}
@@ -71,7 +77,11 @@ export const ChatPage: React.FC = () => {
     if (/^(log|diary|note):/i.test(message)) {
       const text = message.replace(/^(log|diary|note):/i, '').trim();
       if (text) {
-        try { await fetch('/api/diary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) }); addMessage('system', '📓 Saved to Diary!'); return true; } catch { return false; }
+        try {
+          await fetch('/api/diary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+          addMessage('system', '📓 Saved to Diary!');
+          return true;
+        } catch { return false; }
       }
     }
     return false;
@@ -84,50 +94,144 @@ export const ChatPage: React.FC = () => {
       const daysMatch = message.match(/(\d+)\s*(day|দিন)/i);
       const days = daysMatch ? parseInt(daysMatch[1]) : 7;
       try {
-        addMessage('system', `💰 ${days}-day plan for ৳${amount}...`);
+        addMessage('system', `💰 Generating ${days}-day plan for ৳${amount}...`);
         const res = await fetch(`/api/money/get-plan?target_amount=${amount}&days=${days}&skills=general`);
         const data = await res.json();
-        if (data?.plan) { addMessage('system', `📊 Daily: ৳${data.plan.goal.daily_target?.toFixed(2)}`); return true; }
+        if (data?.plan) {
+          addMessage('system', `📊 Daily Target: ৳${data.plan.goal.daily_target?.toFixed(2)}/day`);
+          return true;
+        }
       } catch { return false; }
     }
     return false;
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files; if (!files) return;
+    const files = e.target.files;
+    if (!files) return;
     setUploading(true);
     for (let i = 0; i < files.length; i++) {
-      const file = files[i]; addMessage('system', `📎 ${file.name}...`);
-      const formData = new FormData(); formData.append('file', file);
-      try { const res = await fetch('/api/diary/upload', { method: 'POST', body: formData }); const data = await res.json(); addMessage('system', `✅ ${data.filename}`); } catch { addMessage('system', `❌ Failed`); }
+      const file = files[i];
+      addMessage('system', `📎 Uploading: ${file.name}...`);
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/diary/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        addMessage('system', `✅ ${data.filename} uploaded`);
+      } catch { addMessage('system', `❌ Failed: ${file.name}`); }
     }
-    setUploading(false); if (fileRef.current) fileRef.current.value = '';
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   const toggleVoice = () => {
     setIsRecording(!isRecording);
-    if (!isRecording) { addMessage('system', '🎤 Recording...'); setTimeout(() => { setIsRecording(false); addMessage('system', '✅ Voice saved'); }, 3000); }
+    if (!isRecording) {
+      addMessage('system', '🎤 Recording...');
+      setTimeout(() => { setIsRecording(false); addMessage('system', '✅ Voice note saved'); }, 3000);
+    }
   };
 
+  // ============================================================
+  // INTERACTIVE Q&A FLOW
+  // ============================================================
   const handleSendMessage = async (msg?: string) => {
-    const userMsg = msg || input.trim(); if (!userMsg) return;
+    const userMsg = msg || input.trim();
+    if (!userMsg) return;
     if (!msg) { addMessage('user', userMsg); setInput(''); }
+
     await loadLocalContext(userMsg);
     if (await checkDiary(userMsg)) return;
     if (await checkMoney(userMsg)) return;
+
+    // Q&A Mode Active — collect answers
+    if (qaActive) {
+      const newAnswers = { ...answers, [questionIndex]: userMsg };
+      setAnswers(newAnswers);
+      const nextIndex = questionIndex + 1;
+
+      if (nextIndex >= allQuestions.length) {
+        setQaActive(false);
+        addMessage('system', '✅ All answers collected! Generating final plan...');
+        addMessage('system', '📋 Your Answers:');
+        allQuestions.forEach((q, i) => addMessage('system', `  ${i + 1}. ${q} → ${newAnswers[i] || '—'}`));
+        try {
+          const res = await fetch('/api/chat/interactive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: originalMessage || userMsg, answers: newAnswers, question_index: nextIndex })
+          });
+          const data = await res.json();
+          if (data.meta?.project) {
+            setProjectData(data.meta.project);
+            setShowPlan(true);
+            setMode('planner');
+            addMessage('system', `📁 ${data.meta.project.id}: ${data.meta.project.phases?.length || 0} phases ready`);
+          }
+          addMessage('jarvis', '✅ Plan ready! Review, Edit or Approve below.', 'PLANNER');
+        } catch {
+          addMessage('jarvis', '✅ Plan generated. Review below.', 'PLANNER');
+          setShowPlan(true);
+        }
+      } else {
+        setQuestionIndex(nextIndex);
+        addMessage('jarvis', `❓ Q${nextIndex + 1}/${allQuestions.length}: ${allQuestions[nextIndex]}`, 'PLANNER');
+        addMessage('system', `Progress: ${nextIndex}/${allQuestions.length} answered`);
+      }
+      return;
+    }
+
+    // Normal Flow — check for planner intent
     try {
-      const result = await sendMessage(userMsg); setMode(result.mode as any);
+      const result = await sendMessage(userMsg);
+      setMode(result.mode as any);
       addMessage('jarvis', result.response, result.mode === 'planner' ? 'PLANNER' : 'EXECUTOR');
-      if (result.meta?.project) { const p = result.meta.project; setProjectData(p); setShowPlan(true); addMessage('system', `📁 ${p.id}`); addMessage('system', `📋 ${p.phases?.length || 0} Phases`); (p.phases || []).forEach((ph: any) => addMessage('system', `  ⬜ ${ph.name || ph}`)); }
-      if (result.meta?.questions) { (result.meta.questions || []).forEach((q: string, i: number) => addMessage('system', `  ${i + 1}. ${q}`)); }
-    } catch { const intent = detectIntent(userMsg); setMode(intent.mode as any); addMessage('jarvis', '⚠️ Offline', intent.mode === 'planner' ? 'PLANNER' : 'EXECUTOR'); if (intent.mode === 'planner') setShowPlan(true); }
+
+      // Activate Q&A if planner with questions
+      if (result.meta?.all_questions && result.meta?.total_questions) {
+        setQaActive(true);
+        setAllQuestions(result.meta.all_questions);
+        setQuestionIndex(0);
+        setAnswers({});
+        setProjectType(result.meta.project_type || 'general');
+        setOriginalMessage(userMsg);
+        addMessage('system', `🧠 ${result.meta.project_type?.toUpperCase()} Planner — ${result.meta.total_questions} questions`);
+        addMessage('jarvis', `❓ Q1/${result.meta.total_questions}: ${result.meta.all_questions[0]}`, 'PLANNER');
+        return;
+      }
+
+      // Standard planner response (no interactive Q&A)
+      if (result.meta?.project) {
+        const p = result.meta.project;
+        setProjectData(p); setShowPlan(true);
+        addMessage('system', `📁 Project: ${p.id}`);
+        addMessage('system', `📋 ${p.phases?.length || 0} Phases:`);
+        (p.phases || []).forEach((ph: any) => addMessage('system', `  ⬜ ${ph.name || ph}`));
+      }
+      if (result.meta?.questions && !result.meta?.all_questions) {
+        (result.meta.questions || []).forEach((q: string, i: number) => addMessage('system', `  ${i + 1}. ${q}`));
+      }
+    } catch {
+      const intent = detectIntent(userMsg);
+      setMode(intent.mode as any);
+      addMessage('jarvis', '⚠️ Backend offline. Local mode.', intent.mode === 'planner' ? 'PLANNER' : 'EXECUTOR');
+      if (intent.mode === 'planner') setShowPlan(true);
+    }
   };
 
   const handleSend = () => handleSendMessage();
-  const handleReview = () => { setShowApproval(true); if (projectData) { (projectData.phases || []).forEach((p: any) => addMessage('system', `  ⬜ ${p.name || p}`)); } };
+  const handleReview = () => { setShowApproval(true); if (projectData) { addMessage('system', '📋 Review:'); (projectData.phases || []).forEach((p: any) => addMessage('system', `  ⬜ ${p.name || p}`)); } };
   const handleApprove = async () => {
-    setMode('execution'); setShowApproval(false); setShowPlan(false); setExecuting(true); addMessage('system', '✅ Executing...');
-    try { await fetch('/api/execute/queue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project: projectData }) }); const er = await fetch('/api/execute/start', { method: 'POST' }); const ed = await er.json(); addMessage('jarvis', `⚡ ${ed.tasks_executed || 0} done!`, 'EXECUTOR'); } catch { addMessage('system', '📋 Queued locally.'); }
+    setMode('execution'); setShowApproval(false); setShowPlan(false); setExecuting(true);
+    addMessage('system', '✅ Approved. Executing...');
+    try {
+      await fetch('/api/execute/queue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project: projectData }) });
+      const execRes = await fetch('/api/execute/start', { method: 'POST' });
+      const execData = await execRes.json();
+      addMessage('jarvis', `⚡ ${execData.tasks_executed || projectData?.tasks?.length || 0} tasks executed!`, 'EXECUTOR');
+      addMessage('system', '🎉 Execution complete!');
+    } catch { addMessage('system', '📋 Queued locally.'); }
     setExecuting(false);
   };
 
@@ -136,37 +240,65 @@ export const ChatPage: React.FC = () => {
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#232A34] bg-[#0F1419] flex-shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-sm font-bold tracking-wider text-gray-200">MASTER CHAT</span>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 border border-green-500/30 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /><span className="text-[10px] font-semibold text-green-500 tracking-wider">AI BRAIN · ONLINE</span></div>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 border border-green-500/30 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-[10px] font-semibold text-green-500 tracking-wider">AI BRAIN · ONLINE</span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
+          {qaActive && <span className="text-[10px] text-yellow-400 animate-pulse font-bold">Q{questionIndex + 1}/{allQuestions.length}</span>}
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${mode === 'planner' ? 'bg-purple-500/20 text-purple-400' : mode === 'execution' ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400'}`}>{mode}</span>
           {executing && <span className="text-[10px] text-yellow-400 animate-pulse">⏳</span>}
+          {uploading && <span className="text-[10px] text-yellow-400 animate-pulse">📤</span>}
         </div>
       </div>
+
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map(msg => (
           <div key={msg.id} className={cn('flex gap-2', msg.from === 'user' && 'flex-row-reverse')}>
-            {msg.from === 'jarvis' ? <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: 'linear-gradient(135deg, #0f2a4a, #0a1628)', border: '1px solid rgba(0,212,255,0.3)' }}><Brain className="w-3.5 h-3.5 text-cyan-400" /></div> : msg.from === 'user' ? <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-1">M</div> : null}
+            {msg.from === 'jarvis' ? (
+              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: 'linear-gradient(135deg, #0f2a4a, #0a1628)', border: '1px solid rgba(0,212,255,0.3)' }}><Brain className="w-3.5 h-3.5 text-cyan-400" /></div>
+            ) : msg.from === 'user' ? (
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-1">M</div>
+            ) : null}
             <div className={cn('max-w-[80%]', msg.from === 'user' && 'flex flex-col items-end')}>
-              <div className="flex items-center gap-2 mb-1"><span className="text-[10px] font-bold text-gray-300">{msg.from === 'jarvis' ? 'JARVIS' : msg.from === 'user' ? 'YOU' : 'SYSTEM'}</span>{msg.agent && <span className={cn('text-[8px] font-bold px-1.5 py-0.5 rounded', agentColors[msg.agent])}>{msg.agent}</span>}<span className="text-[9px] text-gray-500">{msg.time}</span></div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold text-gray-300">{msg.from === 'jarvis' ? 'JARVIS' : msg.from === 'user' ? 'YOU' : 'SYSTEM'}</span>
+                {msg.agent && <span className={cn('text-[8px] font-bold px-1.5 py-0.5 rounded', agentColors[msg.agent])}>{msg.agent}</span>}
+                <span className="text-[9px] text-gray-500">{msg.time}</span>
+              </div>
               <div className={cn('rounded-xl px-4 py-2.5 text-sm', msg.from === 'jarvis' ? 'bg-[#151A22] border border-[#232A34] text-gray-200' : msg.from === 'user' ? 'bg-blue-600/20 border border-blue-500/30 text-blue-100' : 'bg-gray-700/20 border border-gray-600/20 text-gray-400 text-xs text-center')}>{msg.content}</div>
             </div>
           </div>
         ))}
-        {showPlan && !showApproval && <div className="flex gap-2 justify-center mt-3"><button onClick={handleReview} className="px-4 py-2 bg-purple-600/20 border border-purple-500/40 rounded-lg text-purple-400 text-xs font-bold hover:bg-purple-600/30">📋 Review Plan</button></div>}
-        {showApproval && <div className="flex gap-2 justify-center mt-2"><button onClick={handleApprove} className="px-4 py-2 bg-green-600/20 border border-green-500/40 rounded-lg text-green-400 text-xs font-bold hover:bg-green-600/30">✅ Approve & Execute</button><button onClick={() => { setShowApproval(false); setShowPlan(false); }} className="px-4 py-2 bg-red-600/20 border border-red-500/40 rounded-lg text-red-400 text-xs font-bold hover:bg-red-600/30">❌ Reject</button></div>}
+        {showPlan && !showApproval && (
+          <div className="flex gap-2 justify-center mt-3">
+            <button onClick={handleReview} className="px-4 py-2 bg-purple-600/20 border border-purple-500/40 rounded-lg text-purple-400 text-xs font-bold hover:bg-purple-600/30">📋 Review Plan</button>
+            <button onClick={() => { setShowApproval(true); }} className="px-4 py-2 bg-yellow-600/20 border border-yellow-500/40 rounded-lg text-yellow-400 text-xs font-bold hover:bg-yellow-600/30">✏️ Edit</button>
+          </div>
+        )}
+        {showApproval && (
+          <div className="flex gap-2 justify-center mt-2">
+            <button onClick={handleApprove} className="px-4 py-2 bg-green-600/20 border border-green-500/40 rounded-lg text-green-400 text-xs font-bold hover:bg-green-600/30">✅ Approve & Execute</button>
+            <button onClick={() => { setShowApproval(false); setShowPlan(false); setQaActive(false); addMessage('system', '❌ Rejected. Start over.'); }} className="px-4 py-2 bg-red-600/20 border border-red-500/40 rounded-lg text-red-400 text-xs font-bold hover:bg-red-600/30">❌ Reject</button>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
+
       <div className="px-4 py-2 border-t border-[#232A34] flex items-center gap-2 flex-shrink-0">
-        {agentSelectors.map(agent => <button key={agent.role} className={cn('flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-semibold tracking-wider', agentColors[agent.role])}>{agent.role}<ChevronDown className="w-2.5 h-2.5" /></button>)}
+        {agentSelectors.map(agent => (
+          <button key={agent.role} className={cn('flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-semibold tracking-wider', agentColors[agent.role])}>{agent.role}<ChevronDown className="w-2.5 h-2.5" /></button>
+        ))}
       </div>
+
       <div className="px-3 py-3 border-t border-[#232A34] bg-[#0F1419] flex items-center gap-2 flex-shrink-0">
-        <button onClick={toggleVoice} className={`p-2 rounded-lg border ${isRecording ? 'bg-red-500/20 border-red-500/40 text-red-400 animate-pulse' : 'bg-green-500/20 border-green-500/40 text-green-400'}`}><Mic className="w-4 h-4" /></button>
-        <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400"><Paperclip className="w-4 h-4" /></button>
-        <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400"><Image className="w-4 h-4" /></button>
+        <button onClick={toggleVoice} className={`p-2 rounded-lg border transition-all ${isRecording ? 'bg-red-500/20 border-red-500/40 text-red-400 animate-pulse' : 'bg-green-500/20 border-green-500/40 text-green-400 hover:bg-green-500/30'}`}><Mic className="w-4 h-4" /></button>
+        <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"><Paperclip className="w-4 h-4" /></button>
+        <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"><Image className="w-4 h-4" /></button>
         <input ref={fileRef} type="file" onChange={handleFileUpload} className="hidden" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt" />
-        <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSend()} placeholder="Ask anything or give a command..." className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none" />
-        <button onClick={handleSend} className="flex items-center gap-2 px-5 py-2 bg-cyan-500 text-black text-xs font-bold rounded-lg hover:bg-cyan-400"><Send className="w-3.5 h-3.5" />EXECUTE</button>
+        <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleSend()} placeholder={qaActive ? `Answer Q${questionIndex + 1}...` : "Ask anything or give a command..."} className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none" />
+        <button onClick={handleSend} className="flex items-center gap-2 px-5 py-2 bg-cyan-500 text-black text-xs font-bold rounded-lg hover:bg-cyan-400"><Send className="w-3.5 h-3.5" />{qaActive ? 'ANSWER' : 'EXECUTE'}</button>
       </div>
     </div>
   );

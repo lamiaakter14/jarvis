@@ -1,7 +1,7 @@
 import React from 'react';
-import Sidebar from './Sidebar';
-import Header from './Header';
-import StatusBar from './StatusBar';
+import { Sidebar } from './Sidebar';
+import { Header } from './Header';
+import { StatusBar } from './StatusBar';
 
 interface AppLayoutProps {
   children: React.ReactNode;

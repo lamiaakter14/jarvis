@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BookOpen, Send, Mic, Image, Paperclip, X, Play, FileText } from 'lucide-react';
+import { BookOpen, Send, Mic, Image, Paperclip, Play, FileText } from 'lucide-react';
 
 export const Diary: React.FC = () => {
   const [text, setText] = useState('');

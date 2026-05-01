@@ -73,3 +73,16 @@
     background-clip: text;
   }
 }
+
+/* Fix sidebar text overflow */
+aside nav span.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+/* Prevent message text from leaking into sidebar */
+aside {
+  overflow: hidden;
+}

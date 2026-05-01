@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { DollarSign, MapPin, LayoutDashboard, Brain, Zap, CheckSquare, FolderOpen, Target, BookOpen, TrendingUp, RefreshCw, Settings, ChevronLeft, ChevronRight, Menu, X, MessageSquare } from 'lucide-react';
+import { DollarSign, MapPin, LayoutDashboard, Brain, CheckSquare, FolderOpen, Target, BookOpen, TrendingUp, RefreshCw, Settings, ChevronLeft, ChevronRight, Menu, X, MessageSquare } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const sections = [

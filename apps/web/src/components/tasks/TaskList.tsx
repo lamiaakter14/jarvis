@@ -54,7 +54,7 @@ export const TaskList: React.FC = () => {
             key={status}
             title={status}
             value={tasks.filter(task => task.status === status.toLowerCase()).length}
-            color={status === "Completed" ? "green" : status === "Failed" ? "amber" : "blue"}
+            color={status === "Completed" ? "cyan" : status === "Failed" ? "orange" : "blue"}
             icon={status === "Completed" ? CheckSquare : ListTodo}
           />
         ))}

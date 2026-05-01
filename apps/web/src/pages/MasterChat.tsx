@@ -23,7 +23,6 @@ export const MasterChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
-  const [currentQuestions, setCurrentQuestions] = useState<string[]>([]);
   const [answerIndex, setAnswerIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);

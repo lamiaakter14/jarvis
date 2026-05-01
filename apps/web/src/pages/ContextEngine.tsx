@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Plus, Trash2, Edit2, Search, Filter, X, Save } from 'lucide-react';
+import { MapPin, Plus, Trash2, Search, X } from 'lucide-react';
 import { getContexts, addContext, deleteContext, getCategories, Context } from '../api/contextApi';
 
 export const ContextEngine: React.FC = () => {
@@ -8,7 +8,6 @@ export const ContextEngine: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingContext, setEditingContext] = useState<Context | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Form state
