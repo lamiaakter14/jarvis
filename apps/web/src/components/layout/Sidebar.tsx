@@ -6,7 +6,7 @@ import { cn } from '../../utils/cn';
 const sections = [
   { label: 'MAIN', items: [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Master Chat', href: '/command-center', icon: MessageSquare, badge: 'CORE' },
+    { name: 'Master Chat', href: '/chat', icon: MessageSquare, badge: 'CORE' },
   ]},
   { label: 'PLANNING', items: [
     { name: 'Plans', href: '/plans', icon: Brain },

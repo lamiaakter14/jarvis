@@ -1,3 +1,4 @@
+import { ChatPage } from './pages/ChatPage';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -31,6 +32,7 @@ function App() {
               <Route path="innovations" element={<Innovations />} />
               <Route path="performance" element={<Performance />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="chat" element={<ChatPage />} />
               <Route path="money" element={<MoneyMode />} />
               <Route path="context" element={<ContextEngine />} />
               <Route path="diary" element={<Diary />} />

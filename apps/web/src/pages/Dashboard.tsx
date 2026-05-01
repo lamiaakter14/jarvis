@@ -3,7 +3,7 @@ import { Activity, Target, Zap, BarChart3 } from 'lucide-react';
 import { StatsCard } from '../components/dashboard/StatsCard';
 import { ActivityFeed } from '../components/dashboard/ActivityFeed';
 import { QuickCommands } from '../components/dashboard/QuickCommands';
-import { MasterChat } from '../components/dashboard/MasterChat';
+import { MiniChat } from '../components/dashboard/MiniChat';
 
 const productivitySparkline = [60, 65, 58, 70, 75, 72, 80, 78, 85, 88, 86, 92];
 const tasksSparkline = [80, 95, 100, 92, 108, 110, 115, 112, 120, 118, 125, 128];
@@ -57,7 +57,7 @@ export const Dashboard: React.FC = () => {
       {/* Main content: chat + activity feed */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-3 min-h-0">
         <div className="lg:col-span-2 min-h-0">
-          <MasterChat />
+          <MiniChat />
         </div>
         <div className="min-h-0">
           <ActivityFeed />
