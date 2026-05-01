@@ -312,3 +312,52 @@ async def get_agent_status():
         "system": "JARVIS OS v11.0.0",
         "pipeline": "Intent → Strategy → Validation → Approval → Execution → Memory"
     }
+
+# ============================================================
+# Phase 12: Memory Engine API
+# ============================================================
+from jarvis_core.agents.memory_engine import MemoryEngine
+memory_engine = MemoryEngine()
+
+@app.get("/api/memory/patterns")
+async def get_patterns():
+    """Get user behavior patterns."""
+    return memory_engine.get_patterns()
+
+@app.get("/api/memory/projects")
+async def get_project_history():
+    """Get all past projects."""
+    return {"projects": memory_engine.get_project_history()}
+
+@app.post("/api/memory/suggest")
+async def get_suggestions(request: dict):
+    """Get next-action suggestions."""
+    intent = request.get("intent", {})
+    return {"suggestions": memory_engine.suggest_next_action(intent)}
+
+# Update OS process to log interactions
+@app.post("/api/os/process")
+async def os_process_v12(request: ChatRequest):
+    intent = intent_v2.detect(request.message)
+    strategy = strategist.generate_plan(request.message, intent["domain"], intent.get("entities"))
+    validation = validator.validate(strategy, intent)
+    
+    # Phase 12: Log to memory
+    memory_engine.log_interaction(request.message, intent, "success")
+    if strategy:
+        memory_engine.save_project_memory(strategy)
+    
+    # Phase 12: Get suggestions
+    suggestions = memory_engine.suggest_next_action(intent)
+    
+    memory_updates = [
+        f"Intent: {intent['type']}",
+        f"Strategy: {strategy['project_id']}",
+        f"Validation: {validation['recommendation']}"
+    ]
+    
+    result = OutputComposer.compose(intent, strategy, validation, memory=memory_updates)
+    result["suggestions"] = suggestions
+    result["memory_insights"] = memory_engine.get_patterns()
+    
+    return result

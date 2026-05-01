@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, Shield, Zap, Database, MessageSquare, Check, AlertTriangle, Clock } from 'lucide-react';
+import { Brain, Shield, Zap, Database, MessageSquare } from 'lucide-react';
 
 interface AgentStatus {
   name: string;
@@ -9,7 +9,7 @@ interface AgentStatus {
 
 export const AgentPanel: React.FC = () => {
   const [agents, setAgents] = useState<AgentStatus[]>([]);
-  const [pipeline, setPipeline] = useState('');
+  const [_pipeline, setPipeline] = useState('');
   const [systemStatus, setSystemStatus] = useState('loading');
 
   useEffect(() => {

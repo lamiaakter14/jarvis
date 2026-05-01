@@ -184,7 +184,18 @@ export const ChatPage: React.FC = () => {
 
     // Normal Flow — check for planner intent
     try {
-      const result = await sendMessage(userMsg);
+      // Try new OS pipeline first
+      let result;
+      try {
+        const osRes = await fetch("/api/os/process", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMsg })
+        });
+        result = await osRes.json();
+      } catch {
+        result = await sendMessage(userMsg);
+      }
       setMode(result.mode as any);
       addMessage('jarvis', result.response, result.mode === 'planner' ? 'PLANNER' : 'EXECUTOR');
 
@@ -245,6 +256,7 @@ export const ChatPage: React.FC = () => {
           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 border border-green-500/30 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             <span className="text-[10px] font-semibold text-green-500 tracking-wider">AI BRAIN · ONLINE</span>
+            <span className="text-[9px] text-gray-500 ml-2">5 Agents Active</span>
           </div>
         </div>
         <div className="flex items-center gap-2">

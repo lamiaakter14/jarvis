@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Check, AlertTriangle, Zap, Brain } from 'lucide-react';
+import { Activity, AlertTriangle, Zap, Brain } from 'lucide-react';
 
 interface FeedItem {
   id: string;
