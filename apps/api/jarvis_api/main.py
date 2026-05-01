@@ -249,3 +249,20 @@ async def pdf_generate(data: dict):
 @app.get("/api/execute/queue")
 async def execution_queue():
     return {"queue": real_executor.get_queue(), "log": real_executor.get_log()}
+
+# Phase 10: Structured Output
+from jarvis_core.engine.output_builder import OutputBuilder
+
+@app.post("/api/v2/chat")
+async def chat_v2(request: ChatRequest):
+    r = detect_intent(request.message)
+    meta = {}
+    if r["intent"] == "planner":
+        try:
+            plan_result = planner.plan(request.message)
+            meta["project"] = plan_result["project"]
+            meta["questions"] = plan_result["questions"]
+        except Exception as e:
+            meta["planner_error"] = str(e)
+    
+    return OutputBuilder.build(r["intent"], r["mode"], generate_response(r["intent"], request.message), meta)

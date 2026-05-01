@@ -223,18 +223,21 @@ export const ChatPage: React.FC = () => {
   const handleSend = () => handleSendMessage();
   const handleReview = () => { setShowApproval(true); if (projectData) { addMessage('system', '📋 Review:'); (projectData.phases || []).forEach((p: any) => addMessage('system', `  ⬜ ${p.name || p}`)); } };
   const handleApprove = async () => {
-    setMode('execution'); setShowApproval(false); setShowPlan(false); setExecuting(true);
-    addMessage('system', '✅ Approved. Executing...');
+    setMode("execution"); setShowApproval(false); setShowPlan(false); setExecuting(true);
+    addMessage("system", "✅ Approved. Sending to Execution Hub...");
     try {
-      await fetch('/api/execute/queue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project: projectData }) });
-      const execRes = await fetch('/api/execute/start', { method: 'POST' });
+      await fetch("/api/execute/queue", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ project: projectData }) });
+      const execRes = await fetch("/api/execute/start", { method: "POST" });
       const execData = await execRes.json();
-      addMessage('jarvis', `⚡ ${execData.tasks_executed || projectData?.tasks?.length || 0} tasks executed!`, 'EXECUTOR');
-      addMessage('system', '🎉 Execution complete!');
-    } catch { addMessage('system', '📋 Queued locally.'); }
+      addMessage("jarvis", `⚡ ${execData.tasks_executed || projectData?.tasks?.length || 0} tasks executed!`, "EXECUTOR");
+      addMessage("system", "🎉 Execution complete! [Open Execution Hub](/execute)");
+      await fetch("/api/diary", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: `✅ Project ${projectData?.id}: ${execData.tasks_executed || 0} tasks executed` }) });
+      addMessage("system", "📓 Auto-saved to Diary!");
+    } catch {
+      addMessage("system", "📋 Queued locally. [Open Execution Hub](/execute)");
+    }
     setExecuting(false);
   };
-
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#232A34] bg-[#0F1419] flex-shrink-0">
