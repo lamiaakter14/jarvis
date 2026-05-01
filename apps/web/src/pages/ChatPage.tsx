@@ -194,7 +194,6 @@ export const ChatPage: React.FC = () => {
         setAllQuestions(result.meta.all_questions);
         setQuestionIndex(0);
         setAnswers({});
-        setProjectType(result.meta.project_type || 'general');
         setOriginalMessage(userMsg);
         addMessage('system', `🧠 ${result.meta.project_type?.toUpperCase()} Planner — ${result.meta.total_questions} questions`);
         addMessage('jarvis', `❓ Q1/${result.meta.total_questions}: ${result.meta.all_questions[0]}`, 'PLANNER');

@@ -22,7 +22,7 @@ export const CognitiveLoop: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           daily_income: dailyData,
-          target: target,
+          _target: _target,
           days_remaining: daysLeft,
           skills: ['graphic_design', 'content_writing'],
           platforms: ['Upwork', 'Fiverr']
@@ -54,7 +54,7 @@ export const CognitiveLoop: React.FC = () => {
               <input
                 type="number"
                 value={daysLeft}
-                onChange={(e) => setDaysLeft(Number(e.target.value))}
+                onChange={(e) => setDaysLeft(Number(e._target.value))}
                 className="w-full bg-gray-900 border border-gray-700 rounded-lg p-2"
               />
             </div>

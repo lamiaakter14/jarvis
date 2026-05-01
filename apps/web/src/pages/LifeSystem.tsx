@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Target, TrendingUp, Users, BookOpen, Calendar, CheckCircle, Circle, Plus, Star, Award, Clock } from 'lucide-react';
-import { getDashboard, updateSkill, updatePrayer, updateQuran, addAccountability, DashboardData } from '../api/lifeApi';
 
 export const LifeSystem: React.FC = () => {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
