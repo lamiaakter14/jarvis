@@ -15,3 +15,4 @@ class AgentType(str, Enum):
     AMPLIFIER = "amplifier"
     INNOVATOR = "innovator"
     REFLECTOR = "reflector"
+    POLITICAL_MEDIA_OS = "political_media_os"
